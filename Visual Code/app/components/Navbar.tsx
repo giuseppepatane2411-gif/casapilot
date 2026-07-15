@@ -1,73 +1,39 @@
 import Link from "next/link";
+
 import Container from "@/components/ui/Container";
+import Logo from "@/components/brand/Logo";
 
 export default function Navbar() {
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-2xl">
 
       <Container>
 
-        <div className="flex h-20 items-center justify-between">
+        <div className="flex h-24 items-center justify-between">
 
-          <Link
-            href="/"
-            className="flex items-center gap-4"
-          >
+          {/* Logo */}
 
-            {/* LOGO */}
+          <Logo />
 
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 text-white">
-
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-              >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="9"
-                  stroke="white"
-                  strokeWidth="1.8"
-                />
-
-                <path
-                  d="M12 6 L15.8 12 L12 18 L8.2 12 Z"
-                  fill="white"
-                />
-              </svg>
-
-            </div>
-
-            <div>
-
-              <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-                Casa<span className="text-blue-600">Pilot</span>
-              </h1>
-
-              <p className="text-xs text-slate-500">
-                L'assistente immobiliare intelligente
-              </p>
-
-            </div>
-
-          </Link>
+          {/* Menu */}
 
           <nav className="hidden items-center gap-10 md:flex">
 
             <Link
               href="/professionals"
-              className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
+              className="group relative text-[15px] font-medium text-slate-600 transition-all duration-300 hover:text-slate-950"
             >
-              Professionisti
+              Per i professionisti
+
+              <span className="absolute -bottom-2 left-0 h-[2px] w-0 rounded-full bg-blue-600 transition-all duration-300 group-hover:w-full" />
+
             </Link>
 
             <Link
-              href="/dashboard"
-              className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
+              href="/login"
+              className="rounded-full border border-slate-200 px-5 py-2 text-[15px] font-medium text-slate-700 transition-all duration-300 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
             >
-              Dashboard
+              Accedi
             </Link>
 
           </nav>

@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
-import { Manrope, Inter } from "next/font/google";
+import { Instrument_Sans } from "next/font/google";
 import "./globals.css";
 
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-heading",
-});
-
-const inter = Inter({
+const instrument = Instrument_Sans({
   subsets: ["latin"],
   variable: "--font-body",
 });
@@ -25,7 +20,7 @@ export default function RootLayout({
   return (
     <html
       lang="it"
-      className={`${manrope.variable} ${inter.variable}`}
+      className={instrument.variable}
     >
       <body>{children}</body>
     </html>

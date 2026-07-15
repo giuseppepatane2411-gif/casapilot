@@ -1,17 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import {
   ArrowUpRight,
-  Building2,
-  FileText,
+  Compass,
   Home,
   KeyRound,
-  Search,
+  Users,
 } from "lucide-react";
+
+import Conversation from "@/components/pilot/Conversation";
 
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
@@ -29,54 +29,62 @@ const actions = [
     icon: KeyRound,
   },
   {
-    title: "Acquistare",
-    href: "/dashboard/buy",
-    icon: Search,
-  },
-  {
-    title: "Immobili",
-    href: "/dashboard",
-    icon: FileText,
-  },
-  {
-    title: "Professionisti",
+    title: "Trova un professionista",
     href: "/professionals",
-    icon: Building2,
+    icon: Users,
   },
 ];
 
 export default function Hero() {
-  const router = useRouter();
   const [message, setMessage] = useState("");
+  const [conversationStarted, setConversationStarted] = useState(false);
 
   const startPilot = () => {
-    router.push("/dashboard/sell");
+    if (!message.trim()) return;
+
+    setConversationStarted(true);
   };
 
   return (
     <section className="bg-white">
       <Container>
+
         <div className="mx-auto flex min-h-[85vh] max-w-5xl flex-col items-center justify-center py-24">
 
-          <div className="mb-8">
-            <span className="rounded-full border border-blue-100 bg-blue-50 px-5 py-2 text-sm font-medium text-blue-700">
-              PILOT
-            </span>
-          </div>
+          
 
-          <h1 className="max-w-4xl text-center text-6xl font-bold tracking-tight text-slate-900">
-            L'assistente immobiliare
-            <br />
-            intelligente.
+          {/* Titolo */}
+
+          
+          <h1 className="max-w-5xl text-center text-7xl font-semibold leading-[0.95] tracking-[-0.05em] text-slate-950">
+
+           Il tuo assistente immobiliare
+
+          <br />
+           intelligente.
+           <span className="text-slate-950">
+           
+          </span>
+
+           <br />
+
+          
+
           </h1>
+          
+          {/* Sottotitolo */}
 
-          <p className="mt-8 max-w-2xl text-center text-xl leading-9 text-slate-500">
-            Vendi, affitta, acquista e gestisci i tuoi immobili
-            con l'aiuto dell'intelligenza artificiale.
+          <p className="mt-10 max-w-3xl text-center text-[22px] leading-10 font-normal text-slate-500">
+
+            Vendi, affitta e gestisci i tuoi immobili con l'aiuto di
+            <strong> Pilot AI</strong>, l'assistente che ti guida passo dopo
+            passo.
+
           </p>
 
-          <div className="mt-14 w-full max-w-3xl rounded-3xl border border-slate-200 bg-white p-3 shadow-xl shadow-slate-100">
+          {/* Barra Pilot */}
 
+          <div className="mt-16 w-full max-w-4xl rounded-[30px] border border-slate-200 bg-white/90 p-3 shadow-[0_25px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl">
             <div className="flex items-center gap-3">
 
               <input
@@ -87,13 +95,13 @@ export default function Hero() {
                     startPilot();
                   }
                 }}
-                className="flex-1 border-none bg-transparent px-5 py-4 text-lg outline-none"
-                placeholder="Come posso aiutarti oggi?"
+                placeholder="Dimmi cosa vuoi fare con il tuo immobile..."
+                className="flex-1 border-none bg-transparent px-8 py-5 text-lg text-slate-900 placeholder:text-slate-400 outline-none"
               />
 
               <Button
                 onClick={startPilot}
-                className="rounded-2xl px-6"
+                className="h-16 w-16 rounded-full bg-blue-600 transition-all duration-300 hover:scale-105 hover:bg-blue-700"
               >
                 <ArrowUpRight size={20} />
               </Button>
@@ -102,39 +110,81 @@ export default function Hero() {
 
           </div>
 
-          <p className="mt-12 text-sm uppercase tracking-[0.25em] text-slate-400">
-            Oppure scegli un percorso
-          </p>
+                    {/* Quick Actions */}
 
-          <div className="mt-8 grid w-full max-w-5xl grid-cols-2 gap-5 lg:grid-cols-5">
+          {!conversationStarted && (
+            <>
+              <p className="mt-12 text-sm uppercase tracking-[0.25em] text-slate-400">
+                Oppure scegli da dove iniziare
+              </p>
 
-            {actions.map((action) => {
-              const Icon = action.icon;
+              <div className="mt-10 flex flex-wrap justify-center gap-8">
 
-              return (
-                <Link
-                  key={action.title}
-                  href={action.href}
-                >
-                  <Card className="cursor-pointer text-center transition-all duration-200 hover:-translate-y-1">
+                {actions.map((action) => {
+                  const Icon = action.icon;
 
-                    <Icon
-                      className="mx-auto mb-4 text-blue-600"
-                      size={34}
-                    />
+                  return (
+                    <Link
+                      key={action.title}
+                      href={action.href}
+                    >
+                      <Card className="group relative w-72 rounded-[28px] border border-slate-200 bg-white p-8 text-left shadow-sm transition-all duration-500 hover:-translate-y-2 hover:border-slate-300 hover:shadow-2xl">
+                        <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 transition group-hover:bg-blue-50">
 
-                    <h3 className="font-semibold text-slate-900">
-                      {action.title}
-                    </h3>
+  <Icon
+    size={28}
+    className="text-slate-900 group-hover:text-blue-600"
+  />
 
-                  </Card>
-                </Link>
-              );
-            })}
+</div>
 
-          </div>
+<h3 className="text-xl font-semibold text-slate-900">
+
+  {action.title}
+
+</h3>
+
+<p className="mt-3 leading-7 text-slate-500">
+
+  {action.title === "Vendere" &&
+    "Pilot ti accompagna nella vendita passo dopo passo."}
+
+  {action.title === "Affittare" &&
+    "Gestisci documenti, contratto e inquilino in un unico posto."}
+
+  {action.title === "Trova un professionista" &&
+    "Geometri, notai, tecnici e agenti verificati."}
+
+</p>
+
+<div className="mt-8 flex items-center font-semibold text-blue-600">
+
+  Scopri
+
+  <ArrowUpRight
+    size={18}
+    className="ml-2 transition group-hover:translate-x-1"
+  />
+
+</div>
+
+                      </Card>
+                    </Link>
+                  );
+                })}
+
+              </div>
+            </>
+          )}
+
+          {/* Conversation */}
+
+          {conversationStarted && (
+            <Conversation message={message} />
+          )}
 
         </div>
+
       </Container>
     </section>
   );

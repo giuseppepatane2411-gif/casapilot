@@ -1,94 +1,140 @@
+"use client";
+
 import {
-  Brain,
-  FileText,
-  MessageSquare,
+  Bot,
+  FileCheck2,
   Users,
+  ArrowRight,
 } from "lucide-react";
 
 const steps = [
   {
-    icon: MessageSquare,
-    title: "Tu parli con Pilot",
+    icon: Bot,
+    title: "Parla con Pilot",
     description:
-      "Spiega semplicemente cosa vuoi fare con il tuo immobile.",
+      "Descrivi quello che vuoi fare. Pilot comprende la tua situazione e crea il percorso più adatto.",
   },
   {
-    icon: Brain,
-    title: "Pilot analizza",
+    icon: FileCheck2,
+    title: "Pilot prepara tutto",
     description:
-      "L'assistente comprende la tua situazione e costruisce il percorso migliore.",
-  },
-  {
-    icon: FileText,
-    title: "Fascicolo automatico",
-    description:
-      "CasaPilot crea automaticamente il fascicolo del tuo immobile.",
+      "Documenti, controlli, scadenze e fascicolo dell'immobile vengono organizzati automaticamente.",
   },
   {
     icon: Users,
-    title: "Professionisti",
+    title: "Coinvolgi i professionisti",
     description:
-      "Quando serve, trovi i professionisti migliori già verificati.",
+      "Quando serve, trovi notai, geometri, tecnici e agenti già verificati direttamente su CasaPilot.",
   },
 ];
 
 export default function HowItWorks() {
   return (
-    <section className="py-32">
+    <section className="py-36">
 
-      <div className="mx-auto max-w-6xl px-6">
+      <div className="mx-auto max-w-7xl px-6">
+
+        {/* Heading */}
 
         <div className="mx-auto max-w-3xl text-center">
 
-          <h2 className="text-5xl font-bold tracking-tight text-slate-900">
+          <span className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-600">
+            Come funziona
+          </span>
 
-            Pilot lavora al posto tuo
-
+          <h2 className="mt-6 text-5xl font-semibold tracking-[-0.04em] text-slate-950">
+            Pilot lavora al posto tuo.
           </h2>
 
-          <p className="mt-6 text-xl leading-9 text-slate-500">
-
-            Da una semplice conversazione nasce tutto il percorso per
-            vendere o affittare il tuo immobile.
-
+          <p className="mt-8 text-xl leading-9 text-slate-500">
+            Ti accompagna passo dopo passo nella vendita o nell'affitto,
+            eliminando dubbi, burocrazia e perdite di tempo.
           </p>
 
         </div>
 
-        <div className="mt-24 grid gap-8 md:grid-cols-2">
+        {/* Timeline */}
 
-          {steps.map((step) => {
-            const Icon = step.icon;
+        <div className="relative mt-24">
 
-            return (
-              <div
-                key={step.title}
-                className="rounded-3xl border border-slate-200 bg-white p-10 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
+          <div className="absolute left-0 right-0 top-10 hidden border-t border-dashed border-slate-300 lg:block" />
 
-                  <Icon
-                    size={28}
-                    className="text-slate-900"
-                  />
+          <div className="grid gap-10 lg:grid-cols-3">
+
+            {steps.map((step, index) => {
+              const Icon = step.icon;
+
+              return (
+                <div
+                  key={step.title}
+                  className="relative"
+                >
+
+                  {/* Numero */}
+
+                  <div className="absolute -top-5 left-8 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white shadow-lg">
+
+                    {index + 1}
+
+                  </div>
+
+                  {/* Card */}
+
+                  <div
+                    className="
+                      h-full
+                      rounded-[34px]
+                      border
+                      border-slate-200
+                      bg-white
+                      p-10
+                      shadow-[0_25px_70px_rgba(15,23,42,.05)]
+                      transition-all
+                      duration-500
+                      hover:-translate-y-2
+                      hover:shadow-[0_35px_90px_rgba(15,23,42,.10)]
+                    "
+                  >
+
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50">
+
+                      <Icon
+                        size={30}
+                        className="text-blue-600"
+                      />
+
+                    </div>
+
+                    <h3 className="mt-8 text-2xl font-semibold text-slate-950">
+
+                      {step.title}
+
+                    </h3>
+
+                    <p className="mt-5 leading-8 text-slate-500">
+
+                      {step.description}
+
+                    </p>
+
+                    <div className="mt-10 flex items-center font-semibold text-blue-600">
+
+                      Continua
+
+                      <ArrowRight
+                        size={18}
+                        className="ml-2"
+                      />
+
+                    </div>
+
+                  </div>
 
                 </div>
+              );
+            })}
 
-                <h3 className="text-2xl font-semibold">
-
-                  {step.title}
-
-                </h3>
-
-                <p className="mt-4 leading-8 text-slate-500">
-
-                  {step.description}
-
-                </p>
-
-              </div>
-            );
-          })}
+          </div>
 
         </div>
 

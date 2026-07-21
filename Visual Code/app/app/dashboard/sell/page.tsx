@@ -8,7 +8,6 @@ export default function SellPage() {
         {/* INTRODUZIONE DI PILOT */}
 
         <div className="mb-10 rounded-3xl bg-white p-10 shadow-xl">
-
           <p className="text-sm font-semibold text-blue-600">
             PILOT
           </p>
@@ -24,12 +23,11 @@ export default function SellPage() {
             Per iniziare ho bisogno di conoscerlo.
             Ti serviranno meno di 3 minuti.
           </p>
-
         </div>
 
         {/* CONVERSAZIONE */}
 
-        <Conversation />
+        <Conversation message="Ciao! Iniziamo. Qual è l'indirizzo dell'immobile che desideri vendere?" />
 
       </div>
     </main>

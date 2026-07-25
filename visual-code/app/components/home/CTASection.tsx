@@ -1,97 +1,108 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
+import {
+  ArrowRight,
+  CheckCircle2,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 
 export default function CTASection() {
   return (
-    <section className="py-40">
+    <section className="bg-white px-4 pb-20 pt-8 sm:px-6 sm:pb-28 sm:pt-12 lg:px-8 lg:pb-36">
+      <div className="mx-auto max-w-7xl">
+        <div className="relative overflow-hidden rounded-[30px] border border-slate-200 bg-slate-50 px-6 py-14 shadow-[0_24px_70px_rgba(15,23,42,0.06)] sm:rounded-[38px] sm:px-10 sm:py-18 lg:flex lg:items-center lg:justify-between lg:gap-14 lg:px-16 lg:py-20">
+          {/* Decorazione */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-blue-100/80 blur-3xl"
+          />
 
-      <div className="mx-auto max-w-7xl px-6">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -bottom-32 left-1/3 h-64 w-64 rounded-full bg-indigo-100/60 blur-3xl"
+          />
 
-        <div
-          className="
-            overflow-hidden
-            rounded-[42px]
-            bg-slate-950
-            px-14
-            py-24
-            text-center
-            shadow-[0_40px_120px_rgba(15,23,42,.25)]
-          "
-        >
+          {/* Testo */}
+          <div className="relative z-10 max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-blue-600 shadow-sm sm:text-sm">
+              <Sparkles size={15} aria-hidden="true" />
+              Inizia con CasaPilot
+            </div>
 
-          <span className="text-sm font-semibold uppercase tracking-[0.30em] text-blue-400">
-            CASAPILOT
-          </span>
+            <h2 className="mt-6 text-3xl font-semibold leading-tight tracking-[-0.045em] text-slate-950 sm:text-4xl lg:text-5xl">
+              Il tuo immobile merita un percorso più semplice.
+            </h2>
 
-          <h2 className="mx-auto mt-8 max-w-4xl text-6xl font-semibold leading-tight tracking-[-0.05em] text-white">
+            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
+              Organizza ogni fase, evita errori e trova il supporto giusto
+              quando ne hai davvero bisogno.
+            </p>
 
-            Pronto a lasciare che
-            <br />
-            Pilot lavori per te?
+            <div className="mt-7 flex flex-col gap-3 text-sm text-slate-600 sm:flex-row sm:flex-wrap sm:gap-x-6">
+              <div className="flex items-center gap-2">
+                <CheckCircle2
+                  size={18}
+                  className="text-blue-600"
+                  aria-hidden="true"
+                />
+                Percorso personalizzato
+              </div>
 
-          </h2>
+              <div className="flex items-center gap-2">
+                <ShieldCheck
+                  size={18}
+                  className="text-blue-600"
+                  aria-hidden="true"
+                />
+                Informazioni sempre organizzate
+              </div>
+            </div>
+          </div>
 
-          <p className="mx-auto mt-8 max-w-2xl text-xl leading-9 text-slate-400">
-
-            Vendi o affitta il tuo immobile con una guida intelligente che ti
-            accompagna dall'inizio alla firma.
-
-          </p>
-
-          {/* Barra */}
-
-          <div className="mx-auto mt-16 flex max-w-3xl items-center rounded-full bg-white p-3">
-
-            <input
-              placeholder="Dimmi cosa vuoi fare..."
+          {/* Pulsante */}
+          <div className="relative z-10 mt-10 shrink-0 lg:mt-0">
+            <Link
+              href="/login"
               className="
-                flex-1
-                bg-transparent
-                px-8
-                py-5
-                text-lg
-                text-slate-900
-                placeholder:text-slate-400
-                outline-none
-              "
-            />
-
-            <button
-              className="
-                flex
-                h-16
-                w-16
+                group
+                inline-flex
+                min-h-14
+                w-full
                 items-center
                 justify-center
+                gap-3
                 rounded-full
-                bg-blue-600
+                bg-slate-950
+                px-7
+                text-base
+                font-semibold
                 text-white
-                transition
+                shadow-[0_16px_35px_rgba(15,23,42,0.20)]
+                transition-all
                 duration-300
-                hover:scale-105
-                hover:bg-blue-700
+                hover:-translate-y-0.5
+                hover:bg-blue-600
+                hover:shadow-[0_20px_45px_rgba(37,99,235,0.28)]
+                sm:w-auto
               "
             >
-              <ArrowUpRight size={22} />
-            </button>
+              Inizia gratuitamente
 
+              <ArrowRight
+                size={20}
+                className="transition-transform duration-300 group-hover:translate-x-1"
+                aria-hidden="true"
+              />
+            </Link>
+
+            <p className="mt-3 text-center text-xs text-slate-500">
+              Bastano meno di due minuti.
+            </p>
           </div>
-
-          <div className="mt-12 flex flex-wrap justify-center gap-8 text-sm text-slate-400">
-
-            <span>✓ Nessuna registrazione iniziale</span>
-
-            <span>✓ Gratuito</span>
-
-            <span>✓ Ti guida passo dopo passo</span>
-
-          </div>
-
         </div>
-
       </div>
-
     </section>
   );
 }

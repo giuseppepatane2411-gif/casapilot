@@ -2,57 +2,101 @@ import Link from "next/link";
 import { Compass } from "lucide-react";
 
 type LogoProps = {
-  size?: number;
   showText?: boolean;
+  showTagline?: boolean;
+  compact?: boolean;
+  className?: string;
 };
 
 export default function Logo({
-  size = 22,
   showText = true,
+  showTagline = false,
+  compact = false,
+  className = "",
 }: LogoProps) {
+  const iconSize = compact ? 18 : 21;
+
   return (
     <Link
       href="/"
-      className="group flex items-center gap-4"
+      aria-label="Vai alla Home di CasaPilot"
+      className={`
+        group
+        inline-flex
+        min-w-0
+        items-center
+        gap-3
+        rounded-xl
+        focus-visible:outline-none
+        focus-visible:ring-2
+        focus-visible:ring-blue-600
+        focus-visible:ring-offset-4
+        ${className}
+      `}
     >
-      {/* Icona */}
-
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-xl">
-
-        <Compass
-          size={size}
-          strokeWidth={2.2}
-          className="text-slate-900 transition-transform duration-300 group-hover:rotate-12"
+      <span
+        className={`
+          relative
+          flex
+          shrink-0
+          items-center
+          justify-center
+          overflow-hidden
+          rounded-[14px]
+          bg-slate-950
+          text-white
+          shadow-[0_10px_28px_rgba(15,23,42,0.18)]
+          transition-all
+          duration-300
+          group-hover:-translate-y-0.5
+          group-hover:bg-blue-600
+          group-hover:shadow-[0_14px_34px_rgba(37,99,235,0.28)]
+          ${
+            compact
+              ? "h-9 w-9"
+              : "h-10 w-10 sm:h-11 sm:w-11"
+          }
+        `}
+      >
+        <span
+          aria-hidden="true"
+          className="absolute -right-3 -top-3 h-7 w-7 rounded-full bg-blue-500/50 blur-lg"
         />
 
-      </div>
-
-      {/* Testo */}
+        <Compass
+          size={iconSize}
+          strokeWidth={2.35}
+          aria-hidden="true"
+          className="relative z-10 transition-transform duration-500 group-hover:rotate-[24deg]"
+        />
+      </span>
 
       {showText && (
-        <div className="leading-none">
+        <span className="min-w-0">
+          <span
+            className="
+              block
+              whitespace-nowrap
+              [font-family:var(--font-brand)]
+              text-[22px]
+              font-bold
+              leading-none
+              tracking-[-0.055em]
+              text-slate-950
+              sm:text-[24px]
+            "
+          >
+            Casa
+            <span className="text-blue-600">Pilot</span>
+          </span>
 
-          <h1 className="text-[26px] font-extrabold tracking-[0.18em]">
-
-            <span className="text-slate-950">
-              CASA
+          {showTagline && (
+            <span className="mt-1.5 hidden whitespace-nowrap text-[10px] font-medium tracking-[0.08em] text-slate-500 lg:block">
+              IL TUO ASSISTENTE IMMOBILIARE
             </span>
-
-            <span className="text-blue-600">
-              PILOT
-            </span>
-
-          </h1>
-
-          <p className="mt-2 text-xs font-medium tracking-wide text-slate-500">
-
-            Il tuo assistente immobiliare intelligente
-
-          </p>
-
-        </div>
+          )}
+        </span>
       )}
-
     </Link>
   );
 }

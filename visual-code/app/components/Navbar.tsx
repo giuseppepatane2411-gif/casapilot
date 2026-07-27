@@ -2,142 +2,240 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import {
+  ArrowRight,
+  Menu,
+  X,
+} from "lucide-react";
 
 import Container from "@/components/ui/Container";
 import Logo from "@/components/brand/Logo";
 
-export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+const navigation = [
+  {
+    label: "Come funziona",
+    href: "/#come-funziona",
+  },
+  {
+    label: "Professionisti",
+    href: "/professionals",
+  },
+];
 
-  function closeMenu() {
-    setIsMenuOpen(false);
-  }
+export default function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl">
       <Container>
-        <div className="flex h-16 items-center justify-between md:h-20">
-          {/* Logo */}
-          <div className="shrink-0">
-            <Logo />
-          </div>
+        <div className="flex h-[72px] items-center justify-between sm:h-[78px]">
+          <Logo />
 
-          {/* Menu desktop */}
           <nav
-            className="hidden items-center gap-7 md:flex"
             aria-label="Navigazione principale"
+            className="hidden items-center gap-8 md:flex"
           >
-            <Link
-              href="/#come-funziona"
-              className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
-            >
-              Come funziona
-            </Link>
-
-            <Link
-              href="/professionals"
-              className="text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
-            >
-              Per i professionisti
-            </Link>
+            {navigation.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="
+                  relative
+                  py-2
+                  text-[14px]
+                  font-medium
+                  text-slate-600
+                  transition-colors
+                  hover:text-slate-950
+                  after:absolute
+                  after:bottom-0
+                  after:left-0
+                  after:h-[2px]
+                  after:w-0
+                  after:rounded-full
+                  after:bg-blue-600
+                  after:transition-all
+                  after:duration-300
+                  hover:after:w-full
+                "
+              >
+                {item.label}
+              </Link>
+            ))}
 
             <Link
               href="/login"
-              className="text-sm font-semibold text-slate-700 transition-colors hover:text-slate-950"
+              className="
+                text-[14px]
+                font-semibold
+                text-slate-700
+                transition-colors
+                hover:text-blue-600
+              "
             >
               Accedi
             </Link>
 
             <Link
-              href="/login"
-              className="inline-flex min-h-11 items-center justify-center rounded-full bg-slate-950 px-6 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-600 hover:shadow-md"
+              href="/dashboard"
+              className="
+                group
+                inline-flex
+                h-11
+                items-center
+                justify-center
+                gap-2
+                rounded-full
+                bg-slate-950
+                px-5
+                text-[14px]
+                font-semibold
+                text-white
+                shadow-[0_10px_26px_rgba(15,23,42,0.18)]
+                transition-all
+                duration-300
+                hover:-translate-y-0.5
+                hover:bg-blue-600
+                hover:shadow-[0_14px_30px_rgba(37,99,235,0.25)]
+              "
             >
-              Inizia gratis
+              Prova Pilot
+
+              <ArrowRight
+                size={16}
+                aria-hidden="true"
+                className="transition-transform duration-300 group-hover:translate-x-0.5"
+              />
             </Link>
           </nav>
 
-          {/* Pulsante menu mobile */}
           <button
             type="button"
-            onClick={() => setIsMenuOpen((current) => !current)}
-            className="relative flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 transition-colors hover:bg-slate-50 md:hidden"
-            aria-label={isMenuOpen ? "Chiudi menu" : "Apri menu"}
-            aria-expanded={isMenuOpen}
+            aria-label={menuOpen ? "Chiudi il menu" : "Apri il menu"}
+            aria-expanded={menuOpen}
             aria-controls="mobile-navigation"
+            onClick={() => setMenuOpen((current) => !current)}
+            className="
+              flex
+              h-11
+              w-11
+              items-center
+              justify-center
+              rounded-full
+              border
+              border-slate-200
+              bg-white
+              text-slate-900
+              shadow-sm
+              transition-colors
+              hover:bg-slate-50
+              md:hidden
+            "
           >
-            <span className="sr-only">
-              {isMenuOpen ? "Chiudi menu" : "Apri menu"}
-            </span>
-
-            <div className="flex w-5 flex-col gap-1.5">
-              <span
-                className={`block h-0.5 w-5 rounded-full bg-current transition-transform duration-300 ${
-                  isMenuOpen ? "translate-y-2 rotate-45" : ""
-                }`}
-              />
-
-              <span
-                className={`block h-0.5 w-5 rounded-full bg-current transition-opacity duration-300 ${
-                  isMenuOpen ? "opacity-0" : "opacity-100"
-                }`}
-              />
-
-              <span
-                className={`block h-0.5 w-5 rounded-full bg-current transition-transform duration-300 ${
-                  isMenuOpen ? "-translate-y-2 -rotate-45" : ""
-                }`}
-              />
-            </div>
+            {menuOpen ? (
+              <X size={20} aria-hidden="true" />
+            ) : (
+              <Menu size={21} aria-hidden="true" />
+            )}
           </button>
         </div>
+      </Container>
 
-        {/* Menu mobile */}
-        <div
-          id="mobile-navigation"
-          className={`overflow-hidden transition-all duration-300 md:hidden ${
-            isMenuOpen
-              ? "max-h-[420px] border-t border-slate-200/70 opacity-100"
-              : "max-h-0 border-t border-transparent opacity-0"
-          }`}
-        >
+      <div
+        id="mobile-navigation"
+        className={`
+          overflow-hidden
+          border-t
+          border-slate-200/70
+          bg-white
+          transition-all
+          duration-300
+          md:hidden
+          ${
+            menuOpen
+              ? "max-h-[420px] opacity-100"
+              : "max-h-0 border-transparent opacity-0"
+          }
+        `}
+      >
+        <Container>
           <nav
-            className="flex flex-col gap-1 py-4"
             aria-label="Navigazione mobile"
+            className="flex flex-col py-4"
           >
-            <Link
-              href="/#come-funziona"
-              onClick={closeMenu}
-              className="rounded-xl px-4 py-3 text-base font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-950"
-            >
-              Come funziona
-            </Link>
-
-            <Link
-              href="/professionals"
-              onClick={closeMenu}
-              className="rounded-xl px-4 py-3 text-base font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-950"
-            >
-              Per i professionisti
-            </Link>
+            {navigation.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={closeMenu}
+                className="
+                  flex
+                  min-h-12
+                  items-center
+                  border-b
+                  border-slate-100
+                  py-3
+                  text-base
+                  font-medium
+                  text-slate-700
+                  transition-colors
+                  hover:text-blue-600
+                "
+              >
+                {item.label}
+              </Link>
+            ))}
 
             <Link
               href="/login"
               onClick={closeMenu}
-              className="rounded-xl px-4 py-3 text-base font-medium text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-950"
+              className="
+                flex
+                min-h-12
+                items-center
+                py-3
+                text-base
+                font-medium
+                text-slate-700
+                transition-colors
+                hover:text-blue-600
+              "
             >
               Accedi
             </Link>
 
             <Link
-              href="/login"
+              href="/dashboard"
               onClick={closeMenu}
-              className="mt-3 flex min-h-12 items-center justify-center rounded-full bg-slate-950 px-6 text-base font-semibold text-white transition-colors hover:bg-blue-600"
+              className="
+                mt-3
+                flex
+                min-h-12
+                items-center
+                justify-center
+                gap-2
+                rounded-2xl
+                bg-slate-950
+                px-5
+                py-3
+                text-base
+                font-semibold
+                text-white
+                transition-colors
+                hover:bg-blue-600
+              "
             >
-              Inizia gratis
+              Prova Pilot
+
+              <ArrowRight size={18} aria-hidden="true" />
             </Link>
           </nav>
-        </div>
-      </Container>
+        </Container>
+      </div>
     </header>
   );
 }

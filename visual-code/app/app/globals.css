@@ -10,6 +10,7 @@
 
   --font-sans: var(--font-body);
   --font-heading: var(--font-body);
+  --font-brand: var(--font-brand);
   --font-mono: var(--font-body);
   
   --color-sidebar-ring: var(--sidebar-ring);

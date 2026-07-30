@@ -64,7 +64,7 @@ export default function CTASection() {
           {/* Pulsante */}
           <div className="relative z-10 mt-10 shrink-0 lg:mt-0">
             <Link
-              href="/login"
+              href="/dashboard/beta"
               className="
                 group
                 inline-flex
@@ -88,7 +88,7 @@ export default function CTASection() {
                 sm:w-auto
               "
             >
-              Inizia gratuitamente
+              Prova la beta gratuita
 
               <ArrowRight
                 size={20}

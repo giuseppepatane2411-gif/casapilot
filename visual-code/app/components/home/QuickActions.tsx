@@ -12,19 +12,19 @@ const actions = [
   {
     title: "Vendere",
     description: "Vendi casa con Pilot passo dopo passo.",
-    href: "/dashboard/sell",
+    href: "/dashboard/properties/new",
     icon: Home,
   },
   {
     title: "Affittare",
     description: "Gestisci tutto in un unico spazio.",
-    href: "/dashboard/rent",
+    href: "/dashboard/properties/new",
     icon: KeyRound,
   },
   {
-    title: "Professionisti",
-    description: "Trova tecnici e consulenti verificati.",
-    href: "/professionals",
+    title: "Prova la demo",
+    description: "Scopri Pilot OS con un immobile già configurato.",
+    href: "/dashboard/beta",
     icon: Users,
   },
 ];

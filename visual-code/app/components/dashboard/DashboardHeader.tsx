@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  Bell,
-  ChevronDown,
-  Menu,
-} from "lucide-react";
+import Link from "next/link";
+import { FlaskConical, HardDrive, Menu } from "lucide-react";
 
 type DashboardHeaderProps = {
   onOpenMobileMenu: () => void;
@@ -21,51 +18,38 @@ export default function DashboardHeader({
             type="button"
             aria-label="Apri il menu"
             onClick={onOpenMobileMenu}
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm transition-colors hover:bg-slate-50 lg:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 lg:hidden"
           >
             <Menu size={20} aria-hidden="true" />
           </button>
 
           <div>
             <p className="text-sm font-semibold text-slate-950 sm:text-base">
-              Il tuo percorso
+              CasaPilot Beta
             </p>
-
             <p className="hidden text-xs text-slate-500 sm:block">
-              Tutto ciò che serve, in un unico spazio.
+              Prova, completa una missione e condividi il feedback.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <button
-            type="button"
-            aria-label="Apri le notifiche"
-            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition-colors hover:bg-slate-50 hover:text-slate-950"
+          <span className="hidden min-h-10 items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 text-xs font-bold text-emerald-700 md:inline-flex">
+            <HardDrive size={15} />
+            Dati locali
+          </span>
+
+          <Link
+            href="/dashboard/beta"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-950 px-3.5 text-sm font-bold text-white shadow-sm hover:bg-blue-600"
           >
-            <Bell size={19} aria-hidden="true" />
+            <FlaskConical size={17} />
+            <span className="hidden sm:inline">Beta Lab</span>
+          </Link>
 
-            <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-blue-600 ring-2 ring-white" />
-          </button>
-
-          <button
-            type="button"
-            className="flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 shadow-sm transition-colors hover:bg-slate-50 sm:px-3"
-          >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">
-              G
-            </span>
-
-            <span className="hidden text-sm font-semibold text-slate-800 sm:block">
-              Giuseppe
-            </span>
-
-            <ChevronDown
-              size={15}
-              aria-hidden="true"
-              className="hidden text-slate-400 sm:block"
-            />
-          </button>
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+            B
+          </span>
         </div>
       </div>
     </header>

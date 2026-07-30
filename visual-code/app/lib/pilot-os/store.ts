@@ -4,7 +4,7 @@ import type {
   PilotTimelineEvent,
 } from "@/lib/pilot-os/types";
 
-const PILOT_MEMORY_STORAGE_KEY = "casapilot-pilot-os-memory-v2";
+export const PILOT_MEMORY_STORAGE_KEY = "casapilot-pilot-os-memory-v2";
 export const PILOT_MEMORY_CHANGE_EVENT = "casapilot:pilot-memory-changed";
 
 type PilotMemoryMap = Record<string, JourneyPilotMemory>;

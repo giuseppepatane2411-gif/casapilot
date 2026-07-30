@@ -86,7 +86,7 @@ function ActiveDashboard({
             Percorso attivo
           </div>
           <h1 className="text-3xl font-bold tracking-[-0.045em] text-slate-950 sm:text-4xl">
-            Buongiorno, Giuseppe.
+            Buongiorno.
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500 sm:text-base">
             La preparazione di {journey.property.name} è al {journey.progress}%. Concentrati su una sola missione alla volta.
@@ -313,7 +313,7 @@ function EmptyDashboard() {
           <Sparkles size={14} />
           Dashboard personale
         </div>
-        <h1 className="text-3xl font-bold tracking-[-0.045em] text-slate-950 sm:text-4xl">Buongiorno, Giuseppe.</h1>
+        <h1 className="text-3xl font-bold tracking-[-0.045em] text-slate-950 sm:text-4xl">Buongiorno.</h1>
         <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500 sm:text-base">
           Non hai ancora una pratica attiva. Inizia con poche informazioni: Pilot costruirà il percorso intorno al tuo immobile.
         </p>
@@ -330,13 +330,22 @@ function EmptyDashboard() {
           <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-100 sm:text-base">
             Scegli se vuoi vendere o affittare, descrivi l’immobile e indica i documenti che possiedi già. Servono meno di tre minuti.
           </p>
-          <Link
-            href="/dashboard/properties/new"
-            className="group mt-7 inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-bold text-blue-700 shadow-lg hover:-translate-y-0.5 hover:bg-blue-50"
-          >
-            Inizia adesso
-            <ArrowRight size={17} className="transition-transform group-hover:translate-x-0.5" />
-          </Link>
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/dashboard/properties/new"
+              className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-white px-5 text-sm font-bold text-blue-700 shadow-lg hover:-translate-y-0.5 hover:bg-blue-50"
+            >
+              Crea una pratica reale
+              <ArrowRight size={17} className="transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href="/dashboard/beta"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 text-sm font-bold text-white hover:bg-white/15"
+            >
+              Prova prima la demo
+              <Sparkles size={17} />
+            </Link>
+          </div>
         </div>
       </section>
 

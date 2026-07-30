@@ -9,7 +9,7 @@ type PilotCardProps = {
 };
 
 export default function PilotCard({
-  title = "Ciao Giuseppe.",
+  title = "Ciao.",
   message = "Quando crei un percorso, userò i suoi dati per proporti la prossima attività utile.",
   suggestion = "Inizia dalle informazioni che hai già: potrai completare il resto con calma.",
   href = "/dashboard/pilot",
@@ -29,7 +29,7 @@ export default function PilotCard({
         <div className="flex items-center justify-between">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold">
             <Sparkles size={14} />
-            Pilot AI
+            Pilot OS
           </span>
           <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10">
             <Bot size={20} />

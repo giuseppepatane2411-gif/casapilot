@@ -6,9 +6,7 @@ import {
   ArrowLeft,
   ArrowRight,
   Building2,
-  Check,
   Clock3,
-  FileText,
   Home,
   LandPlot,
   MapPin,
@@ -20,6 +18,7 @@ import {
   Warehouse,
 } from "lucide-react";
 
+import DocumentGuideItem from "@/components/property-journey/DocumentGuideItem";
 import { useJourneys } from "@/hooks/useJourneys";
 import { usePilotMemory } from "@/hooks/usePilotMemory";
 import { buildPilotContext } from "@/lib/pilot-os";
@@ -232,36 +231,15 @@ function JourneyContent({
               </span>
             </div>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              {requiredDocuments.map((document) => {
-                const selected = journey.documents.includes(document.id);
-
-                return (
-                  <button
-                    key={document.id}
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() => toggleDocument(document.id)}
-                    className={`flex min-h-28 items-start gap-3 rounded-2xl border p-4 text-left transition-all focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 ${
-                      selected
-                        ? "border-emerald-300 bg-emerald-50/70"
-                        : "border-slate-200 bg-white hover:border-blue-200 hover:shadow-md"
-                    }`}
-                  >
-                    <span
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                        selected ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-500"
-                      }`}
-                    >
-                      {selected ? <Check size={18} strokeWidth={2.8} /> : <FileText size={18} />}
-                    </span>
-                    <span>
-                      <span className="block font-bold text-slate-950">{document.title}</span>
-                      <span className="mt-1 block text-xs leading-5 text-slate-500">{document.description}</span>
-                    </span>
-                  </button>
-                );
-              })}
+            <div className="mt-6 grid items-start gap-3 sm:grid-cols-2">
+              {requiredDocuments.map((document) => (
+                <DocumentGuideItem
+                  key={document.id}
+                  document={document}
+                  selected={journey.documents.includes(document.id)}
+                  onToggle={() => toggleDocument(document.id)}
+                />
+              ))}
             </div>
 
             <p className="mt-5 rounded-2xl bg-slate-50 p-4 text-xs leading-5 text-slate-500">

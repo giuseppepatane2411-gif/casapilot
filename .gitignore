@@ -1,0 +1,6 @@
+﻿visual-code-backup/
+visual-code-backup-v1/
+**/node_modules/
+**/.next/
+**/.env
+**/.env.local

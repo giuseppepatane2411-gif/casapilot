@@ -6,10 +6,14 @@ import {
   Bot,
   Building2,
   FileText,
+  FolderLock,
   Home,
   LayoutDashboard,
   Plus,
+  Rocket,
+  MessageSquareText,
   Settings,
+  ShieldCheck,
   Users,
   X,
 } from "lucide-react";
@@ -22,6 +26,11 @@ type DashboardSidebarProps = {
 };
 
 const mainNavigation = [
+  {
+    label: "Test Flight",
+    href: "/dashboard/beta",
+    icon: Rocket,
+  },
   {
     label: "Dashboard",
     href: "/dashboard",
@@ -44,9 +53,19 @@ const mainNavigation = [
     icon: FileText,
   },
   {
-    label: "Pilot AI",
+    label: "Archivio locale",
+    href: "/dashboard/vault",
+    icon: FolderLock,
+  },
+  {
+    label: "Pilot OS",
     href: "/dashboard/pilot",
     icon: Bot,
+  },
+  {
+    label: "Feedback beta",
+    href: "/dashboard/feedback",
+    icon: MessageSquareText,
   },
   {
     label: "Professionisti",
@@ -60,6 +79,11 @@ const secondaryNavigation = [
     label: "Impostazioni",
     href: "/dashboard/settings",
     icon: Settings,
+  },
+  {
+    label: "Privacy beta",
+    href: "/privacy",
+    icon: ShieldCheck,
   },
   {
     label: "Torna alla Home",
@@ -225,16 +249,16 @@ export default function DashboardSidebar({
 
           <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white">
-              G
+              B
             </div>
 
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-slate-950">
-                Giuseppe
+                Utente beta
               </p>
 
               <p className="truncate text-xs text-slate-500">
-                Piano gratuito
+                Beta gratuita
               </p>
             </div>
 

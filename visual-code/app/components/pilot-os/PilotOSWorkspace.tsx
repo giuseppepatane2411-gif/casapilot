@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import {
   ArrowRight,
   Bot,
@@ -19,6 +20,7 @@ import PilotTimeline from "@/components/pilot-os/PilotTimeline";
 import PropertyQuickData from "@/components/pilot-os/PropertyQuickData";
 import { useJourneys } from "@/hooks/useJourneys";
 import { usePilotMemory } from "@/hooks/usePilotMemory";
+import { markBetaMilestone, trackBetaEvent } from "@/lib/beta/storage";
 import { buildPilotContext } from "@/lib/pilot-os";
 
 export default function PilotOSWorkspace() {
@@ -28,9 +30,14 @@ export default function PilotOSWorkspace() {
     activeJourney,
     activateJourney,
   } = useJourneys();
-  const { hydrated: memoryHydrated, memory } = usePilotMemory(
-    activeJourney?.id ?? null,
-  );
+  const activeJourneyId = activeJourney?.id ?? null;
+  const { hydrated: memoryHydrated, memory } = usePilotMemory(activeJourneyId);
+
+  useEffect(() => {
+    if (!activeJourneyId) return;
+    markBetaMilestone("pilot-opened");
+    trackBetaEvent("pilot-opened", { journeyId: activeJourneyId });
+  }, [activeJourneyId]);
 
   if (!journeysHydrated || !memoryHydrated) {
     return <PilotSkeleton />;
@@ -58,7 +65,7 @@ export default function PilotOSWorkspace() {
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-bold">
               <BrainCircuit size={14} />
-              Pilot OS v2 · Command Center
+              Pilot OS · Beta Zero-Cost
             </span>
             <h1 className="mt-6 max-w-4xl text-3xl font-bold tracking-[-0.05em] sm:text-5xl">
               Pilot non mostra dati.

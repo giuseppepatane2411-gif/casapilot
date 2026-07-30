@@ -203,7 +203,7 @@ export default function PropertyWizard() {
     try {
       const journey = createJourney(data);
       clearWizardDraft();
-      router.push(`/dashboard?propertyCreated=1&journey=${journey.id}`);
+      router.push(`/dashboard/beta/success?journey=${journey.id}`);
     } catch {
       setValidationMessage(
         "Non siamo riusciti a creare il percorso. Controlla i dati e riprova.",

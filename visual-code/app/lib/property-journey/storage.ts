@@ -250,6 +250,49 @@ export function createJourney(data: WizardData) {
   return journey;
 }
 
+
+export function replaceJourneys(
+  journeys: PropertyJourney[],
+  activeJourneyId: string | null = null,
+) {
+  if (!isBrowser()) return;
+
+  const validJourneys = journeys.filter(isJourney);
+  writeJourneys(validJourneys);
+
+  const nextActiveId =
+    validJourneys.find((journey) => journey.id === activeJourneyId)?.id ??
+    validJourneys[0]?.id ??
+    null;
+
+  if (nextActiveId) {
+    window.localStorage.setItem(ACTIVE_JOURNEY_STORAGE_KEY, nextActiveId);
+  } else {
+    window.localStorage.removeItem(ACTIVE_JOURNEY_STORAGE_KEY);
+  }
+
+  emitChange();
+}
+
+export function upsertJourney(journey: PropertyJourney) {
+  if (!isBrowser() || !isJourney(journey)) return null;
+
+  const journeys = readJourneys();
+  const existingIndex = journeys.findIndex((item) => item.id === journey.id);
+  const nextJourneys = [...journeys];
+
+  if (existingIndex >= 0) {
+    nextJourneys[existingIndex] = journey;
+  } else {
+    nextJourneys.unshift(journey);
+  }
+
+  writeJourneys(nextJourneys);
+  window.localStorage.setItem(ACTIVE_JOURNEY_STORAGE_KEY, journey.id);
+  emitChange();
+  return journey;
+}
+
 export function updateJourneyDocuments(
   journeyId: string,
   documents: DocumentKey[],

@@ -13,6 +13,10 @@ const navigation = [
     href: "/#come-funziona",
   },
   {
+    label: "Prova la beta",
+    href: "/dashboard/beta",
+  },
+  {
     label: "Professionisti",
     href: "/professionals",
   },
@@ -73,11 +77,11 @@ export default function Navbar() {
                 hover:text-blue-600
               "
             >
-              Accedi
+              Accesso beta
             </Link>
 
             <Link
-              href="/dashboard"
+              href="/dashboard/beta"
               className="
                 group
                 inline-flex
@@ -99,7 +103,7 @@ export default function Navbar() {
                 hover:shadow-[0_14px_30px_rgba(37,99,235,0.25)]
               "
             >
-              Dashboard
+              Prova la beta
 
               <ArrowRight
                 size={16}
@@ -201,11 +205,11 @@ export default function Navbar() {
                 hover:text-blue-600
               "
             >
-              Accedi
+              Accesso beta
             </Link>
 
             <Link
-              href="/dashboard"
+              href="/dashboard/beta"
               onClick={closeMenu}
               className="
                 mt-3
@@ -225,7 +229,7 @@ export default function Navbar() {
                 hover:bg-blue-600
               "
             >
-              Dashboard
+              Prova la beta
 
               <ArrowRight size={18} aria-hidden="true" />
             </Link>

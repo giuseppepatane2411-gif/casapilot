@@ -6,10 +6,12 @@ import {
   Building2,
   CheckCircle2,
   FileText,
+  FolderLock,
   Plus,
 } from "lucide-react";
 
 import { useJourneys } from "@/hooks/useJourneys";
+import { useLocalVault } from "@/hooks/useLocalVault";
 import {
   getOperationLabel,
   getRequiredDocuments,
@@ -17,8 +19,9 @@ import {
 
 export default function DocumentsOverview() {
   const { hydrated, journeys } = useJourneys();
+  const { hydrated: vaultHydrated, documents: vaultDocuments } = useLocalVault();
 
-  if (!hydrated) {
+  if (!hydrated || !vaultHydrated) {
     return <div className="h-80 animate-pulse rounded-[28px] bg-slate-200/70" />;
   }
 
@@ -47,13 +50,22 @@ export default function DocumentsOverview() {
           </p>
         </div>
 
-        <Link
-          href="/dashboard/properties/new"
-          className="inline-flex min-h-12 items-center justify-center gap-2 self-start rounded-2xl bg-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:-translate-y-0.5 hover:bg-blue-700 sm:self-auto"
-        >
-          <Plus size={18} />
-          Nuovo percorso
-        </Link>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Link
+            href="/dashboard/vault"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-700 shadow-sm hover:border-blue-200 hover:text-blue-700"
+          >
+            <FolderLock size={18} />
+            Archivio locale
+          </Link>
+          <Link
+            href="/dashboard/properties/new"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:-translate-y-0.5 hover:bg-blue-700"
+          >
+            <Plus size={18} />
+            Nuovo percorso
+          </Link>
+        </div>
       </header>
 
       {journeys.length === 0 ? (
@@ -77,9 +89,10 @@ export default function DocumentsOverview() {
         </section>
       ) : (
         <>
-          <section className="grid gap-4 sm:grid-cols-3">
+          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <Metric label="Totale checklist" value={totalRequired} tone="neutral" />
             <Metric label="Disponibili" value={totalAvailable} tone="success" />
+            <Metric label="File allegati" value={vaultDocuments.length} tone="files" />
             <Metric label="Da recuperare" value={totalMissing} tone="danger" />
           </section>
 
@@ -94,6 +107,9 @@ export default function DocumentsOverview() {
               const completion = requiredDocuments.length
                 ? Math.round((available / requiredDocuments.length) * 100)
                 : 0;
+              const attachedFiles = vaultDocuments.filter(
+                (document) => document.journeyId === journey.id,
+              ).length;
 
               return (
                 <article
@@ -115,7 +131,7 @@ export default function DocumentsOverview() {
                           </span>
                         </div>
                         <p className="mt-1 text-sm text-slate-500">
-                          {available} disponibili · {missing} da recuperare
+                          {available} disponibili · {attachedFiles} file locali · {missing} da recuperare
                         </p>
                       </div>
                     </div>
@@ -133,13 +149,22 @@ export default function DocumentsOverview() {
                           />
                         </div>
                       </div>
-                      <Link
-                        href={`/dashboard/properties/${journey.id}#documents`}
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-700 hover:bg-slate-50"
-                      >
-                        Aggiorna checklist
-                        <ArrowRight size={16} />
-                      </Link>
+                      <div className="flex gap-2">
+                        <Link
+                          href={`/dashboard/vault?journey=${journey.id}`}
+                          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-bold text-white hover:bg-blue-600"
+                        >
+                          <FolderLock size={16} />
+                          Archivio
+                        </Link>
+                        <Link
+                          href={`/dashboard/properties/${journey.id}#documents`}
+                          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                        >
+                          Checklist
+                          <ArrowRight size={16} />
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </article>
@@ -159,20 +184,27 @@ export default function DocumentsOverview() {
 type MetricProps = {
   label: string;
   value: number;
-  tone: "neutral" | "success" | "danger";
+  tone: "neutral" | "success" | "files" | "danger";
 };
 
 function Metric({ label, value, tone }: MetricProps) {
   const styles = {
     neutral: "bg-slate-100 text-slate-700",
     success: "bg-emerald-100 text-emerald-700",
+    files: "bg-blue-100 text-blue-700",
     danger: "bg-rose-100 text-rose-700",
   };
 
   return (
     <article className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
       <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${styles[tone]}`}>
-        {tone === "success" ? <CheckCircle2 size={19} /> : <FileText size={19} />}
+        {tone === "success" ? (
+          <CheckCircle2 size={19} />
+        ) : tone === "files" ? (
+          <FolderLock size={19} />
+        ) : (
+          <FileText size={19} />
+        )}
       </span>
       <p className="mt-5 text-sm font-semibold text-slate-500">{label}</p>
       <p className="mt-1 text-3xl font-bold text-slate-950">{value}</p>

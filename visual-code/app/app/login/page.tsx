@@ -20,7 +20,7 @@ export default function LoginPage() {
                 Entra nello spazio CasaPilot.
               </h1>
               <p className="mt-4 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
-                In questa fase MVP non serve ancora un account: puoi provare dashboard, wizard e checklist direttamente nel browser.
+                In questa fase beta non serve ancora un account: puoi provare dashboard, wizard e checklist direttamente nel browser.
               </p>
 
               <div className="mt-8 space-y-3 text-sm text-slate-200">
@@ -37,17 +37,17 @@ export default function LoginPage() {
           </div>
 
           <div className="flex flex-col justify-center p-7 sm:p-10">
-            <p className="text-sm font-semibold text-blue-600">CasaPilot MVP</p>
-            <h2 className="mt-2 text-3xl font-bold text-slate-950">Continua come Giuseppe</h2>
+            <p className="text-sm font-semibold text-blue-600">CasaPilot Beta</p>
+            <h2 className="mt-2 text-3xl font-bold text-slate-950">Continua senza account</h2>
             <p className="mt-3 text-sm leading-6 text-slate-500">
               L’autenticazione reale sarà collegata quando aggiungeremo database e profili utente.
             </p>
 
             <Link
-              href="/dashboard"
+              href="/dashboard/beta"
               className="group mt-8 inline-flex min-h-13 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:-translate-y-0.5 hover:bg-blue-700"
             >
-              Entra nella dashboard
+              Apri la Beta Lab
               <ArrowRight size={17} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
 

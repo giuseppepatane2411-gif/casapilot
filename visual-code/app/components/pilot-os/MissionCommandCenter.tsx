@@ -10,8 +10,10 @@ import {
   ListChecks,
   Sparkles,
   Target,
+  Upload,
 } from "lucide-react";
 
+import { markBetaMilestone, trackBetaEvent } from "@/lib/beta/storage";
 import { getDocumentDefinition } from "@/lib/property-journey/scoring";
 import { updateJourneyDocuments } from "@/lib/property-journey/storage";
 import {
@@ -50,6 +52,11 @@ export default function MissionCommandCenter({
           "Pilot ha aggiornato checklist, Health Score e prossima missione.",
         type: "document",
       });
+      markBetaMilestone("mission-completed");
+      trackBetaEvent("mission-completed", {
+        journeyId: context.journey.id,
+        metadata: { missionId: selectedMission.id, documentId: selectedMission.documentId },
+      });
       return;
     }
 
@@ -59,6 +66,11 @@ export default function MissionCommandCenter({
       title: "Missione completata",
       description: selectedMission.title,
       type: "mission",
+    });
+    markBetaMilestone("mission-completed");
+    trackBetaEvent("mission-completed", {
+      journeyId: context.journey.id,
+      metadata: { missionId: selectedMission.id },
     });
   }
 
@@ -113,7 +125,25 @@ export default function MissionCommandCenter({
         </div>
 
         <div className="mt-6 flex flex-wrap items-center gap-3">
-          {canComplete ? (
+          {mission.documentId ? (
+            <>
+              <Link
+                href={`/dashboard/vault?journey=${context.journey.id}&document=${mission.documentId}`}
+                className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-bold text-blue-700 shadow-lg hover:-translate-y-0.5 hover:bg-blue-50"
+              >
+                <Upload size={18} />
+                Allega il documento
+              </Link>
+              <button
+                type="button"
+                onClick={() => completeMission(mission)}
+                className="inline-flex min-h-12 items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 text-sm font-bold text-white hover:bg-white/15"
+              >
+                <CheckCircle2 size={18} />
+                Ce l’ho già, senza file
+              </button>
+            </>
+          ) : canComplete ? (
             <button
               type="button"
               onClick={() => completeMission(mission)}
@@ -131,13 +161,15 @@ export default function MissionCommandCenter({
               <ArrowRight size={17} />
             </Link>
           )}
-          <Link
-            href={mission.href}
-            className="inline-flex min-h-12 items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 text-sm font-bold text-white hover:bg-white/15"
-          >
-            Apri attività
-            <ArrowRight size={17} />
-          </Link>
+          {!mission.documentId && (
+            <Link
+              href={mission.href}
+              className="inline-flex min-h-12 items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 text-sm font-bold text-white hover:bg-white/15"
+            >
+              Apri attività
+              <ArrowRight size={17} />
+            </Link>
+          )}
         </div>
 
         {context.missionQueue.length > 1 && (

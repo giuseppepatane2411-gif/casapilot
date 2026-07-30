@@ -40,7 +40,7 @@ export default function Features() {
 
           <p className="mt-6 text-lg text-slate-600">
             CasaPilot non è solo un archivio documentale.
-            È l'assistente immobiliare digitale che accompagna utenti,
+            È l’assistente immobiliare digitale che accompagna utenti,
             proprietari, inquilini e professionisti in ogni pratica.
           </p>
 

@@ -47,7 +47,7 @@ export default function HowItWorks() {
           </h2>
 
           <p className="mt-8 text-xl leading-9 text-slate-500">
-            Ti accompagna passo dopo passo nella vendita o nell'affitto,
+            Ti accompagna passo dopo passo nella vendita o nell’affitto,
             eliminando dubbi, burocrazia e perdite di tempo.
           </p>
 

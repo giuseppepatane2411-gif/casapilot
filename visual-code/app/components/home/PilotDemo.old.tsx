@@ -42,7 +42,7 @@ export default function PilotDemo() {
             <div className="mt-5 flex items-center gap-2 text-green-600">
               <CheckCircle2 size={18} />
               <span className="font-medium">
-                Fascicolo dell'immobile creato.
+                Fascicolo dell’immobile creato.
               </span>
             </div>
 

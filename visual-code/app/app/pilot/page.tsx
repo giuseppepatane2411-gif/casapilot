@@ -60,7 +60,7 @@ export default function PilotPage() {
             </h2>
 
             <p className="mb-6">
-              L'immobile si trova in Italia?
+              L’immobile si trova in Italia?
             </p>
 
             <div className="flex gap-4">

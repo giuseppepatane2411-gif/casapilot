@@ -42,7 +42,7 @@ export default function Conversation({
           />
 
           <span className="font-medium text-emerald-700">
-            Fascicolo dell'immobile creato.
+            Fascicolo dell’immobile creato.
           </span>
         </div>
 

@@ -2,11 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  ArrowRight,
-  Menu,
-  X,
-} from "lucide-react";
+import { ArrowRight, Menu, X } from "lucide-react";
 
 import Container from "@/components/ui/Container";
 import Logo from "@/components/brand/Logo";
@@ -103,7 +99,7 @@ export default function Navbar() {
                 hover:shadow-[0_14px_30px_rgba(37,99,235,0.25)]
               "
             >
-              Prova Pilot
+              Dashboard
 
               <ArrowRight
                 size={16}
@@ -229,7 +225,7 @@ export default function Navbar() {
                 hover:bg-blue-600
               "
             >
-              Prova Pilot
+              Dashboard
 
               <ArrowRight size={18} aria-hidden="true" />
             </Link>

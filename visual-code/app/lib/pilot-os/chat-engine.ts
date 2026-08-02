@@ -49,7 +49,7 @@ export function answerPilotQuestion(
     normalized.includes("punteggio") ||
     normalized.includes("salute")
   ) {
-    return `L’Health Score è ${context.journey.healthScore}/100 e la prontezza operativa è ${context.readiness.overall}%. Completando “${context.mission.title}” puoi ottenere circa ${context.mission.scoreGain} punti e ridurre il rischio principale della pratica.`;
+    return `Il percorso verso l’obiettivo è al ${context.goalProgress.overall}% e la prontezza attuale è ${context.readiness.overall}%. Il prossimo passo è “${context.mission.title}”: completandolo puoi avanzare di circa ${context.mission.scoreGain} punti percentuali nel percorso.`;
   }
 
   if (
@@ -95,7 +95,7 @@ export function answerPilotQuestion(
     return `${context.summary} La prontezza complessiva è ${context.readiness.overall}% (${context.readiness.label.toLowerCase()}). Sono presenti ${context.risks.length} attenzioni operative e ${context.missionQueue.length} missioni ancora aperte.`;
   }
 
-  return `Per ${context.journey.property.name} terrei il focus su “${context.mission.title}”. Posso aiutarti soprattutto su documenti mancanti, Health Score, rischi, preparazione dell’annuncio e prossimo passo operativo.`;
+  return `Per ${context.journey.property.name} terrei il focus su “${context.mission.title}”. Posso aiutarti soprattutto su documenti mancanti, avanzamento verso l’obiettivo, rischi, preparazione dell’annuncio e prossimo passo operativo.`;
 }
 
 export const PILOT_QUICK_QUESTIONS = [

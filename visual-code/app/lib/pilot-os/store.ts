@@ -152,6 +152,14 @@ export function savePilotMessages(journeyId: string, messages: PilotMessage[]) {
   writeMemoryMap(map);
 }
 
+export function deleteJourneyPilotMemory(journeyId: string) {
+  if (!isBrowser()) return;
+  const map = readMemoryMap();
+  if (!(journeyId in map)) return;
+  delete map[journeyId];
+  writeMemoryMap(map);
+}
+
 export function createPilotMessage(
   role: PilotMessage["role"],
   content: string,

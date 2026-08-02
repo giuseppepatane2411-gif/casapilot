@@ -1,4 +1,5 @@
 import { getOperationGoal } from "@/lib/pilot-os/knowledge";
+import { calculateGoalProgress } from "@/lib/pilot-os/goal-progress";
 import {
   generateMission,
   generateMissionQueue,
@@ -22,6 +23,10 @@ function getMissingInformation(journey: PropertyJourney) {
   if (!journey.property.address) missing.push("indirizzo");
   if (!journey.property.postalCode) missing.push("CAP");
   if (!journey.property.province) missing.push("provincia");
+  if (!journey.property.locationVerified) missing.push("posizione verificata");
+  if (!journey.property.cadastralSheet) missing.push("foglio catastale");
+  if (!journey.property.cadastralParcel) missing.push("particella o mappale");
+  if (!journey.property.cadastralSubaltern) missing.push("subalterno");
   return missing;
 }
 
@@ -52,6 +57,7 @@ export function buildPilotContext(
   const missingInformation = getMissingInformation(journey);
   const readiness = calculateReadiness(journey, memory);
   const risks = generateRisks(journey);
+  const goalProgress = calculateGoalProgress(journey, memory);
 
   return {
     journey,
@@ -63,6 +69,7 @@ export function buildPilotContext(
     missingInformation,
     readiness,
     risks,
+    goalProgress,
     knownFacts: countKnownFacts(journey, memory),
     summary: `Pilot sta aiutando l’utente a ${getOperationGoal(
       journey.operation,

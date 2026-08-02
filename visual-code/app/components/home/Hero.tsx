@@ -34,7 +34,7 @@ export default function Hero() {
             <div className="flex justify-center">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white backdrop-blur-md sm:px-4 sm:text-sm">
                 <Sparkles size={15} aria-hidden="true" />
-                Pilot OS è pronto a guidarti
+                Pilot è pronto a guidarti
               </div>
             </div>
 

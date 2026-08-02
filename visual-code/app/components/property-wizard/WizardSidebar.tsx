@@ -2,8 +2,7 @@ import {
   CheckCircle2,
   Clock3,
   FileCheck2,
-  ShieldCheck,
-  Sparkles,
+  Save,
 } from "lucide-react";
 
 import { getRequiredDocuments } from "@/lib/property-journey/constants";
@@ -17,7 +16,6 @@ type WizardSidebarProps = {
 
 export default function WizardSidebar({
   data,
-  healthScore,
   draftLoaded,
 }: WizardSidebarProps) {
   const requiredDocuments = getRequiredDocuments(
@@ -30,79 +28,65 @@ export default function WizardSidebar({
 
   return (
     <aside className="space-y-4 lg:sticky lg:top-[96px] lg:self-start">
-      <section className="relative overflow-hidden rounded-[28px] bg-slate-950 p-6 text-white shadow-xl shadow-slate-950/10">
-        <div
-          aria-hidden="true"
-          className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-blue-600/30 blur-3xl"
-        />
-
-        <div className="relative">
-          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-bold">
-            <Sparkles size={14} />
-            Anteprima Pilot
-          </span>
-
-          <h2 className="mt-6 text-2xl font-bold">Stai costruendo una pratica solida.</h2>
-          <p className="mt-3 text-sm leading-6 text-slate-300">
-            Le risposte servono a personalizzare missioni, checklist e priorità del percorso.
-          </p>
-
-          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.07] p-4">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-                  Health Score stimato
-                </p>
-                <p className="mt-2 text-4xl font-bold tracking-[-0.05em]">
-                  {healthScore}
-                  <span className="ml-1 text-sm text-slate-400">/100</span>
-                </p>
-              </div>
-
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white">
-                <ShieldCheck size={23} />
-              </span>
-            </div>
-
-            <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
-              <div
-                className="h-full rounded-full bg-blue-500 transition-[width] duration-500"
-                style={{ width: `${healthScore}%` }}
-              />
-            </div>
-          </div>
-        </div>
+      <section className="rounded-[26px] border border-blue-100 bg-blue-50 p-5 sm:p-6">
+        <p className="text-xs font-bold uppercase tracking-[0.12em] text-blue-700">
+          Non serve sapere tutto adesso
+        </p>
+        <h2 className="mt-3 text-xl font-bold text-slate-950">
+          Rispondi solo a quello che sai.
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          Se ti manca un documento non è un problema: CasaPilot lo inserirà tra le cose da fare dopo.
+        </p>
       </section>
 
       <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-            <FileCheck2 size={19} />
-          </span>
-          <div>
-            <p className="font-bold text-slate-950">Checklist iniziale</p>
-            <p className="text-xs text-slate-500">
-              {availableDocuments} di {requiredDocuments.length || "—"} documenti disponibili
-            </p>
+        <div className="space-y-4 text-sm text-slate-600">
+          <div className="flex items-start gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+              <CheckCircle2 size={17} />
+            </span>
+            <div>
+              <p className="font-bold text-slate-900">Percorso personalizzato</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Le prossime attività dipenderanno dalle tue risposte.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <Clock3 size={17} />
+            </span>
+            <div>
+              <p className="font-bold text-slate-900">Pochi minuti</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Ti chiediamo solo le informazioni essenziali.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+              <FileCheck2 size={17} />
+            </span>
+            <div>
+              <p className="font-bold text-slate-900">Documenti</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                {requiredDocuments.length
+                  ? `${availableDocuments} di ${requiredDocuments.length} già indicati come disponibili.`
+                  : "La checklist apparirà quando avremo i dati necessari."}
+              </p>
+            </div>
           </div>
         </div>
 
-        <div className="mt-5 space-y-3 text-sm text-slate-600">
-          <p className="flex items-center gap-2">
-            <CheckCircle2 size={16} className="text-emerald-600" />
-            Percorso personalizzato
-          </p>
-          <p className="flex items-center gap-2">
-            <Clock3 size={16} className="text-blue-600" />
-            Meno di 3 minuti
-          </p>
-        </div>
-
-        <p className="mt-5 border-t border-slate-100 pt-4 text-xs leading-5 text-slate-500">
+        <div className="mt-5 flex items-center gap-2 border-t border-slate-100 pt-4 text-xs leading-5 text-slate-500">
+          <Save size={15} className="shrink-0" />
           {draftLoaded
-            ? "Le modifiche vengono salvate automaticamente in questo browser."
-            : "Caricamento del salvataggio automatico…"}
-        </p>
+            ? "Le risposte vengono salvate automaticamente in questo browser."
+            : "Stiamo preparando il salvataggio automatico…"}
+        </div>
       </section>
     </aside>
   );

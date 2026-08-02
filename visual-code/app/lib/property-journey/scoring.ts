@@ -2,6 +2,10 @@ import {
   DOCUMENT_DEFINITIONS,
   getRequiredDocuments,
 } from "@/lib/property-journey/constants";
+import {
+  calculateBaseGoalProgress,
+  calculateSetupCompletion,
+} from "@/lib/property-journey/progress-model";
 import type {
   DocumentKey,
   JourneyMission,
@@ -64,35 +68,20 @@ export function calculateJourneyMetrics(data: WizardData) {
     data.operation,
     data.propertyType,
   );
-
-  const profileMilestones = [
-    Boolean(data.operation),
-    Boolean(data.propertyType),
-    hasText(data.propertyName),
-    hasText(data.surface),
-    Boolean(data.occupancy),
-    hasText(data.city) && hasText(data.province) && hasText(data.country),
-    hasText(data.address),
-  ];
-
-  const completedProfileMilestones = profileMilestones.filter(Boolean).length;
+  const setupCompletion = calculateSetupCompletion(data);
   const completedDocuments = requiredDocuments.filter((document) =>
     data.documents.includes(document.id),
   ).length;
 
-  const totalActivities =
-    profileMilestones.length + requiredDocuments.length + FUTURE_ACTIVITIES;
-  const completedActivities =
-    completedProfileMilestones + completedDocuments;
-
   return {
     healthScore: calculateWizardHealthScore(data),
-    progress: Math.min(
-      100,
-      Math.round((completedActivities / totalActivities) * 100),
-    ),
-    completedActivities,
-    totalActivities,
+    // Questo è solo il progresso misurabile dalla scheda e dai documenti.
+    // Le fasi successive dipendono dalla memoria di Pilot e vengono calcolate
+    // dal modello obiettivo-aware dopo la creazione della pratica.
+    progress: calculateBaseGoalProgress(data),
+    completedActivities:
+      Math.round(setupCompletion / 10) + completedDocuments,
+    totalActivities: 10 + requiredDocuments.length + FUTURE_ACTIVITIES,
   };
 }
 
@@ -108,6 +97,14 @@ export function journeyToWizardData(journey: PropertyJourney): WizardData {
     province: journey.property.province,
     address: journey.property.address,
     postalCode: journey.property.postalCode,
+    cadastralSheet: journey.property.cadastralSheet ?? "",
+    cadastralParcel: journey.property.cadastralParcel ?? "",
+    cadastralSubaltern: journey.property.cadastralSubaltern ?? "",
+    latitude: journey.property.latitude ?? null,
+    longitude: journey.property.longitude ?? null,
+    locationVerified: journey.property.locationVerified ?? false,
+    locationVerifiedAt: journey.property.locationVerifiedAt ?? "",
+    locationLabel: journey.property.locationLabel ?? "",
     documents: journey.documents,
   };
 }

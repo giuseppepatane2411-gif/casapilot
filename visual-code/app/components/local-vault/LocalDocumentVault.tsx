@@ -31,7 +31,7 @@ import {
   MAX_LOCAL_FILE_SIZE,
 } from "@/lib/local-vault/db";
 import type { LocalVaultDocument } from "@/lib/local-vault/types";
-import { markBetaMilestone, trackBetaEvent } from "@/lib/beta/storage";
+import { markProductMilestone, trackProductEvent } from "@/lib/product/storage";
 import { addPilotTimelineEvent } from "@/lib/pilot-os/store";
 import {
   getOperationLabel,
@@ -111,16 +111,16 @@ export default function LocalDocumentVault() {
           <FolderLock size={27} />
         </span>
         <h1 className="mt-5 text-3xl font-bold text-slate-950">
-          Crea prima una pratica immobiliare
+          Aggiungi prima il tuo immobile
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-500">
-          L’archivio collega ogni file a un immobile e a una voce precisa della checklist.
+          Ogni file verrà collegato al tuo immobile e alla voce corretta della checklist.
         </p>
         <Link
           href="/dashboard/properties/new"
           className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-2xl bg-blue-600 px-5 text-sm font-bold text-white hover:bg-blue-700"
         >
-          Crea il primo percorso
+          Aggiungi il mio immobile
           <ArrowRight size={17} />
         </Link>
       </section>
@@ -161,9 +161,9 @@ export default function LocalDocumentVault() {
         description: `${file.name} è stato collegato alla pratica e resta soltanto su questo dispositivo.`,
         type: "document",
       });
-      markBetaMilestone("vault-used");
-      markBetaMilestone("mission-completed");
-      trackBetaEvent("vault-file-added", {
+      markProductMilestone("vault-used");
+      markProductMilestone("mission-completed");
+      trackProductEvent("vault-file-added", {
         journeyId: activeJourney.id,
         metadata: {
           documentKey: uploadingDocument,
@@ -173,7 +173,7 @@ export default function LocalDocumentVault() {
       });
       setMessage({
         tone: "success",
-        text: `${file.name} è stato archiviato. Health Score e missioni sono stati aggiornati.`,
+        text: `${file.name} è stato salvato. Lo stato della pratica e la prossima azione sono stati aggiornati.`,
       });
     } catch (uploadError) {
       setMessage({
@@ -200,7 +200,7 @@ export default function LocalDocumentVault() {
       await remove(document.id);
       setMessage({
         tone: "success",
-        text: `${document.name} è stato eliminato dall’archivio locale.`,
+        text: `${document.name} è stato eliminato dai file locali.`,
       });
     } catch (deleteError) {
       setMessage({
@@ -244,19 +244,19 @@ export default function LocalDocumentVault() {
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-bold text-blue-100">
               <FolderLock size={14} />
-              Archivio locale · nessun server
+              I tuoi documenti · solo su questo dispositivo
             </span>
             <h1 className="mt-5 max-w-3xl text-3xl font-bold tracking-[-0.05em] sm:text-5xl">
-              I documenti della casa, ordinati e privati.
+              Aggiungi e consulta i documenti dell’immobile.
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-              Collega PDF e immagini alla checklist. I file vengono conservati nel browser tramite IndexedDB e non vengono inviati a CasaPilot o a servizi esterni.
+              Puoi allegare PDF e immagini alle voci della checklist. I file restano nel browser e non vengono inviati automaticamente a server esterni.
             </p>
           </div>
 
           <div className="rounded-3xl border border-white/10 bg-white/10 p-4 backdrop-blur">
             <label className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-              Pratica attiva
+              Immobile selezionato
             </label>
             <div className="relative mt-2">
               <Building2 size={17} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" />
@@ -306,7 +306,7 @@ export default function LocalDocumentVault() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <VaultMetric icon={FileCheck2} label="Checklist disponibili" value={`${checklistAvailable}/${requiredDocuments.length}`} detail="documenti dichiarati" />
         <VaultMetric icon={Database} label="File allegati" value={String(attachedFiles)} detail={`${attachedDocumentTypes.size} categorie coperte`} />
-        <VaultMetric icon={HardDrive} label="Spazio dei file" value={formatBytes(stats.totalBytes)} detail={storagePercentage === null ? "archivio del browser" : `${storagePercentage}% uso browser stimato`} />
+        <VaultMetric icon={HardDrive} label="Spazio dei file" value={formatBytes(stats.totalBytes)} detail={storagePercentage === null ? "salvati nel browser" : `${storagePercentage}% uso browser stimato`} />
         <VaultMetric icon={ShieldCheck} label="Invii esterni" value="0" detail="tutto resta locale" />
       </section>
 
@@ -316,14 +316,14 @@ export default function LocalDocumentVault() {
             <p className="text-sm font-semibold text-blue-600">Checklist operativa</p>
             <h2 className="mt-1 text-2xl font-bold text-slate-950">Allega i documenti che possiedi</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              Il caricamento segna automaticamente il documento come disponibile e aggiorna Pilot OS.
+              Il caricamento segna automaticamente il documento come disponibile e aggiorna Pilot.
             </p>
           </div>
           <Link
             href="/dashboard/pilot"
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-700 hover:border-blue-200 hover:text-blue-700"
           >
-            Torna a Pilot OS
+            Torna a Pilot
             <ArrowRight size={16} />
           </Link>
         </div>
@@ -474,7 +474,7 @@ export default function LocalDocumentVault() {
           <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
             <AlertTriangle size={20} />
           </span>
-          <h2 className="mt-4 text-xl font-bold text-amber-950">Limite della beta locale</h2>
+          <h2 className="mt-4 text-xl font-bold text-amber-950">Limite dell’archivio locale</h2>
           <p className="mt-2 text-sm leading-6 text-amber-800">
             I file non sono inclusi nel backup JSON e possono andare persi cancellando i dati del browser. Conserva sempre gli originali in un luogo sicuro.
           </p>

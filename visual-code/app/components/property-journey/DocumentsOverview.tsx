@@ -4,210 +4,207 @@ import Link from "next/link";
 import {
   ArrowRight,
   Building2,
-  CheckCircle2,
+  Check,
+  ChevronDown,
   FileText,
   FolderLock,
   Plus,
 } from "lucide-react";
 
+import DocumentGuideItem from "@/components/property-journey/DocumentGuideItem";
 import { useJourneys } from "@/hooks/useJourneys";
 import { useLocalVault } from "@/hooks/useLocalVault";
-import {
-  getOperationLabel,
-  getRequiredDocuments,
-} from "@/lib/property-journey/constants";
+import { getRequiredDocuments } from "@/lib/property-journey/constants";
+import { updateJourneyDocuments } from "@/lib/property-journey/storage";
+import type { DocumentKey } from "@/lib/property-journey/types";
 
 export default function DocumentsOverview() {
-  const { hydrated, journeys } = useJourneys();
+  const {
+    hydrated,
+    journeys,
+    activeJourney,
+    activateJourney,
+  } = useJourneys();
   const { hydrated: vaultHydrated, documents: vaultDocuments } = useLocalVault();
 
   if (!hydrated || !vaultHydrated) {
     return <div className="h-80 animate-pulse rounded-[28px] bg-slate-200/70" />;
   }
 
-  const totalRequired = journeys.reduce(
-    (total, journey) =>
-      total +
-      getRequiredDocuments(journey.operation, journey.property.type).length,
-    0,
-  );
-  const totalAvailable = journeys.reduce(
-    (total, journey) => total + journey.documents.length,
-    0,
-  );
-  const totalMissing = Math.max(0, totalRequired - totalAvailable);
+  if (!activeJourney) {
+    return (
+      <section className="mx-auto max-w-3xl rounded-[30px] border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm sm:p-10">
+        <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+          <FileText size={25} />
+        </span>
+        <h1 className="mt-5 text-2xl font-bold text-slate-950">Prima aggiungiamo il tuo immobile.</h1>
+        <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-500">
+          Dopo poche domande CasaPilot preparerà la checklist dei documenti che ti servono.
+        </p>
+        <Link
+          href="/dashboard/properties/new"
+          className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-2xl bg-blue-600 px-5 text-sm font-bold text-white hover:bg-blue-700"
+        >
+          <Plus size={17} />
+          Crea il mio immobile
+        </Link>
+      </section>
+    );
+  }
+
+  const requiredDocuments = getRequiredDocuments(activeJourney.operation, activeJourney.property.type);
+  const availableIds = new Set(activeJourney.documents);
+  const available = requiredDocuments.filter((document) => availableIds.has(document.id));
+  const missing = requiredDocuments.filter((document) => !availableIds.has(document.id));
+  const primaryMissing = missing[0] ?? null;
+  const otherMissing = missing.slice(1);
+  const attachedFiles = vaultDocuments.filter((document) => document.journeyId === activeJourney.id).length;
+  const progress = requiredDocuments.length ? Math.round((available.length / requiredDocuments.length) * 100) : 0;
+
+  function toggleDocument(documentId: DocumentKey) {
+    const nextDocuments = activeJourney.documents.includes(documentId)
+      ? activeJourney.documents.filter((item) => item !== documentId)
+      : [...activeJourney.documents, documentId];
+
+    updateJourneyDocuments(activeJourney.id, nextDocuments);
+  }
 
   return (
-    <div className="space-y-7">
-      <header className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+    <div className="mx-auto max-w-4xl space-y-5">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-blue-600">Archivio pratiche</p>
-          <h1 className="mt-1 text-3xl font-bold text-slate-950 sm:text-4xl">
-            Documenti
+          <p className="text-sm font-semibold text-blue-600">Documenti</p>
+          <h1 className="mt-1 text-3xl font-bold tracking-[-0.04em] text-slate-950 sm:text-4xl">
+            Qui teniamo tutto in ordine.
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-            Una vista unica delle checklist iniziali dei tuoi immobili.
+            Ti mostriamo prima ciò che manca. Quello che hai già resta al suo posto, senza occupare spazio.
           </p>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Link
-            href="/dashboard/vault"
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-700 shadow-sm hover:border-blue-200 hover:text-blue-700"
-          >
-            <FolderLock size={18} />
-            Archivio locale
-          </Link>
-          <Link
-            href="/dashboard/properties/new"
-            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:-translate-y-0.5 hover:bg-blue-700"
-          >
-            <Plus size={18} />
-            Nuovo percorso
-          </Link>
-        </div>
+        {journeys.length > 1 && (
+          <div className="relative w-full sm:w-64">
+            <Building2 size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <select
+              value={activeJourney.id}
+              onChange={(event) => activateJourney(event.target.value)}
+              className="min-h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-9 text-sm font-bold text-slate-900 outline-none focus:border-blue-400"
+            >
+              {journeys.map((journey) => (
+                <option key={journey.id} value={journey.id}>{journey.property.name}</option>
+              ))}
+            </select>
+            <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          </div>
+        )}
       </header>
 
-      {journeys.length === 0 ? (
-        <section className="rounded-[30px] border border-dashed border-slate-300 bg-white p-9 text-center shadow-sm">
-          <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-blue-50 text-blue-600">
-            <FileText size={27} />
-          </span>
-          <h2 className="mt-5 text-2xl font-bold text-slate-950">
-            Nessuna checklist disponibile
-          </h2>
-          <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-500">
-            I documenti vengono organizzati automaticamente quando crei una pratica.
-          </p>
+      <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">{activeJourney.property.name}</p>
+            <p className="mt-2 text-sm font-semibold text-slate-700">
+              {missing.length === 0
+                ? "Hai indicato tutti i documenti della checklist iniziale."
+                : `${missing.length} ${missing.length === 1 ? "documento manca ancora" : "documenti mancano ancora"}.`}
+            </p>
+            <p className="mt-1 text-xs text-slate-400">
+              {available.length} di {requiredDocuments.length} disponibili{attachedFiles > 0 ? ` · ${attachedFiles} file allegati` : ""}
+            </p>
+          </div>
           <Link
-            href="/dashboard/properties/new"
-            className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-bold text-white hover:bg-blue-600"
+            href={`/dashboard/vault?journey=${activeJourney.id}`}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-700 hover:bg-slate-50"
           >
-            Crea una pratica
-            <ArrowRight size={16} />
+            <FolderLock size={16} />
+            I miei file
           </Link>
+        </div>
+        <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+          <div className="h-full rounded-full bg-blue-600" style={{ width: `${progress}%` }} />
+        </div>
+      </section>
+
+      {primaryMissing ? (
+        <section className="rounded-[28px] border border-amber-200 bg-amber-50/50 p-4 shadow-sm sm:p-5">
+          <div className="mb-3">
+            <p className="text-xs font-bold uppercase tracking-[0.12em] text-amber-700">Comincia da questo</p>
+            <p className="mt-1 text-sm text-amber-900">Non serve occuparti di tutti i documenti insieme.</p>
+          </div>
+          <DocumentGuideItem
+            document={primaryMissing}
+            selected={false}
+            onToggle={() => toggleDocument(primaryMissing.id)}
+          />
         </section>
       ) : (
-        <>
-          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <Metric label="Totale checklist" value={totalRequired} tone="neutral" />
-            <Metric label="Disponibili" value={totalAvailable} tone="success" />
-            <Metric label="File allegati" value={vaultDocuments.length} tone="files" />
-            <Metric label="Da recuperare" value={totalMissing} tone="danger" />
-          </section>
-
-          <section className="space-y-4">
-            {journeys.map((journey) => {
-              const requiredDocuments = getRequiredDocuments(
-                journey.operation,
-                journey.property.type,
-              );
-              const available = journey.documents.length;
-              const missing = Math.max(0, requiredDocuments.length - available);
-              const completion = requiredDocuments.length
-                ? Math.round((available / requiredDocuments.length) * 100)
-                : 0;
-              const attachedFiles = vaultDocuments.filter(
-                (document) => document.journeyId === journey.id,
-              ).length;
-
-              return (
-                <article
-                  key={journey.id}
-                  className="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
-                >
-                  <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
-                    <div className="flex min-w-0 items-start gap-4">
-                      <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-                        <Building2 size={22} />
-                      </span>
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="truncate text-xl font-bold text-slate-950">
-                            {journey.property.name}
-                          </h2>
-                          <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700">
-                            {getOperationLabel(journey.operation)}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-sm text-slate-500">
-                          {available} disponibili · {attachedFiles} file locali · {missing} da recuperare
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                      <div className="min-w-44">
-                        <div className="flex items-center justify-between text-xs font-bold text-slate-500">
-                          <span>Completamento</span>
-                          <span>{completion}%</span>
-                        </div>
-                        <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100">
-                          <div
-                            className="h-full rounded-full bg-blue-600"
-                            style={{ width: `${completion}%` }}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Link
-                          href={`/dashboard/vault?journey=${journey.id}`}
-                          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-bold text-white hover:bg-blue-600"
-                        >
-                          <FolderLock size={16} />
-                          Archivio
-                        </Link>
-                        <Link
-                          href={`/dashboard/properties/${journey.id}#documents`}
-                          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-700 hover:bg-slate-50"
-                        >
-                          Checklist
-                          <ArrowRight size={16} />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </section>
-
-          <p className="rounded-2xl border border-slate-200 bg-white p-4 text-xs leading-5 text-slate-500">
-            Le checklist aiutano a organizzare la pratica, ma non sostituiscono la verifica di un professionista abilitato.
-          </p>
-        </>
+        <section className="rounded-[26px] border border-emerald-200 bg-emerald-50 p-5 shadow-sm">
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+              <Check size={18} strokeWidth={2.8} />
+            </span>
+            <div>
+              <h2 className="font-bold text-emerald-950">Checklist iniziale completa.</h2>
+              <p className="mt-1 text-sm leading-6 text-emerald-800">
+                Torna al percorso: CasaPilot ti mostrerà il prossimo passo utile.
+              </p>
+            </div>
+          </div>
+        </section>
       )}
+
+      {otherMissing.length > 0 && (
+        <details className="group rounded-[24px] border border-slate-200 bg-white shadow-sm">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 text-sm font-bold text-slate-700 [&::-webkit-details-marker]:hidden">
+            <span>Vedi gli altri documenti da recuperare ({otherMissing.length})</span>
+            <ChevronDown size={17} className="text-slate-400 transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="space-y-3 border-t border-slate-100 p-4">
+            {otherMissing.map((document) => (
+              <DocumentGuideItem
+                key={document.id}
+                document={document}
+                selected={false}
+                onToggle={() => toggleDocument(document.id)}
+              />
+            ))}
+          </div>
+        </details>
+      )}
+
+      {available.length > 0 && (
+        <details className="group rounded-[24px] border border-slate-200 bg-white shadow-sm">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-5 text-sm font-bold text-slate-700 [&::-webkit-details-marker]:hidden">
+            <span>Documenti già disponibili ({available.length})</span>
+            <ChevronDown size={17} className="text-slate-400 transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="space-y-3 border-t border-slate-100 p-4">
+            {available.map((document) => (
+              <DocumentGuideItem
+                key={document.id}
+                document={document}
+                selected
+                onToggle={() => toggleDocument(document.id)}
+              />
+            ))}
+          </div>
+        </details>
+      )}
+
+      <Link
+        href="/dashboard"
+        className="group flex items-center justify-between gap-3 rounded-2xl bg-slate-950 p-4 text-white"
+      >
+        <div>
+          <p className="text-sm font-bold">Non sai cosa fare dopo?</p>
+          <p className="mt-1 text-xs text-slate-300">Torna al Percorso: CasaPilot sceglie la priorità per te.</p>
+        </div>
+        <ArrowRight size={18} className="shrink-0 transition-transform group-hover:translate-x-1" />
+      </Link>
+
+      <p className="text-xs leading-5 text-slate-400">
+        CasaPilot organizza la checklist, ma le verifiche tecniche, fiscali e legali vanno confermate con un professionista abilitato quando necessario.
+      </p>
     </div>
-  );
-}
-
-type MetricProps = {
-  label: string;
-  value: number;
-  tone: "neutral" | "success" | "files" | "danger";
-};
-
-function Metric({ label, value, tone }: MetricProps) {
-  const styles = {
-    neutral: "bg-slate-100 text-slate-700",
-    success: "bg-emerald-100 text-emerald-700",
-    files: "bg-blue-100 text-blue-700",
-    danger: "bg-rose-100 text-rose-700",
-  };
-
-  return (
-    <article className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm">
-      <span className={`flex h-10 w-10 items-center justify-center rounded-xl ${styles[tone]}`}>
-        {tone === "success" ? (
-          <CheckCircle2 size={19} />
-        ) : tone === "files" ? (
-          <FolderLock size={19} />
-        ) : (
-          <FileText size={19} />
-        )}
-      </span>
-      <p className="mt-5 text-sm font-semibold text-slate-500">{label}</p>
-      <p className="mt-1 text-3xl font-bold text-slate-950">{value}</p>
-    </article>
   );
 }

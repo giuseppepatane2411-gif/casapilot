@@ -3,17 +3,14 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  Check,
   CheckCircle2,
   Clock3,
   FileCheck2,
-  ListChecks,
-  Sparkles,
   Target,
   Upload,
 } from "lucide-react";
 
-import { markBetaMilestone, trackBetaEvent } from "@/lib/beta/storage";
+import { markProductMilestone, trackProductEvent } from "@/lib/product/storage";
 import { getDocumentDefinition } from "@/lib/property-journey/scoring";
 import { updateJourneyDocuments } from "@/lib/property-journey/storage";
 import {
@@ -21,13 +18,6 @@ import {
   completePilotMission,
 } from "@/lib/pilot-os/store";
 import type { PilotContext, PilotMission } from "@/lib/pilot-os/types";
-
-const priorityLabels = {
-  critical: "Urgente",
-  high: "Alta",
-  medium: "Media",
-  low: "Bassa",
-};
 
 type MissionCommandCenterProps = {
   context: PilotContext;
@@ -49,13 +39,16 @@ export default function MissionCommandCenter({
         id: `document-${selectedMission.documentId}`,
         title: `${document?.title ?? "Documento"} disponibile`,
         description:
-          "Pilot ha aggiornato checklist, Health Score e prossima missione.",
+          "CasaPilot ha aggiornato la checklist e scelto la prossima azione.",
         type: "document",
       });
-      markBetaMilestone("mission-completed");
-      trackBetaEvent("mission-completed", {
+      markProductMilestone("mission-completed");
+      trackProductEvent("mission-completed", {
         journeyId: context.journey.id,
-        metadata: { missionId: selectedMission.id, documentId: selectedMission.documentId },
+        metadata: {
+          missionId: selectedMission.id,
+          documentId: selectedMission.documentId,
+        },
       });
       return;
     }
@@ -63,91 +56,76 @@ export default function MissionCommandCenter({
     completePilotMission(context.journey.id, selectedMission.id);
     addPilotTimelineEvent(context.journey.id, {
       id: `mission-${selectedMission.id}`,
-      title: "Missione completata",
+      title: "Attività completata",
       description: selectedMission.title,
       type: "mission",
     });
-    markBetaMilestone("mission-completed");
-    trackBetaEvent("mission-completed", {
+    markProductMilestone("mission-completed");
+    trackProductEvent("mission-completed", {
       journeyId: context.journey.id,
       metadata: { missionId: selectedMission.id },
     });
   }
 
   const canComplete =
-    Boolean(mission.documentId) || mission.id === "marketing-material";
+    Boolean(mission.documentId) || mission.canCompleteManually === true;
 
   return (
-    <section className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-blue-600 via-blue-600 to-indigo-700 p-6 text-white shadow-xl shadow-blue-600/20 sm:p-8">
-      <div
-        aria-hidden="true"
-        className="absolute -right-20 -top-24 h-72 w-72 rounded-full border border-white/10"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute -right-5 top-8 h-44 w-44 rounded-full border border-white/10"
-      />
+    <section className="overflow-hidden rounded-[30px] border border-blue-200 bg-white shadow-lg shadow-blue-600/5">
+      <div className="border-b border-blue-100 bg-blue-50 px-5 py-4 sm:px-7">
+        <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-blue-700">
+          <Target size={15} />
+          Cosa facciamo adesso
+        </p>
+      </div>
 
-      <div className="relative">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="flex items-center gap-2 text-sm font-semibold text-blue-100">
-            <Target size={17} />
-            Missione di oggi
-          </p>
-          <div className="flex items-center gap-2">
-            <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold">
-              {Math.max(context.missionQueue.length, 1)} missioni aperte
-            </span>
-            <span className="rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold">
-              Priorità {priorityLabels[mission.priority]}
-            </span>
-          </div>
-        </div>
-
-        <h2 className="mt-6 max-w-3xl text-3xl font-bold tracking-[-0.045em] sm:text-4xl">
+      <div className="p-5 sm:p-7">
+        <h2 className="max-w-3xl text-2xl font-bold tracking-[-0.035em] text-slate-950 sm:text-3xl">
           {mission.title}
         </h2>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-blue-100 sm:text-base">
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
           {mission.description}
         </p>
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          <Metric icon={Clock3} label="Tempo stimato" value={`${mission.estimatedMinutes} min`} />
-          <Metric icon={Sparkles} label="Impatto score" value={`+${mission.scoreGain} punti`} />
-          <Metric icon={ListChecks} label="Prontezza" value={`${context.readiness.overall}%`} />
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600">
+            <Clock3 size={14} />
+            Circa {mission.estimatedMinutes} minuti
+          </span>
+          <details>
+            <summary className="cursor-pointer list-none rounded-full bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200 [&::-webkit-details-marker]:hidden">
+              Perché serve?
+            </summary>
+            <p className="mt-2 max-w-xl rounded-2xl bg-slate-50 p-3 text-xs leading-5 text-slate-600">
+              {mission.reason}
+            </p>
+          </details>
         </div>
 
-        <div className="mt-5 rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-          <p className="text-xs font-bold uppercase tracking-[0.1em] text-blue-100">
-            Perché questa missione
-          </p>
-          <p className="mt-2 text-sm leading-6 text-white">{mission.reason}</p>
-        </div>
-
-        <div className="mt-6 flex flex-wrap items-center gap-3">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           {mission.documentId ? (
             <>
               <Link
                 href={`/dashboard/vault?journey=${context.journey.id}&document=${mission.documentId}`}
-                className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-bold text-blue-700 shadow-lg hover:-translate-y-0.5 hover:bg-blue-50"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700"
               >
                 <Upload size={18} />
-                Allega il documento
+                Aggiungi il documento
               </Link>
               <button
                 type="button"
                 onClick={() => completeMission(mission)}
-                className="inline-flex min-h-12 items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 text-sm font-bold text-white hover:bg-white/15"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-700 hover:bg-slate-50"
               >
                 <CheckCircle2 size={18} />
-                Ce l’ho già, senza file
+                Ce l’ho già
               </button>
             </>
           ) : canComplete ? (
             <button
               type="button"
               onClick={() => completeMission(mission)}
-              className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-bold text-blue-700 shadow-lg hover:-translate-y-0.5 hover:bg-blue-50"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700"
             >
               <CheckCircle2 size={18} />
               {mission.actionLabel}
@@ -155,80 +133,49 @@ export default function MissionCommandCenter({
           ) : (
             <Link
               href={mission.href}
-              className="inline-flex min-h-12 items-center gap-2 rounded-2xl bg-white px-5 text-sm font-bold text-blue-700 shadow-lg hover:-translate-y-0.5 hover:bg-blue-50"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700"
             >
               {mission.actionLabel}
-              <ArrowRight size={17} />
-            </Link>
-          )}
-          {!mission.documentId && (
-            <Link
-              href={mission.href}
-              className="inline-flex min-h-12 items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 text-sm font-bold text-white hover:bg-white/15"
-            >
-              Apri attività
               <ArrowRight size={17} />
             </Link>
           )}
         </div>
 
         {context.missionQueue.length > 1 && (
-          <div className="mt-7 border-t border-white/10 pt-5">
-            <p className="text-xs font-bold uppercase tracking-[0.12em] text-blue-200">
-              Subito dopo
-            </p>
+          <details className="mt-6 border-t border-slate-100 pt-5">
+            <summary className="cursor-pointer list-none text-sm font-bold text-slate-600 hover:text-blue-600 [&::-webkit-details-marker]:hidden">
+              Vedi cosa verrà dopo
+            </summary>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {context.missionQueue.slice(1, 3).map((nextMission) => (
                 <Link
                   key={nextMission.id}
                   href={nextMission.href}
-                  className="group flex items-center justify-between gap-3 rounded-2xl bg-white/10 px-4 py-3 hover:bg-white/15"
+                  className="group flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-4 py-3 hover:bg-blue-50"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 text-blue-100">
-                      {nextMission.documentId ? (
-                        <FileCheck2 size={17} />
-                      ) : (
-                        <Check size={17} />
-                      )}
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
+                      <FileCheck2 size={17} />
                     </span>
                     <div>
-                      <p className="text-sm font-bold text-white">
+                      <p className="text-sm font-bold text-slate-900">
                         {nextMission.title}
                       </p>
-                      <p className="mt-0.5 text-xs text-blue-200">
-                        {nextMission.estimatedMinutes} min · +{nextMission.scoreGain} punti
+                      <p className="mt-0.5 text-xs text-slate-500">
+                        Circa {nextMission.estimatedMinutes} minuti
                       </p>
                     </div>
                   </div>
                   <ArrowRight
                     size={16}
-                    className="shrink-0 text-blue-200 transition-transform group-hover:translate-x-0.5"
+                    className="shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5"
                   />
                 </Link>
               ))}
             </div>
-          </div>
+          </details>
         )}
       </div>
     </section>
-  );
-}
-
-type MetricProps = {
-  icon: typeof Clock3;
-  label: string;
-  value: string;
-};
-
-function Metric({ icon: Icon, label, value }: MetricProps) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-      <p className="flex items-center gap-2 text-xs font-semibold text-blue-100">
-        <Icon size={14} />
-        {label}
-      </p>
-      <p className="mt-2 text-lg font-bold text-white">{value}</p>
-    </div>
   );
 }

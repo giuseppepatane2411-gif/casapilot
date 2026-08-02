@@ -22,6 +22,14 @@ export const INITIAL_WIZARD_DATA: WizardData = {
   province: "",
   address: "",
   postalCode: "",
+  cadastralSheet: "",
+  cadastralParcel: "",
+  cadastralSubaltern: "",
+  latitude: null,
+  longitude: null,
+  locationVerified: false,
+  locationVerifiedAt: "",
+  locationLabel: "",
   documents: [],
 };
 
@@ -202,7 +210,7 @@ export const WIZARD_STEPS = [
     id: 1,
     label: "Obiettivo",
     title: "Cosa vuoi fare con l’immobile?",
-    description: "Scegli il percorso: adatteremo checklist e suggerimenti.",
+    description: "Scegli il tuo obiettivo: CasaPilot adatterà automaticamente i passi successivi.",
   },
   {
     id: 2,
@@ -214,7 +222,7 @@ export const WIZARD_STEPS = [
     id: 3,
     label: "Posizione",
     title: "Dove si trova?",
-    description: "La posizione ci aiuta a ordinare dati, documenti e attività.",
+    description: "Serve per organizzare correttamente i dati e i documenti dell’immobile.",
   },
   {
     id: 4,
@@ -226,8 +234,8 @@ export const WIZARD_STEPS = [
   {
     id: 5,
     label: "Riepilogo",
-    title: "Il tuo percorso è pronto",
-    description: "Controlla i dati e crea la pratica immobiliare.",
+    title: "Ci siamo",
+    description: "Controlla le informazioni e salva il tuo immobile.",
   },
 ] as const;
 

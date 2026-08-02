@@ -1,71 +1,83 @@
 import { Check } from "lucide-react";
 
 import { WIZARD_STEPS } from "@/lib/property-journey/constants";
+import type { OperationType } from "@/lib/property-journey/types";
 
 type WizardProgressProps = {
   currentStep: number;
+  operation: OperationType | "";
 };
 
 export default function WizardProgress({
   currentStep,
+  operation,
 }: WizardProgressProps) {
-  const percentage = ((currentStep - 1) / (WIZARD_STEPS.length - 1)) * 100;
+  const current = WIZARD_STEPS[currentStep - 1];
+  const objective =
+    operation === "sale"
+      ? "vendita"
+      : operation === "rent"
+        ? "affitto"
+        : "obiettivo finale";
 
   return (
-    <div className="rounded-[26px] border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-      <div className="mb-4 flex items-center justify-between sm:hidden">
-        <p className="text-sm font-bold text-slate-950">
-          Passaggio {currentStep} di {WIZARD_STEPS.length}
-        </p>
-        <p className="text-xs font-semibold text-blue-600">
-          {WIZARD_STEPS[currentStep - 1].label}
-        </p>
+    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm sm:px-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
+            Configurazione iniziale
+          </p>
+          <p className="mt-1 text-sm font-bold text-slate-900">
+            Passaggio {currentStep} di {WIZARD_STEPS.length} · {current.label}
+          </p>
+        </div>
+        <span className="self-start rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
+          Stai creando la scheda
+        </span>
       </div>
 
-      <div className="relative hidden sm:block">
-        <div className="absolute left-5 right-5 top-5 h-1 rounded-full bg-slate-100" />
-        <div
-          className="absolute left-5 top-5 h-1 rounded-full bg-blue-600 transition-[width] duration-500"
-          style={{ width: `calc((100% - 2.5rem) * ${percentage / 100})` }}
-        />
+      <div className="mt-4 grid grid-cols-5 gap-2" aria-label="Avanzamento della configurazione iniziale">
+        {WIZARD_STEPS.map((step) => {
+          const completed = step.id < currentStep;
+          const active = step.id === currentStep;
 
-        <ol className="relative grid grid-cols-5 gap-2">
-          {WIZARD_STEPS.map((step) => {
-            const completed = step.id < currentStep;
-            const active = step.id === currentStep;
-
-            return (
-              <li key={step.id} className="flex flex-col items-center text-center">
+          return (
+            <div key={step.id} className="min-w-0">
+              <div
+                className={`flex h-2 items-center justify-center rounded-full transition-colors ${
+                  completed || active ? "bg-blue-600" : "bg-slate-100"
+                }`}
+              />
+              <div className="mt-2 flex items-center gap-1.5">
                 <span
-                  className={`flex h-10 w-10 items-center justify-center rounded-full border-4 border-white text-sm font-bold shadow-sm transition-colors ${
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
                     completed
-                      ? "bg-blue-600 text-white"
+                      ? "bg-emerald-100 text-emerald-700"
                       : active
-                        ? "bg-slate-950 text-white"
+                        ? "bg-blue-100 text-blue-700"
                         : "bg-slate-100 text-slate-400"
                   }`}
                 >
-                  {completed ? <Check size={17} strokeWidth={2.8} /> : step.id}
+                  {completed ? <Check size={11} strokeWidth={3} /> : step.id}
                 </span>
                 <span
-                  className={`mt-3 text-xs font-bold ${
-                    active || completed ? "text-slate-900" : "text-slate-400"
+                  className={`hidden truncate text-[11px] font-semibold sm:block ${
+                    active ? "text-slate-900" : "text-slate-400"
                   }`}
                 >
                   {step.label}
                 </span>
-              </li>
-            );
-          })}
-        </ol>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      <div className="h-2 overflow-hidden rounded-full bg-slate-100 sm:hidden">
-        <div
-          className="h-full rounded-full bg-blue-600 transition-[width] duration-500"
-          style={{ width: `${(currentStep / WIZARD_STEPS.length) * 100}%` }}
-        />
-      </div>
+      <p className="mt-4 text-xs leading-5 text-slate-500">
+        Questa barra indica soltanto quanto manca per creare la scheda dell’immobile.
+        L’avanzamento reale verso la {objective} verrà calcolato dopo, includendo
+        documenti, preparazione, pubblicazione e passaggi conclusivi.
+      </p>
     </div>
   );
 }

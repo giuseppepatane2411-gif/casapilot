@@ -31,6 +31,14 @@ export type WizardData = {
   province: string;
   address: string;
   postalCode: string;
+  cadastralSheet: string;
+  cadastralParcel: string;
+  cadastralSubaltern: string;
+  latitude: number | null;
+  longitude: number | null;
+  locationVerified: boolean;
+  locationVerifiedAt: string;
+  locationLabel: string;
   documents: DocumentKey[];
 };
 
@@ -51,6 +59,14 @@ export type PropertyJourney = {
     province: string;
     address: string;
     postalCode: string;
+    cadastralSheet: string;
+    cadastralParcel: string;
+    cadastralSubaltern: string;
+    latitude: number | null;
+    longitude: number | null;
+    locationVerified: boolean;
+    locationVerifiedAt: string;
+    locationLabel: string;
   };
   documents: DocumentKey[];
   healthScore: number;

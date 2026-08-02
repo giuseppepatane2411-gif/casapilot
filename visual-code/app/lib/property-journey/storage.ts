@@ -72,6 +72,44 @@ function isJourney(value: unknown): value is PropertyJourney {
   );
 }
 
+
+function normalizeJourney(journey: PropertyJourney): PropertyJourney {
+  const normalized: PropertyJourney = {
+    ...journey,
+    property: {
+      ...journey.property,
+      cadastralSheet: journey.property.cadastralSheet ?? "",
+      cadastralParcel: journey.property.cadastralParcel ?? "",
+      cadastralSubaltern: journey.property.cadastralSubaltern ?? "",
+      latitude:
+        typeof journey.property.latitude === "number" &&
+        Number.isFinite(journey.property.latitude)
+          ? journey.property.latitude
+          : null,
+      longitude:
+        typeof journey.property.longitude === "number" &&
+        Number.isFinite(journey.property.longitude)
+          ? journey.property.longitude
+          : null,
+      locationVerified: journey.property.locationVerified === true,
+      locationVerifiedAt:
+        typeof journey.property.locationVerifiedAt === "string"
+          ? journey.property.locationVerifiedAt
+          : "",
+      locationLabel:
+        typeof journey.property.locationLabel === "string"
+          ? journey.property.locationLabel
+          : "",
+    },
+  };
+  const metrics = calculateJourneyMetrics(journeyToWizardData(normalized));
+
+  return {
+    ...normalized,
+    ...metrics,
+  };
+}
+
 function emitChange() {
   if (!isBrowser()) return;
 
@@ -146,6 +184,14 @@ function migrateLegacyJourney(): PropertyJourney | null {
         province: data.province,
         address: data.address,
         postalCode: data.postalCode,
+        cadastralSheet: data.cadastralSheet,
+        cadastralParcel: data.cadastralParcel,
+        cadastralSubaltern: data.cadastralSubaltern,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        locationVerified: data.locationVerified,
+        locationVerifiedAt: data.locationVerifiedAt,
+        locationLabel: data.locationLabel,
       },
       documents: data.documents,
       ...metrics,
@@ -175,9 +221,10 @@ export function readJourneys(): PropertyJourney[] {
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return [];
 
-    return parsed.filter(isJourney).sort((a, b) =>
-      b.updatedAt.localeCompare(a.updatedAt),
-    );
+    return parsed
+      .filter(isJourney)
+      .map(normalizeJourney)
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   } catch {
     return [];
   }
@@ -237,6 +284,14 @@ export function createJourney(data: WizardData) {
       province: data.province.trim(),
       address: data.address.trim(),
       postalCode: data.postalCode.trim(),
+      cadastralSheet: data.cadastralSheet.trim(),
+      cadastralParcel: data.cadastralParcel.trim(),
+      cadastralSubaltern: data.cadastralSubaltern.trim(),
+      latitude: data.latitude,
+      longitude: data.longitude,
+      locationVerified: data.locationVerified,
+      locationVerifiedAt: data.locationVerifiedAt,
+      locationLabel: data.locationLabel,
     },
     documents: data.documents,
     ...metrics,
@@ -257,7 +312,7 @@ export function replaceJourneys(
 ) {
   if (!isBrowser()) return;
 
-  const validJourneys = journeys.filter(isJourney);
+  const validJourneys = journeys.filter(isJourney).map(normalizeJourney);
   writeJourneys(validJourneys);
 
   const nextActiveId =
@@ -277,6 +332,7 @@ export function replaceJourneys(
 export function upsertJourney(journey: PropertyJourney) {
   if (!isBrowser() || !isJourney(journey)) return null;
 
+  journey = normalizeJourney(journey);
   const journeys = readJourneys();
   const existingIndex = journeys.findIndex((item) => item.id === journey.id);
   const nextJourneys = [...journeys];
@@ -358,6 +414,30 @@ export function updateJourneyProperty(
   return updatedJourney;
 }
 
+export function deleteJourney(journeyId: string) {
+  if (!isBrowser()) return false;
+
+  const journeys = readJourneys();
+  const exists = journeys.some((journey) => journey.id === journeyId);
+  if (!exists) return false;
+
+  const nextJourneys = journeys.filter((journey) => journey.id !== journeyId);
+  writeJourneys(nextJourneys);
+
+  const activeId = readActiveJourneyId();
+  if (activeId === journeyId) {
+    const nextActiveId = nextJourneys[0]?.id ?? null;
+    if (nextActiveId) {
+      window.localStorage.setItem(ACTIVE_JOURNEY_STORAGE_KEY, nextActiveId);
+    } else {
+      window.localStorage.removeItem(ACTIVE_JOURNEY_STORAGE_KEY);
+    }
+  }
+
+  emitChange();
+  return true;
+}
+
 export function saveWizardDraft(step: number, data: WizardData) {
   if (!isBrowser()) return;
 
@@ -410,6 +490,27 @@ function migrateLegacyDraft(): WizardDraft | null {
           typeof formData.address === "string" ? formData.address : "",
         postalCode:
           typeof formData.postalCode === "string" ? formData.postalCode : "",
+        cadastralSheet:
+          typeof formData.cadastralSheet === "string" ? formData.cadastralSheet : "",
+        cadastralParcel:
+          typeof formData.cadastralParcel === "string" ? formData.cadastralParcel : "",
+        cadastralSubaltern:
+          typeof formData.cadastralSubaltern === "string" ? formData.cadastralSubaltern : "",
+        latitude:
+          typeof formData.latitude === "number" && Number.isFinite(formData.latitude)
+            ? formData.latitude
+            : null,
+        longitude:
+          typeof formData.longitude === "number" && Number.isFinite(formData.longitude)
+            ? formData.longitude
+            : null,
+        locationVerified: formData.locationVerified === true,
+        locationVerifiedAt:
+          typeof formData.locationVerifiedAt === "string"
+            ? formData.locationVerifiedAt
+            : "",
+        locationLabel:
+          typeof formData.locationLabel === "string" ? formData.locationLabel : "",
         documents: mapLegacyDocuments(formData.documents),
       },
       updatedAt: new Date().toISOString(),
@@ -441,7 +542,38 @@ export function readWizardDraft(): WizardDraft | null {
       return null;
     }
 
-    return parsed as WizardDraft;
+    return {
+      version: 1,
+      step: parsed.step,
+      data: {
+        ...INITIAL_WIZARD_DATA,
+        ...parsed.data,
+        cadastralSheet: parsed.data.cadastralSheet ?? "",
+        cadastralParcel: parsed.data.cadastralParcel ?? "",
+        cadastralSubaltern: parsed.data.cadastralSubaltern ?? "",
+        latitude:
+          typeof parsed.data.latitude === "number" && Number.isFinite(parsed.data.latitude)
+            ? parsed.data.latitude
+            : null,
+        longitude:
+          typeof parsed.data.longitude === "number" && Number.isFinite(parsed.data.longitude)
+            ? parsed.data.longitude
+            : null,
+        locationVerified: parsed.data.locationVerified === true,
+        locationVerifiedAt:
+          typeof parsed.data.locationVerifiedAt === "string"
+            ? parsed.data.locationVerifiedAt
+            : "",
+        locationLabel:
+          typeof parsed.data.locationLabel === "string"
+            ? parsed.data.locationLabel
+            : "",
+      },
+      updatedAt:
+        typeof parsed.updatedAt === "string"
+          ? parsed.updatedAt
+          : new Date().toISOString(),
+    };
   } catch {
     return null;
   }

@@ -82,7 +82,7 @@ export async function addLocalVaultDocument(input: {
   file: File;
 }) {
   if (input.file.size > MAX_LOCAL_FILE_SIZE) {
-    throw new Error("Il file supera il limite di 15 MB previsto per la beta.");
+    throw new Error("Il file supera il limite massimo di 15 MB.");
   }
 
   if (
@@ -129,6 +129,32 @@ export async function deleteLocalVaultDocument(documentId: string) {
       transaction.oncomplete = () => resolve();
       transaction.onerror = () => reject(transaction.error ?? new Error("Impossibile eliminare il file."));
       transaction.onabort = () => reject(transaction.error ?? new Error("Eliminazione annullata."));
+    });
+  } finally {
+    database.close();
+  }
+  emitChange();
+}
+
+export async function deleteLocalVaultDocumentsForJourney(journeyId: string) {
+  const database = await openDatabase();
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const transaction = database.transaction(STORE_NAME, "readwrite");
+      const store = transaction.objectStore(STORE_NAME);
+      const index = store.index("journeyId");
+      const request = index.openCursor(IDBKeyRange.only(journeyId));
+
+      request.onsuccess = () => {
+        const cursor = request.result;
+        if (!cursor) return;
+        cursor.delete();
+        cursor.continue();
+      };
+      request.onerror = () => reject(request.error ?? new Error("Impossibile leggere i file dell’immobile."));
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error ?? new Error("Impossibile eliminare i file dell’immobile."));
+      transaction.onabort = () => reject(transaction.error ?? new Error("Eliminazione dei file annullata."));
     });
   } finally {
     database.close();

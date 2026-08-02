@@ -1,197 +1,54 @@
-# 🏠 CasaPilot
+# CasaPilot
 
-> **L'assistente intelligente per vendere e affittare casa.**
+> Il tuo assistente immobiliare intelligente.
 
----
+CasaPilot accompagna privati e professionisti nell’organizzazione di vendita e locazione di immobili. Trasforma dati, documenti e attività in un percorso comprensibile, collegato all’obiettivo dell’utente.
 
 ## Versione
 
-**0.1.0**
+**CasaPilot 1.0**
 
-## Stato del progetto
+## Funzioni presenti
 
-🟡 In progettazione
+- creazione e gestione di più tipologie di immobile;
+- indirizzo guidato e posizione verificata sulla mappa;
+- avanzamento basato su vendita o affitto;
+- checklist e archivio documentale locale;
+- missioni e priorità di Pilot;
+- backup e ripristino delle pratiche;
+- registrazione privata e professionale;
+- conferma email, accesso e recupero password;
+- profilo professionale con percorso di verifica;
+- Row Level Security sui dati dell’account.
 
-## Ultimo aggiornamento
+## Principio di prodotto
 
-07 Luglio 2026
+CasaPilot mostra una priorità alla volta e distingue sempre:
 
----
+- ciò che l’utente ha già completato;
+- ciò che manca per il suo obiettivo;
+- ciò che richiede un professionista abilitato;
+- ciò che può essere pubblicato o condiviso.
 
-# 📖 Cos'è CasaPilot
+## Architettura
 
-CasaPilot è una piattaforma digitale basata sull'Intelligenza Artificiale che accompagna proprietari, acquirenti, inquilini e professionisti durante tutte le fasi della vendita e della locazione immobiliare.
+| Area | Tecnologia |
+|---|---|
+| Applicazione | Next.js e React |
+| Account e database | Supabase e PostgreSQL |
+| Autorizzazione | Row Level Security |
+| Hosting previsto | Vercel |
+| Pratiche attuali | Archiviazione locale del browser |
 
-L'obiettivo è trasformare un processo spesso complesso e frammentato in un'esperienza semplice, guidata e sicura.
+## Avvio
 
-Attraverso un assistente intelligente, checklist dinamiche e un marketplace di professionisti qualificati, CasaPilot aiuta gli utenti a sapere sempre quale sarà il passo successivo.
-
----
-
-# 🎯 Mission
-
-Semplificare la compravendita e la locazione immobiliare in Italia, guidando ogni utente passo dopo passo e mettendolo in contatto con i professionisti giusti nel momento in cui ne ha bisogno.
-
----
-
-# 🚀 Vision
-
-Diventare la piattaforma italiana di riferimento per la gestione digitale dell'intero ciclo di vita di un immobile.
-
-CasaPilot non vuole essere un semplice portale immobiliare.
-
-Vuole diventare il sistema operativo del settore immobiliare italiano.
-
----
-
-# 👥 A chi è rivolto
-
-### Privati
-
-- Proprietari
-- Acquirenti
-- Inquilini
-
-### Professionisti
-
-- Agenti immobiliari
-- Geometri
-- Architetti
-- Ingegneri
-- Notai
-- Broker mutui
-- Certificatori APE
-- Fotografi immobiliari
-- Home Stager
-- Imprese edili
-- Idraulici
-- Elettricisti
-- Imprese di traslochi
-- Imprese di pulizie
-
----
-
-# ⭐ Funzionalità previste
-
-- 🤖 Assistente IA (Pilot)
-- 📂 Fascicolo Digitale dell'immobile
-- ✅ Checklist intelligenti
-- 📄 Gestione documentale
-- 📊 Verifica pratica
-- 📅 Promemoria e scadenze
-- 🏘️ Gestione immobili
-- 📝 Generazione guidata dei documenti
-- 👷 Marketplace dei professionisti
-- 💬 Richiesta preventivi
-- 📈 Dashboard delle pratiche
-
----
-
-# 💼 Modello di Business
-
-## Utenti privati
-
-Utilizzo gratuito delle funzionalità principali.
-
-## Professionisti
-
-- Abbonamento mensile
-- Acquisto Lead
-- Servizi Premium
-
----
-
-# 🏗️ Architettura Tecnologica
-
-| Componente | Tecnologia |
-|------------|------------|
-| Frontend | Next.js |
-| Backend | Supabase |
-| Database | PostgreSQL |
-| AI | OpenAI |
-| Hosting | Vercel |
-| Storage | Supabase Storage |
-| Pagamenti | Stripe |
-
----
-
-# 📂 Struttura del progetto
+Apri `visual-code/app` e consulta:
 
 ```text
-CasaPilot
-│
-├── docs
-├── frontend
-├── backend
-├── database
-├── branding
-├── marketing
-├── ai
-├── assets
-└── README.md
+README.md
+SUPABASE_ACCOUNT_SETUP.md
 ```
 
----
+## Licenza
 
-# 📌 Filosofia del progetto
-
-Ogni funzionalità nasce da un problema reale riscontrato nel mercato immobiliare.
-
-CasaPilot non sostituisce il professionista.
-
-Lo valorizza.
-
-L'obiettivo è costruire un ecosistema capace di mettere in relazione utenti e professionisti nel momento giusto, semplificando procedure, riducendo errori e migliorando l'esperienza di tutti gli attori coinvolti.
-
----
-
-# 🛣️ Roadmap
-
-## Fase 1 - Fondamenta
-
-- [x] Idea
-- [x] Nome del progetto
-- [x] Visione iniziale
-- [x] Modello di Business
-- [ ] PRD
-- [ ] Manuale Operativo
-- [ ] Database
-- [ ] Wireframe
-- [ ] Branding
-
-## Fase 2 - MVP
-
-- [ ] Backend
-- [ ] Frontend
-- [ ] AI Assistant
-- [ ] Dashboard
-- [ ] Marketplace Professionisti
-
-## Fase 3 - Beta
-
-- [ ] Test utenti
-- [ ] Ottimizzazione
-- [ ] Lancio Beta
-
-## Fase 4 - Lancio
-
-- [ ] Versione 1.0
-- [ ] Marketing
-- [ ] Prime Lead
-- [ ] Primi ricavi
-
----
-
-# 📈 Obiettivo
-
-Creare la piattaforma italiana di riferimento per la gestione intelligente delle pratiche immobiliari, capace di accompagnare gli utenti dalla decisione iniziale fino alla conclusione della compravendita o della locazione.
-
----
-
-# 📄 Licenza
-
-Copyright © 2026 CasaPilot.
-
-Tutti i diritti riservati.
-
-Progetto attualmente in fase di progettazione e sviluppo.
+Copyright © 2026 CasaPilot. Tutti i diritti riservati.

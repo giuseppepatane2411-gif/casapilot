@@ -11,12 +11,12 @@ import {
   Upload,
 } from "lucide-react";
 
-import { BETA_STATE_STORAGE_KEY, LEGACY_BETA_STATE_STORAGE_KEY } from "@/lib/beta/constants";
+import { LEGACY_PRODUCT_STATE_STORAGE_KEYS, PRODUCT_STATE_STORAGE_KEY } from "@/lib/product/constants";
 import {
-  readBetaState,
-  replaceBetaState,
-} from "@/lib/beta/storage";
-import type { CasaPilotBackup } from "@/lib/beta/types";
+  readProductState,
+  replaceProductState,
+} from "@/lib/product/storage";
+import type { CasaPilotBackup } from "@/lib/product/types";
 import { clearLocalVault } from "@/lib/local-vault/db";
 import { PILOT_MEMORY_STORAGE_KEY } from "@/lib/pilot-os/store";
 import {
@@ -55,9 +55,9 @@ export default function LocalDataSettings() {
 
   function exportData() {
     const payload: CasaPilotBackup = {
-      version: 3,
+      version: 4,
       product: "CasaPilot",
-      release: "beta-zero-cost-v2-test-flight",
+      release: "casapilot-1.0",
       exportedAt: new Date().toISOString(),
       activeJourneyId: readActiveJourneyId(),
       journeys: readJourneys(),
@@ -65,7 +65,7 @@ export default function LocalDataSettings() {
       pilotMemory: readJsonObject(
         PILOT_MEMORY_STORAGE_KEY,
       ) as CasaPilotBackup["pilotMemory"],
-      betaState: readBetaState(),
+      productState: readProductState(),
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
       type: "application/json",
@@ -131,8 +131,11 @@ export default function LocalDataSettings() {
         window.localStorage.removeItem(PILOT_MEMORY_STORAGE_KEY);
       }
 
-      if (parsed.betaState?.version === 2) {
-        replaceBetaState(parsed.betaState);
+      const legacyBackup = parsed as typeof parsed & { betaState?: unknown; productState?: unknown };
+      if (legacyBackup.productState) {
+        replaceProductState(legacyBackup.productState);
+      } else if (legacyBackup.betaState) {
+        replaceProductState(legacyBackup.betaState);
       }
 
       setMessage({
@@ -157,7 +160,7 @@ export default function LocalDataSettings() {
 
   async function clearData() {
     const confirmed = window.confirm(
-      "Vuoi cancellare pratiche, bozze, memoria di Pilot, sessioni di test, feedback e file dell’Archivio locale? L’operazione non può essere annullata.",
+      "Vuoi cancellare pratiche, bozze, memoria di Pilot, preferenze, dati tecnici e file dell’Archivio locale? L’operazione non può essere annullata.",
     );
 
     if (!confirmed) return;
@@ -166,25 +169,25 @@ export default function LocalDataSettings() {
     window.localStorage.removeItem(ACTIVE_JOURNEY_STORAGE_KEY);
     window.localStorage.removeItem(WIZARD_DRAFT_STORAGE_KEY);
     window.localStorage.removeItem(PILOT_MEMORY_STORAGE_KEY);
-    window.localStorage.removeItem(BETA_STATE_STORAGE_KEY);
-    window.localStorage.removeItem(LEGACY_BETA_STATE_STORAGE_KEY);
+    window.localStorage.removeItem(PRODUCT_STATE_STORAGE_KEY);
+    LEGACY_PRODUCT_STATE_STORAGE_KEYS.forEach((key) => window.localStorage.removeItem(key));
     try {
       await clearLocalVault();
     } catch {
       // La pulizia dei dati principali deve proseguire anche se IndexedDB non è disponibile.
     }
-    window.location.href = "/dashboard/beta";
+    window.location.href = "/dashboard";
   }
 
   return (
     <div className="space-y-7">
       <header>
-        <p className="text-sm font-semibold text-blue-600">Dati della beta</p>
+        <p className="text-sm font-semibold text-blue-600">Dati e backup</p>
         <h1 className="mt-1 text-3xl font-bold text-slate-950 sm:text-4xl">
           Backup, importazione e privacy
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-          In questa fase le pratiche vengono conservate nel browser. Esporta un backup prima di cambiare dispositivo o cancellare i dati del sito.
+          Le pratiche vengono conservate nel browser. Esporta un backup prima di cambiare dispositivo o cancellare i dati del sito.
         </p>
       </header>
 
@@ -216,7 +219,7 @@ export default function LocalDataSettings() {
               Archivio locale completo
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              Il backup include immobili, checklist, bozza del wizard, memoria di Pilot OS, timeline, conversazioni, sessioni di test e feedback. I file binari dell’Archivio locale restano esclusi: conserva sempre gli originali.
+              Il backup include immobili, checklist, bozza del wizard, memoria di Pilot, timeline, conversazioni, preferenze e dati tecnici. I file salvati sul dispositivo restano esclusi: conserva sempre gli originali.
             </p>
           </div>
         </div>
@@ -262,7 +265,7 @@ export default function LocalDataSettings() {
               Il file di backup può contenere dati sensibili
             </h2>
             <p className="mt-2 text-sm leading-6 text-amber-800">
-              Non pubblicarlo e non inviarlo a persone non autorizzate. In questa beta non carichiamo il file su server esterni: l’importazione avviene nel browser.
+              Non pubblicarlo e non inviarlo a persone non autorizzate. Il file non viene caricato automaticamente su server esterni: l’importazione avviene nel browser.
             </p>
           </div>
         </div>
@@ -276,7 +279,7 @@ export default function LocalDataSettings() {
               Cancella tutti i dati locali
             </h2>
             <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-              Rimuove pratiche, demo, missioni, timeline, feedback e bozze da questo browser.
+              Rimuove pratiche, missioni, timeline, preferenze e bozze da questo browser.
             </p>
           </div>
           <button

@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s | CasaPilot",
   },
   description:
-    "L’assistente immobiliare intelligente che ti guida nella vendita e nell’affitto della tua casa.",
+    "L’assistente immobiliare intelligente che ti guida nella vendita e nell’affitto del tuo immobile.",
 };
 
 export default function RootLayout({

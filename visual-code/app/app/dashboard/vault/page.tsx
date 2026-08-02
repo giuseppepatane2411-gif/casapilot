@@ -4,8 +4,8 @@ import { Suspense } from "react";
 import LocalDocumentVault from "@/components/local-vault/LocalDocumentVault";
 
 export const metadata: Metadata = {
-  title: "Archivio locale",
-  description: "Collega documenti alla pratica senza inviarli a server esterni.",
+  title: "I miei file",
+  description: "Salva i file dell’immobile sul dispositivo e collegali alla checklist.",
 };
 
 export default function LocalVaultPage() {

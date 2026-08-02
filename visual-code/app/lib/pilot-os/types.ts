@@ -1,4 +1,5 @@
 import type { DocumentKey, PropertyJourney } from "@/lib/property-journey/types";
+import type { GoalProgress } from "@/lib/pilot-os/goal-progress";
 
 export type PilotPriority = "critical" | "high" | "medium" | "low";
 
@@ -7,7 +8,9 @@ export type PilotMissionCategory =
   | "documents"
   | "marketing"
   | "verification"
-  | "strategy";
+  | "strategy"
+  | "market"
+  | "closing";
 
 export type PilotMission = {
   id: string;
@@ -22,6 +25,7 @@ export type PilotMission = {
   documentId?: DocumentKey;
   completed: boolean;
   actionLabel: string;
+  canCompleteManually?: boolean;
 };
 
 export type PilotRecommendation = {
@@ -87,5 +91,6 @@ export type PilotContext = {
   summary: string;
   readiness: PilotReadiness;
   risks: PilotRisk[];
+  goalProgress: GoalProgress;
   memory: JourneyPilotMemory;
 };

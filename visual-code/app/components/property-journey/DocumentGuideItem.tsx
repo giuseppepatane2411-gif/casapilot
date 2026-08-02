@@ -34,12 +34,7 @@ export default function DocumentGuideItem({
           : "border-slate-200 bg-white hover:border-blue-200"
       }`}
     >
-      <button
-        type="button"
-        aria-pressed={selected}
-        onClick={onToggle}
-        className="flex min-h-28 w-full items-start gap-3 p-4 text-left focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-blue-100"
-      >
+      <div className="flex items-start gap-3 p-4">
         <span
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
             selected
@@ -53,22 +48,36 @@ export default function DocumentGuideItem({
             <FileText size={18} />
           )}
         </span>
-        <span className="min-w-0 flex-1">
-          <span className="block font-bold text-slate-950">{document.title}</span>
-          <span className="mt-1 block text-xs leading-5 text-slate-500">
-            {document.description}
-          </span>
-          <span
-            className={`mt-3 inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${
-              selected
-                ? "bg-emerald-100 text-emerald-700"
-                : "bg-amber-50 text-amber-700"
-            }`}
-          >
-            {selected ? "Disponibile" : "Da recuperare"}
-          </span>
-        </span>
-      </button>
+
+        <div className="min-w-0 flex-1">
+          <p className="font-bold text-slate-950">{document.title}</p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">{document.description}</p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                selected
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "bg-amber-50 text-amber-700"
+              }`}
+            >
+              {selected ? "Disponibile" : "Da recuperare"}
+            </span>
+            <button
+              type="button"
+              aria-pressed={selected}
+              onClick={onToggle}
+              className={`rounded-full px-3 py-1 text-[11px] font-bold transition-colors ${
+                selected
+                  ? "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                  : "bg-slate-950 text-white hover:bg-blue-700"
+              }`}
+            >
+              {selected ? "Non ce l’ho" : "Ce l’ho già"}
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div className="border-t border-slate-200/80 bg-white/70">
         <button
@@ -79,7 +88,7 @@ export default function DocumentGuideItem({
         >
           <span className="flex items-center gap-2">
             <Lightbulb size={15} />
-            {expanded ? "Nascondi la guida" : "Perché serve e come recuperarlo"}
+            {expanded ? "Nascondi la guida" : "Come faccio a recuperarlo?"}
           </span>
           <ChevronDown
             size={16}
@@ -89,7 +98,7 @@ export default function DocumentGuideItem({
 
         {expanded && (
           <div className="space-y-4 border-t border-slate-100 p-4 text-xs leading-5 text-slate-600">
-            <GuideBlock icon={Lightbulb} title="Perché è importante">
+            <GuideBlock icon={Lightbulb} title="Perché serve">
               {guide.whyItMatters}
             </GuideBlock>
             <GuideBlock icon={MapPinned} title="Come recuperarlo">

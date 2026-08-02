@@ -24,7 +24,7 @@ const steps = [
     icon: Users,
     title: "Coinvolgi i professionisti",
     description:
-      "Quando serve, trovi notai, geometri, tecnici e agenti già verificati direttamente su CasaPilot.",
+      "Quando la pratica richiede supporto, CasaPilot ti collega alle categorie professionali pertinenti e distingue chiaramente i profili verificati.",
   },
 ];
 

@@ -3,15 +3,15 @@
 import { useState } from "react";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import DashboardMobileNav from "@/components/dashboard/DashboardMobileNav";
+import PilotFloatingHelp from "@/components/dashboard/PilotFloatingHelp";
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 
 type DashboardShellProps = {
   children: React.ReactNode;
 };
 
-export default function DashboardShell({
-  children,
-}: DashboardShellProps) {
+export default function DashboardShell({ children }: DashboardShellProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -22,16 +22,15 @@ export default function DashboardShell({
       />
 
       <div className="min-h-screen lg:pl-[280px]">
-        <DashboardHeader
-          onOpenMobileMenu={() => setMobileMenuOpen(true)}
-        />
+        <DashboardHeader onOpenMobileMenu={() => setMobileMenuOpen(true)} />
 
-        <main className="px-4 py-6 sm:px-6 sm:py-8 xl:px-10">
-          <div className="mx-auto w-full max-w-[1500px]">
-            {children}
-          </div>
+        <main className="px-4 pb-28 pt-6 sm:px-6 sm:pt-8 lg:pb-8 xl:px-10">
+          <div className="mx-auto w-full max-w-[1320px]">{children}</div>
         </main>
       </div>
+
+      <PilotFloatingHelp />
+      <DashboardMobileNav />
     </div>
   );
 }

@@ -1,11 +1,4 @@
-import {
-  Building2,
-  FileCheck2,
-  MapPin,
-  Ruler,
-  ShieldCheck,
-  Target,
-} from "lucide-react";
+import { Building2, FileCheck2, Hash, MapPin, Target } from "lucide-react";
 
 import {
   getOccupancyLabel,
@@ -17,60 +10,25 @@ import type { WizardData } from "@/lib/property-journey/types";
 
 type StepSummaryProps = {
   data: WizardData;
-  healthScore: number;
   onEditStep: (step: number) => void;
 };
 
-export default function StepSummary({
-  data,
-  healthScore,
-  onEditStep,
-}: StepSummaryProps) {
+export default function StepSummary({ data, onEditStep }: StepSummaryProps) {
   if (!data.operation || !data.propertyType) return null;
 
-  const requiredDocuments = getRequiredDocuments(
-    data.operation,
-    data.propertyType,
-  );
-  const availableDocuments = requiredDocuments.filter((document) =>
-    data.documents.includes(document.id),
-  );
+  const requiredDocuments = getRequiredDocuments(data.operation, data.propertyType);
+  const availableDocuments = requiredDocuments.filter((document) => data.documents.includes(document.id));
   const missingDocuments = requiredDocuments.length - availableDocuments.length;
-  const generatedName =
-    data.propertyName.trim() || `${getPropertyLabel(data.propertyType)} a ${data.city}`;
+  const generatedName = data.propertyName.trim() || `${getPropertyLabel(data.propertyType)} a ${data.city}`;
 
   return (
     <div className="space-y-5">
-      <section className="overflow-hidden rounded-[26px] border border-slate-200 bg-slate-950 text-white">
-        <div className="grid gap-6 p-6 sm:p-7 lg:grid-cols-[1fr_190px] lg:items-center">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.13em] text-blue-300">
-              Nuova pratica
-            </p>
-            <h3 className="mt-3 text-2xl font-bold sm:text-3xl">{generatedName}</h3>
-            <p className="mt-3 flex items-center gap-2 text-sm text-slate-300">
-              <MapPin size={16} />
-              {data.address}, {data.city} ({data.province})
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/[0.07] p-4">
-            <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-              <ShieldCheck size={15} />
-              Health Score
-            </p>
-            <p className="mt-3 text-4xl font-bold tracking-[-0.05em]">
-              {healthScore}
-              <span className="ml-1 text-sm text-slate-400">/100</span>
-            </p>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
-              <div
-                className="h-full rounded-full bg-blue-500"
-                style={{ width: `${healthScore}%` }}
-              />
-            </div>
-          </div>
-        </div>
+      <section className="rounded-[26px] border border-emerald-200 bg-emerald-50 p-5 sm:p-6">
+        <p className="text-xs font-bold uppercase tracking-[0.13em] text-emerald-700">Quasi fatto</p>
+        <h3 className="mt-2 text-2xl font-bold text-emerald-950">{generatedName}</h3>
+        <p className="mt-2 text-sm leading-6 text-emerald-800">
+          Controlla solo che queste informazioni siano corrette. Non devi completare tutto adesso.
+        </p>
       </section>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -89,32 +47,38 @@ export default function StepSummary({
         />
         <SummaryCard
           icon={MapPin}
-          label="Posizione"
+          label="Dove si trova"
           value={`${data.city}, ${data.province}`}
-          detail={`${data.address} · ${data.postalCode}`}
+          detail={`${data.address} · ${data.postalCode}${data.locationVerified ? " · Posizione confermata" : data.latitude !== null && data.longitude !== null ? " · Punto da confermare" : " · Posizione non indicata"}`}
           onEdit={() => onEditStep(3)}
         />
+        {(data.cadastralSheet || data.cadastralParcel || data.cadastralSubaltern) && (
+          <SummaryCard
+            icon={Hash}
+            label="Dati catastali"
+            value={[
+              data.cadastralSheet ? `Foglio ${data.cadastralSheet}` : "",
+              data.cadastralParcel ? `Part. ${data.cadastralParcel}` : "",
+              data.cadastralSubaltern ? `Sub. ${data.cadastralSubaltern}` : "",
+            ].filter(Boolean).join(" · ")}
+            detail="Puoi modificarli anche dopo aver creato l’immobile."
+            onEdit={() => onEditStep(3)}
+          />
+        )}
         <SummaryCard
           icon={FileCheck2}
           label="Documenti"
-          value={`${availableDocuments.length} disponibili`}
-          detail={`${missingDocuments} da recuperare`}
+          value={`${availableDocuments.length} già disponibili`}
+          detail={missingDocuments > 0 ? `${missingDocuments} da recuperare più avanti` : "Checklist iniziale completa"}
           onEdit={() => onEditStep(4)}
         />
       </div>
 
-      <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-5">
-        <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
-            <Ruler size={19} />
-          </span>
-          <div>
-            <p className="font-bold text-slate-950">Dopo la creazione</p>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
-              La dashboard mostrerà la prima missione, il punteggio aggiornato e i documenti da recuperare. Potrai modificare la checklist in qualsiasi momento.
-            </p>
-          </div>
-        </div>
+      <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
+        <p className="font-bold text-slate-950">Cosa succede dopo?</p>
+        <p className="mt-1 text-sm leading-6 text-slate-600">
+          CasaPilot ti porterà direttamente alla prima cosa utile da fare. Non dovrai scegliere da solo da dove iniziare.
+        </p>
       </div>
     </div>
   );
@@ -128,13 +92,7 @@ type SummaryCardProps = {
   onEdit: () => void;
 };
 
-function SummaryCard({
-  icon: Icon,
-  label,
-  value,
-  detail,
-  onEdit,
-}: SummaryCardProps) {
+function SummaryCard({ icon: Icon, label, value, detail, onEdit }: SummaryCardProps) {
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-4">
       <div className="flex items-start gap-3">

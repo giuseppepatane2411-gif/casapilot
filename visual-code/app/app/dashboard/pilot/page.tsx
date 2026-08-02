@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import PilotOSWorkspace from "@/components/pilot-os/PilotOSWorkspace";
 
 export const metadata: Metadata = {
-  title: "Pilot OS",
-  description: "Missioni, rischi e prossimi passi per il tuo immobile.",
+  title: "Pilot",
+  description: "Il prossimo passo della tua pratica, spiegato in modo semplice.",
 };
 
 export default function DashboardPilotPage() {

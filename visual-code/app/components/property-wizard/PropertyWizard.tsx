@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
@@ -19,14 +19,12 @@ import StepOperation from "@/components/property-wizard/StepOperation";
 import StepProperty from "@/components/property-wizard/StepProperty";
 import StepSummary from "@/components/property-wizard/StepSummary";
 import WizardProgress from "@/components/property-wizard/WizardProgress";
-import WizardSidebar from "@/components/property-wizard/WizardSidebar";
 import {
   INITIAL_WIZARD_DATA,
   WIZARD_STEPS,
   getRequiredDocuments,
 } from "@/lib/property-journey/constants";
 import {
-  calculateWizardHealthScore,
   filterDocumentsForJourney,
 } from "@/lib/property-journey/scoring";
 import {
@@ -46,6 +44,7 @@ const LAST_STEP = WIZARD_STEPS.length;
 
 export default function PropertyWizard() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
   const [data, setData] = useState<WizardData>(INITIAL_WIZARD_DATA);
   const [draftLoaded, setDraftLoaded] = useState(false);
@@ -57,10 +56,6 @@ export default function PropertyWizard() {
   const requiredDocuments = useMemo(
     () => getRequiredDocuments(data.operation, data.propertyType),
     [data.operation, data.propertyType],
-  );
-  const healthScore = useMemo(
-    () => calculateWizardHealthScore(data),
-    [data],
   );
 
   useEffect(() => {
@@ -74,13 +69,22 @@ export default function PropertyWizard() {
           ...draft.data,
         });
         setDraftRestored(true);
+      } else {
+        const goal = searchParams.get("goal");
+        if (goal === "sale" || goal === "rent") {
+          setData({
+            ...INITIAL_WIZARD_DATA,
+            operation: goal,
+          });
+          setStep(2);
+        }
       }
 
       setDraftLoaded(true);
     }, 0);
 
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!draftLoaded || isCreating) return;
@@ -203,7 +207,7 @@ export default function PropertyWizard() {
     try {
       const journey = createJourney(data);
       clearWizardDraft();
-      router.push(`/dashboard/beta/success?journey=${journey.id}`);
+      router.push(`/dashboard?created=${journey.id}`);
     } catch {
       setValidationMessage(
         "Non siamo riusciti a creare il percorso. Controlla i dati e riprova.",
@@ -222,7 +226,7 @@ export default function PropertyWizard() {
               className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-slate-950"
             >
               <ArrowLeft size={17} />
-              Torna alla dashboard
+              Torna a Oggi
             </Link>
 
             <div className="mt-4 flex items-center gap-3">
@@ -231,10 +235,10 @@ export default function PropertyWizard() {
               </span>
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.13em] text-blue-600">
-                  Nuovo percorso
+                  Nuovo immobile
                 </p>
                 <h1 className="mt-1 text-2xl font-bold text-slate-950 sm:text-3xl">
-                  Configura la tua pratica
+                  Parlaci del tuo immobile
                 </h1>
               </div>
             </div>
@@ -262,9 +266,9 @@ export default function PropertyWizard() {
           </div>
         )}
 
-        <WizardProgress currentStep={step} />
+        <WizardProgress currentStep={step} operation={data.operation} />
 
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_330px]">
+        <div className="mx-auto max-w-4xl">
           <section className="overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-100 px-5 py-6 sm:px-7 sm:py-7">
               <p className="text-xs font-bold uppercase tracking-[0.13em] text-blue-600">
@@ -303,11 +307,7 @@ export default function PropertyWizard() {
               )}
 
               {step === 5 && (
-                <StepSummary
-                  data={data}
-                  healthScore={healthScore}
-                  onEditStep={editStep}
-                />
+                <StepSummary data={data} onEditStep={editStep} />
               )}
 
               {validationMessage && (
@@ -356,7 +356,7 @@ export default function PropertyWizard() {
                     disabled={isCreating}
                     className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:-translate-y-0.5 hover:bg-blue-700 disabled:cursor-wait disabled:opacity-70"
                   >
-                    {isCreating ? "Creazione in corso…" : "Crea il percorso"}
+                    {isCreating ? "Creazione in corso…" : "Vai al primo passo"}
                     {!isCreating && <CheckCircle2 size={18} />}
                   </button>
                 )}
@@ -364,11 +364,6 @@ export default function PropertyWizard() {
             </footer>
           </section>
 
-          <WizardSidebar
-            data={data}
-            healthScore={healthScore}
-            draftLoaded={draftLoaded}
-          />
         </div>
       </div>
     </div>

@@ -1,56 +1,62 @@
 "use client";
 
 import Link from "next/link";
-import { FlaskConical, HardDrive, Menu } from "lucide-react";
+import { Menu, UserRound } from "lucide-react";
+import { usePathname } from "next/navigation";
 
-type DashboardHeaderProps = {
-  onOpenMobileMenu: () => void;
-};
+type DashboardHeaderProps = { onOpenMobileMenu: () => void };
 
-export default function DashboardHeader({
-  onOpenMobileMenu,
-}: DashboardHeaderProps) {
+function getSection(pathname: string) {
+  if (pathname.startsWith("/dashboard/properties")) {
+    return { title: "I miei immobili", subtitle: "Dati e pratiche immobiliari" };
+  }
+  if (pathname.startsWith("/dashboard/documents") || pathname.startsWith("/dashboard/vault")) {
+    return { title: "Documenti", subtitle: "Cosa hai e cosa manca" };
+  }
+  if (pathname.startsWith("/dashboard/pilot")) {
+    return { title: "Pilot", subtitle: "Chiedi quello che non è chiaro" };
+  }
+  if (pathname.startsWith("/dashboard/professionals")) {
+    return { title: "Professionisti", subtitle: "Supporto per la pratica" };
+  }
+  if (pathname.startsWith("/dashboard/account")) {
+    return { title: "Account", subtitle: "Profilo e accesso" };
+  }
+  if (pathname.startsWith("/dashboard/settings")) {
+    return { title: "Impostazioni", subtitle: "Dati e preferenze" };
+  }
+  return { title: "Percorso", subtitle: "Un passo alla volta" };
+}
+
+export default function DashboardHeader({ onOpenMobileMenu }: DashboardHeaderProps) {
+  const pathname = usePathname();
+  const section = getSection(pathname);
+
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
-      <div className="flex h-[72px] items-center justify-between px-4 sm:px-6 xl:px-10">
-        <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/92 backdrop-blur-xl">
+      <div className="flex h-[68px] items-center justify-between px-4 sm:px-6 xl:px-10">
+        <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
             aria-label="Apri il menu"
             onClick={onOpenMobileMenu}
-            className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 lg:hidden"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm hover:bg-slate-50 lg:hidden"
           >
-            <Menu size={20} aria-hidden="true" />
+            <Menu size={19} aria-hidden="true" />
           </button>
-
-          <div>
-            <p className="text-sm font-semibold text-slate-950 sm:text-base">
-              CasaPilot Beta
-            </p>
-            <p className="hidden text-xs text-slate-500 sm:block">
-              Prova, completa una missione e condividi il feedback.
-            </p>
+          <div className="min-w-0">
+            <p className="truncate text-base font-bold text-slate-950">{section.title}</p>
+            <p className="hidden text-xs text-slate-500 sm:block">{section.subtitle}</p>
           </div>
         </div>
-
-        <div className="flex items-center gap-2 sm:gap-3">
-          <span className="hidden min-h-10 items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 text-xs font-bold text-emerald-700 md:inline-flex">
-            <HardDrive size={15} />
-            Dati locali
-          </span>
-
-          <Link
-            href="/dashboard/beta"
-            className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-950 px-3.5 text-sm font-bold text-white shadow-sm hover:bg-blue-600"
-          >
-            <FlaskConical size={17} />
-            <span className="hidden sm:inline">Beta Lab</span>
-          </Link>
-
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
-            B
-          </span>
-        </div>
+        <Link
+          href="/dashboard/account"
+          aria-label="Apri account"
+          className="flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 text-xs font-bold text-slate-600 shadow-sm hover:border-blue-200 hover:text-blue-700"
+        >
+          <UserRound size={16} />
+          <span className="hidden sm:inline">Account</span>
+        </Link>
       </div>
     </header>
   );

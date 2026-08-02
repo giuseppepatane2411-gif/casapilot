@@ -23,6 +23,10 @@ export function calculateReadiness(
     Boolean(journey.property.province),
     Boolean(journey.property.address),
     Boolean(journey.property.postalCode),
+    journey.property.locationVerified,
+    Boolean(journey.property.cadastralSheet),
+    Boolean(journey.property.cadastralParcel),
+    Boolean(journey.property.cadastralSubaltern),
   ];
   const data = clamp(
     (profileFacts.filter(Boolean).length / profileFacts.length) * 100,
@@ -36,15 +40,32 @@ export function calculateReadiness(
     ? clamp((journey.documents.length / requiredDocuments.length) * 100)
     : 100;
 
-  const completedExecutionMissions = memory.completedMissionIds.filter(
-    (missionId) =>
-      missionId === "marketing-material" || missionId === "strategy-review",
+  const executionMissionIds =
+    journey.operation === "sale"
+      ? [
+          "strategy-review",
+          "marketing-material",
+          "sale-publish-listing",
+          "sale-manage-visits",
+          "sale-review-offer",
+          "sale-close-transaction",
+        ]
+      : [
+          "strategy-review",
+          "marketing-material",
+          "rent-publish-listing",
+          "rent-screen-applicants",
+          "rent-select-tenant",
+          "rent-sign-and-handover",
+        ];
+  const completedExecutionMissions = executionMissionIds.filter((missionId) =>
+    memory.completedMissionIds.includes(missionId),
   ).length;
   const execution = clamp(
-    20 + journey.progress * 0.45 + completedExecutionMissions * 20,
+    (completedExecutionMissions / executionMissionIds.length) * 100,
   );
 
-  const overall = clamp(data * 0.3 + documents * 0.5 + execution * 0.2);
+  const overall = clamp(data * 0.25 + documents * 0.45 + execution * 0.3);
   const label =
     overall >= 85
       ? "Quasi pronto"

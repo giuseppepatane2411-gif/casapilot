@@ -29,7 +29,7 @@ export default function PilotCard({
         <div className="flex items-center justify-between">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold">
             <Sparkles size={14} />
-            Pilot OS
+            Pilot
           </span>
           <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10">
             <Bot size={20} />
@@ -41,7 +41,7 @@ export default function PilotCard({
 
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.07] p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-blue-300">
-            Suggerimento
+            Per aiutarti
           </p>
           <p className="mt-2 text-sm leading-6 text-slate-200">{suggestion}</p>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { ArrowUp, Bot, Sparkles, UserRound } from "lucide-react";
+import { ArrowUp, Bot, UserRound } from "lucide-react";
 
 import {
   answerPilotQuestion,
@@ -70,14 +70,11 @@ export default function PilotChat({ context }: PilotChatProps) {
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
               </div>
               <p className="mt-1 text-xs text-slate-400">
-                Risposte basate sui dati reali dell’immobile
+                Tiene conto dei dati che hai già inserito
               </p>
             </div>
           </div>
-          <span className="inline-flex self-start items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[11px] font-bold text-slate-300 sm:self-auto">
-            <Sparkles size={13} />
-            Motore contestuale locale
-          </span>
+
         </div>
       </header>
 
@@ -135,7 +132,7 @@ export default function PilotChat({ context }: PilotChatProps) {
           <input
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            placeholder="Chiedi qualcosa su questo immobile…"
+            placeholder="Scrivi qui il tuo dubbio…"
             className="min-h-11 min-w-0 flex-1 bg-transparent px-3 text-sm text-slate-900 outline-none placeholder:text-slate-400"
           />
           <button

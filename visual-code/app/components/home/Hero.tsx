@@ -1,19 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Bot, CheckCircle2, Sparkles } from "lucide-react";
 
 import Container from "@/components/ui/Container";
 import SearchBar from "@/components/home/SearchBar";
-import PilotConversation from "@/components/home/PilotConversation";
 
 export default function Hero() {
+  const router = useRouter();
   const [message, setMessage] = useState("");
-  const [conversationStarted, setConversationStarted] = useState(false);
 
   const startPilot = () => {
-    if (!message.trim()) return;
-    setConversationStarted(true);
+    const value = message.trim();
+    if (!value) return;
+
+    router.push(`/dashboard/pilot?message=${encodeURIComponent(value)}`);
   };
 
   return (
@@ -56,12 +58,6 @@ export default function Hero() {
               setMessage={setMessage}
               startPilot={startPilot}
             />
-
-            {conversationStarted && (
-              <div className="mt-5 overflow-hidden rounded-[22px] border border-white/20 bg-white p-4 shadow-[0_22px_60px_rgba(15,23,42,0.16)] sm:mt-7 sm:rounded-[28px] sm:p-6">
-                <PilotConversation message={message} />
-              </div>
-            )}
 
             <div className="mt-7 flex flex-col items-center justify-center gap-2.5 text-sm text-blue-100 sm:mt-9 sm:flex-row sm:flex-wrap sm:gap-x-6">
               <div className="flex items-center gap-2">

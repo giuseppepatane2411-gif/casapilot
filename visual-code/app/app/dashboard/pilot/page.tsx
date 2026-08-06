@@ -1,12 +1,5 @@
-import type { Metadata } from "next";
+import PilotFirstChat from "@/components/pilot/PilotFirstChat";
 
-import PilotOSWorkspace from "@/components/pilot-os/PilotOSWorkspace";
-
-export const metadata: Metadata = {
-  title: "Pilot",
-  description: "Il prossimo passo della tua pratica, spiegato in modo semplice.",
-};
-
-export default function DashboardPilotPage() {
-  return <PilotOSWorkspace />;
+export default function PilotPage() {
+  return <PilotFirstChat />;
 }

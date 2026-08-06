@@ -1,0 +1,1 @@
+import RequestWizard from "@/components/professionals/RequestWizard"; export default async function Page({searchParams}:{searchParams:Promise<{category?:string;service?:string}>}){const p=await searchParams;return <RequestWizard initialCategoryId={p.category} initialServiceId={p.service}/>;}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BadgeCheck,
+  BriefcaseBusiness,
   Building2,
   FileText,
   Plus,
@@ -26,6 +27,7 @@ const navigation = [
   { label: "I miei immobili", href: "/dashboard/properties", icon: Building2 },
   { label: "Documenti", href: "/dashboard/documents", icon: FileText },
   { label: "Professionisti", href: "/dashboard/professionals", icon: Users },
+  { label: "Marketplace", href: "/dashboard/marketplace", icon: BriefcaseBusiness },
 ];
 
 export default function DashboardSidebar({

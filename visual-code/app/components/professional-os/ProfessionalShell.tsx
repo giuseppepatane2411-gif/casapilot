@@ -9,6 +9,7 @@ const NAVIGATION = [
   { label: "Panoramica", href: "/professionista", icon: "home" as const },
   { label: "Servizi", href: "/professionista/servizi", icon: "services" as const },
   { label: "Richieste", href: "/professionista/richieste", icon: "leads" as const },
+  { label: "Marketplace", href: "/professionista/marketplace", icon: "leads" as const },
   { label: "Preventivi", href: "/professionista/preventivi", icon: "quotes" as const },
   { label: "Messaggi", href: "/professionista/messaggi", icon: "messages" as const },
   { label: "Incarichi", href: "/professionista/incarichi", icon: "jobs" as const },

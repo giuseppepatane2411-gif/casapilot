@@ -1,5 +1,5 @@
-import Onboarding from "@/components/professional-os/Onboarding";
+import ProfessionalOnboardingCloud from "@/components/professional-onboarding/ProfessionalOnboardingCloud";
 
 export default function ProfessionistaOnboardingPage() {
-  return <Onboarding />;
+  return <ProfessionalOnboardingCloud />;
 }

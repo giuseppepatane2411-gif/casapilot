@@ -10,7 +10,6 @@ const navigation = [
   { href: "/immobili", label: "Immobili" },
   { href: "/vendere", label: "Vendere" },
   { href: "/affittare", label: "Affittare" },
-  { href: "/valuta-immobile", label: "Valuta" },
   { href: "/immobili?mercato=holiday", label: "Vacanze" },
   { href: "/servizi", label: "Servizi" },
 ];

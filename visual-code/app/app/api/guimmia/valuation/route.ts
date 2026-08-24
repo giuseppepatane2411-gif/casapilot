@@ -109,6 +109,15 @@ function parseInput(body: Record<string, unknown>): PropertyValuationInput | nul
       ? (body.owner as Record<string, unknown>)
       : {};
   const condition = cleanText(rawProperty.condition, 30) as PropertyCondition;
+  const latitude =
+    rawProperty.latitude === "" || rawProperty.latitude === null
+      ? null
+      : cleanNumber(rawProperty.latitude, -90, 90);
+  const longitude =
+    rawProperty.longitude === "" || rawProperty.longitude === null
+      ? null
+      : cleanNumber(rawProperty.longitude, -180, 180);
+  const locationVerified = cleanBoolean(rawProperty.locationVerified);
   const surfaceSqm = cleanNumber(rawProperty.surfaceSqm, 10, 5000);
   const rooms = cleanNumber(rawProperty.rooms, 1, 100);
   const bedrooms = cleanNumber(rawProperty.bedrooms, 0, 50);
@@ -127,6 +136,7 @@ function parseInput(body: Record<string, unknown>): PropertyValuationInput | nul
       ? null
       : cleanNumber(rawProperty.monthlyCondominiumFees, 0, 10000);
   const email = cleanText(rawOwner.email, 160).toLowerCase();
+  const phone = cleanText(rawOwner.phone, 40);
   const heating = cleanText(rawProperty.heating, 30) as PropertyValuationInput["property"]["heating"];
   const occupancy = cleanText(rawProperty.occupancy, 30) as PropertyValuationInput["property"]["occupancy"];
 
@@ -136,6 +146,9 @@ function parseInput(body: Record<string, unknown>): PropertyValuationInput | nul
     !cleanText(rawProperty.propertyType, 80) ||
     !cleanText(rawProperty.city, 120) ||
     !cleanText(rawProperty.province, 120) ||
+    latitude === null ||
+    longitude === null ||
+    !locationVerified ||
     surfaceSqm === null ||
     rooms === null ||
     bedrooms === null ||
@@ -149,6 +162,7 @@ function parseInput(body: Record<string, unknown>): PropertyValuationInput | nul
     !["VACANT", "OWNER_OCCUPIED", "TENANTED"].includes(occupancy) ||
     !cleanText(rawOwner.name, 120) ||
     !isEmail(email) ||
+    !phone ||
     body.privacyAccepted !== true ||
     body.automatedAnalysisAccepted !== true
   ) {
@@ -159,10 +173,15 @@ function parseInput(body: Record<string, unknown>): PropertyValuationInput | nul
     operation,
     property: {
       propertyType: cleanText(rawProperty.propertyType, 80),
+      country: cleanText(rawProperty.country, 80) || "Italia",
       city: cleanText(rawProperty.city, 120),
       province: cleanText(rawProperty.province, 120),
       postalCode: cleanText(rawProperty.postalCode, 12) || undefined,
       address: cleanText(rawProperty.address, 200) || undefined,
+      latitude,
+      longitude,
+      locationVerified: true,
+      locationLabel: cleanText(rawProperty.locationLabel, 300) || undefined,
       surfaceSqm,
       rooms,
       bedrooms,
@@ -183,7 +202,7 @@ function parseInput(body: Record<string, unknown>): PropertyValuationInput | nul
     owner: {
       name: cleanText(rawOwner.name, 120),
       email,
-      phone: cleanText(rawOwner.phone, 40) || undefined,
+      phone,
     },
     privacyAccepted: true,
     automatedAnalysisAccepted: true,

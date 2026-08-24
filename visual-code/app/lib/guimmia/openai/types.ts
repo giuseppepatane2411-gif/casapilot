@@ -19,10 +19,15 @@ export type PropertyValuationInput = {
   operation: ValuationOperation;
   property: {
     propertyType: string;
+    country?: string;
     city: string;
     province: string;
     postalCode?: string;
     address?: string;
+    latitude?: number | null;
+    longitude?: number | null;
+    locationVerified?: boolean;
+    locationLabel?: string;
     surfaceSqm: number;
     rooms: number;
     bedrooms: number;
@@ -43,7 +48,7 @@ export type PropertyValuationInput = {
   owner: {
     name: string;
     email: string;
-    phone?: string;
+    phone: string;
   };
   privacyAccepted: boolean;
   automatedAnalysisAccepted: boolean;
@@ -72,6 +77,22 @@ export type PropertyValuationResult = {
     low: number;
     suggested: number;
     high: number;
+  };
+  officialBenchmark: {
+    source: "OMI";
+    available: boolean;
+    referencePeriod: string;
+    zone: string;
+    propertyType: string;
+    unit: "EUR_SQM_SALE" | "EUR_SQM_MONTH";
+    low: number;
+    high: number;
+    note: string;
+  };
+  valuationMethod: {
+    surfaceBasis: string;
+    appliedFactors: string[];
+    note: string;
   };
   marketEvidence: {
     evidenceSummary: string;

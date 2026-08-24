@@ -26,6 +26,49 @@ const valuationSchema = {
       },
       required: ["low", "suggested", "high"],
     },
+    officialBenchmark: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        source: { type: "string", enum: ["OMI"] },
+        available: { type: "boolean" },
+        referencePeriod: { type: "string" },
+        zone: { type: "string" },
+        propertyType: { type: "string" },
+        unit: {
+          type: "string",
+          enum: ["EUR_SQM_SALE", "EUR_SQM_MONTH"],
+        },
+        low: { type: "number", minimum: 0 },
+        high: { type: "number", minimum: 0 },
+        note: { type: "string" },
+      },
+      required: [
+        "source",
+        "available",
+        "referencePeriod",
+        "zone",
+        "propertyType",
+        "unit",
+        "low",
+        "high",
+        "note",
+      ],
+    },
+    valuationMethod: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        surfaceBasis: { type: "string" },
+        appliedFactors: {
+          type: "array",
+          items: { type: "string" },
+          maxItems: 8,
+        },
+        note: { type: "string" },
+      },
+      required: ["surfaceBasis", "appliedFactors", "note"],
+    },
     marketEvidence: {
       type: "object",
       additionalProperties: false,
@@ -90,6 +133,8 @@ const valuationSchema = {
     "currency",
     "period",
     "range",
+    "officialBenchmark",
+    "valuationMethod",
     "marketEvidence",
     "confidence",
     "summary",
@@ -258,13 +303,19 @@ function quality(
   );
   const score = Math.min(
     100,
-    18 + Math.min(sourceCount, 4) * 8 + Math.min(comparableCount, 4) * 8 +
+    14 +
+      (result.officialBenchmark.available ? 12 : 0) +
+      Math.min(sourceCount, 4) * 8 +
+      Math.min(comparableCount, 4) * 8 +
       Math.round((dataCompleteness - 70) * 0.6),
   );
   const grade = score >= 78 ? "STRONG" : score >= 52 ? "USEFUL" : "LIMITED";
   const notes: string[] = [];
 
   if (sourceCount < 2) notes.push("Poche fonti pubbliche verificabili disponibili.");
+  if (!result.officialBenchmark.available) {
+    notes.push("Quotazione OMI puntuale non disponibile per questa ricerca.");
+  }
   if (comparableCount < 2) notes.push("Campione di immobili comparabili ridotto.");
   if (!input.property.address) notes.push("La microzona non è stata indicata con precisione.");
   if (!input.property.yearBuilt) notes.push("L’anno di costruzione non è disponibile.");
@@ -310,6 +361,28 @@ function validateResult(value: unknown): PropertyValuationResult {
     throw new Error("valuation_evidence_invalid");
   }
 
+  const benchmark = result.officialBenchmark;
+  if (
+    !benchmark ||
+    benchmark.source !== "OMI" ||
+    !Number.isFinite(benchmark.low) ||
+    !Number.isFinite(benchmark.high) ||
+    benchmark.low < 0 ||
+    benchmark.high < benchmark.low ||
+    (benchmark.available && (benchmark.low <= 0 || benchmark.high <= 0)) ||
+    (!benchmark.available && (benchmark.low !== 0 || benchmark.high !== 0))
+  ) {
+    throw new Error("valuation_official_benchmark_invalid");
+  }
+
+  if (!result.valuationMethod || !Array.isArray(result.valuationMethod.appliedFactors)) {
+    throw new Error("valuation_method_invalid");
+  }
+  result.valuationMethod.appliedFactors = result.valuationMethod.appliedFactors
+    .map((factor) => String(factor).trim().slice(0, 140))
+    .filter(Boolean)
+    .slice(0, 8);
+
   result.marketEvidence.comparableSignals = (
     result.marketEvidence.comparableSignals ?? []
   )
@@ -346,6 +419,12 @@ function applyEvidenceGuard(
       "Il numero di annunci comparabili è insufficiente per una lettura robusta della microzona.",
     ).slice(0, 5);
   }
+  if (!guarded.officialBenchmark.available) {
+    guarded.cautions = addUniqueNote(
+      guarded.cautions,
+      "Non è stata verificata una quotazione OMI puntuale per la zona: il riferimento ufficiale non ha contribuito numericamente alla fascia.",
+    ).slice(0, 5);
+  }
 
   return guarded;
 }
@@ -375,17 +454,38 @@ export async function generatePropertyValuation(
         model: configuration.model,
         store: false,
         reasoning: { effort: "low" },
-        max_output_tokens: 2200,
-        max_tool_calls: 2,
-        tools: [{ type: "web_search", external_web_access: true }],
+        max_output_tokens: 2500,
+        max_tool_calls: 3,
+        tools: [
+          {
+            type: "web_search",
+            external_web_access: true,
+            filters: {
+              allowed_domains: [
+                "agenziaentrate.gov.it",
+                "borsinoimmobiliare.it",
+                "immobiliare.it",
+                "idealista.it",
+                "casa.it",
+                "wikicasa.it",
+              ],
+            },
+          },
+        ],
         tool_choice: "required",
         include: ["web_search_call.action.sources"],
         instructions: [
           "Sei il motore di stima preliminare di Guimmia, agenzia immobiliare online italiana.",
           "Produci una fascia indicativa prudente, non una perizia e non una promessa di prezzo.",
           "Per SALE restituisci importi totali; per RENT_LONG_TERM restituisci canoni mensili.",
+          "Applica una gerarchia esplicita: 1) quotazioni ufficiali OMI dell'Agenzia delle Entrate; 2) metodo sintetico-comparativo e coefficienti di merito; 3) annunci comparabili attuali.",
+          "Per officialBenchmark usa esclusivamente una quotazione OMI verificabile su domini dell'Agenzia delle Entrate, coerente con zona, tipologia, stato e operazione. Indica periodo e zona esatti.",
+          "Se non trovi una quotazione OMI puntuale e verificabile, imposta available false, low e high a 0 e spiega il limite: non stimare né inventare valori OMI.",
+          "Consulta Borsino Immobiliare soltanto come riferimento metodologico per superficie commerciale e coefficienti di merito; non presentarlo come fonte ufficiale né come partner di Guimmia.",
+          "In valuationMethod spiega la base di superficie e indica solo i correttivi effettivamente applicati: stato, piano, ascensore, pertinenze, efficienza energetica, occupazione e microzona quando disponibili.",
           "Cerca immobili realmente comparabili per microzona, tipologia, superficie, stato e dotazioni.",
           "Usa gli annunci pubblici trovati online solo come segnali di prezzo richiesto, mai come prezzi finali di compravendite concluse.",
+          "Non dichiarare di avere usato transazioni concluse salvo dati ufficiali sui valori dichiarati effettivamente trovati e citati.",
           "Compila comparableSignals solo con annunci che hai effettivamente trovato: non inventare prezzi, immobili, indirizzi, date o fonti.",
           "Se non trovi almeno due comparabili credibili, restituisci un campione ridotto, allarga la fascia e imposta confidence LOW.",
           "Ricalcola prezzo/m² come askingPrice diviso surfaceSqm e spiega brevemente le differenze importanti.",

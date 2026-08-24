@@ -14,7 +14,7 @@ type LocationSuggestion = {
   address: string;
   latitude: number | null;
   longitude: number | null;
-  provider: "arcgis" | "photon" | "open-meteo" | "zippopotam";
+  provider: "arcgis" | "photon" | "open-meteo" | "zippopotam" | "seed";
 };
 
 type PhotonFeature = {
@@ -84,6 +84,39 @@ const ARCGIS_ENDPOINT =
 const OPEN_METEO_ENDPOINT = "https://geocoding-api.open-meteo.com/v1/search";
 const ZIP_ENDPOINT = "https://api.zippopotam.us/IT";
 
+// Risposta immediata alla prima lettera. Dalla seconda lettera il catalogo
+// viene completato dai provider geografici già usati da Guimmia.
+const MUNICIPALITY_PREFIX_SEED = [
+  ["Agrigento", "AG"], ["Alessandria", "AL"], ["Ancona", "AN"], ["Aosta", "AO"],
+  ["Arezzo", "AR"], ["Ascoli Piceno", "AP"], ["Asti", "AT"], ["Avellino", "AV"],
+  ["Bari", "BA"], ["Barletta", "BT"], ["Belluno", "BL"], ["Benevento", "BN"],
+  ["Bergamo", "BG"], ["Biella", "BI"], ["Bologna", "BO"], ["Bolzano", "BZ"],
+  ["Brescia", "BS"], ["Brindisi", "BR"], ["Cagliari", "CA"], ["Campobasso", "CB"],
+  ["Caserta", "CE"], ["Catania", "CT"], ["Catanzaro", "CZ"], ["Cesena", "FC"],
+  ["Chieti", "CH"], ["Como", "CO"], ["Cosenza", "CS"], ["Cremona", "CR"],
+  ["Crotone", "KR"], ["Cuneo", "CN"], ["Enna", "EN"], ["Ferrara", "FE"],
+  ["Firenze", "FI"], ["Foggia", "FG"], ["Forlì", "FC"], ["Frosinone", "FR"],
+  ["Genova", "GE"], ["Gorizia", "GO"], ["Grosseto", "GR"], ["Imperia", "IM"],
+  ["Isernia", "IS"], ["L'Aquila", "AQ"], ["La Spezia", "SP"], ["Latina", "LT"],
+  ["Lecce", "LE"], ["Lecco", "LC"], ["Livorno", "LI"], ["Lodi", "LO"],
+  ["Lucca", "LU"], ["Milano", "MI"], ["Monza", "MB"], ["Modena", "MO"],
+  ["Macerata", "MC"], ["Mantova", "MN"], ["Marsala", "TP"], ["Massa", "MS"],
+  ["Matera", "MT"], ["Mazara del Vallo", "TP"], ["Merano", "BZ"], ["Messina", "ME"],
+  ["Molfetta", "BA"], ["Moncalieri", "TO"], ["Napoli", "NA"], ["Novara", "NO"],
+  ["Nuoro", "NU"], ["Oristano", "OR"], ["Padova", "PD"], ["Palermo", "PA"],
+  ["Parma", "PR"], ["Pavia", "PV"], ["Perugia", "PG"], ["Pesaro", "PU"],
+  ["Pescara", "PE"], ["Piacenza", "PC"], ["Pisa", "PI"], ["Pistoia", "PT"],
+  ["Pordenone", "PN"], ["Potenza", "PZ"], ["Prato", "PO"], ["Ragusa", "RG"],
+  ["Ravenna", "RA"], ["Reggio Calabria", "RC"], ["Reggio Emilia", "RE"], ["Rieti", "RI"],
+  ["Rimini", "RN"], ["Roma", "RM"], ["Rovigo", "RO"], ["Salerno", "SA"],
+  ["Sassari", "SS"], ["Savona", "SV"], ["Siena", "SI"], ["Siracusa", "SR"],
+  ["Sondrio", "SO"], ["Taranto", "TA"], ["Teramo", "TE"], ["Terni", "TR"],
+  ["Torino", "TO"], ["Trapani", "TP"], ["Trento", "TN"], ["Treviso", "TV"],
+  ["Trieste", "TS"], ["Udine", "UD"], ["Varese", "VA"], ["Venezia", "VE"],
+  ["Verbania", "VB"], ["Vercelli", "VC"], ["Verona", "VR"], ["Vibo Valentia", "VV"],
+  ["Vicenza", "VI"], ["Viterbo", "VT"],
+] as const;
+
 function clean(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -124,6 +157,29 @@ function dedupe(suggestions: LocationSuggestion[]) {
     seen.add(key);
     return true;
   });
+}
+
+function municipalityPrefixSuggestions(query: string): LocationSuggestion[] {
+  const prefix = normalizeForKey(query);
+  if (!prefix) return [];
+  return MUNICIPALITY_PREFIX_SEED.filter(([city]) =>
+    normalizeForKey(city).startsWith(prefix),
+  )
+    .slice(0, 10)
+    .map(([city, province]) => ({
+      id: `seed-${normalizeForKey(city)}`,
+      primary: city,
+      secondary: `${province} · Italia`,
+      kind: "city" as const,
+      country: "Italia",
+      city,
+      province,
+      postalCode: "",
+      address: "",
+      latitude: null,
+      longitude: null,
+      provider: "seed" as const,
+    }));
 }
 
 function isItalianPhoton(feature: PhotonFeature) {
@@ -351,6 +407,7 @@ async function searchPostcode(postcode: string): Promise<LocationSuggestion[]> {
 }
 
 async function searchMunicipalities(query: string) {
+  const prefix = municipalityPrefixSuggestions(query);
   const [openMeteoResult, photonResult, arcGisResult] = await Promise.allSettled([
     searchOpenMeteo(query),
     searchPhoton(query, 10),
@@ -365,7 +422,7 @@ async function searchMunicipalities(query: string) {
     ? arcGisResult.value.filter((item) => item.kind === "city" || (!item.address && Boolean(item.city)))
     : [];
 
-  return dedupe([...openMeteo, ...photon, ...arcGis]).slice(0, 10);
+  return dedupe([...prefix, ...openMeteo, ...photon, ...arcGis]).slice(0, 10);
 }
 
 async function searchAddresses(
@@ -409,7 +466,8 @@ export async function GET(request: NextRequest) {
   const province = clean(request.nextUrl.searchParams.get("province") ?? "");
   const postcode = clean(request.nextUrl.searchParams.get("postcode") ?? "");
 
-  if (query.length < 2 || query.length > 160) {
+  const minimumLength = mode === "municipality" ? 1 : 2;
+  if (query.length < minimumLength || query.length > 160) {
     return NextResponse.json({ suggestions: [] });
   }
 
@@ -421,7 +479,10 @@ export async function GET(request: NextRequest) {
       suggestions = await searchPostcode(query);
       provider = "postcode";
     } else if (mode === "municipality") {
-      suggestions = await searchMunicipalities(query);
+      suggestions =
+        query.length === 1
+          ? municipalityPrefixSuggestions(query)
+          : await searchMunicipalities(query);
       provider = "municipality";
     } else if (mode === "address") {
       suggestions = await searchAddresses(query, city, province, postcode);

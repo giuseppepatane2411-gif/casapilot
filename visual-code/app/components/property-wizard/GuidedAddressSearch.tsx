@@ -107,7 +107,7 @@ export default function GuidedAddressSearch({
   const normalizedAddress = useMemo(() => normalize(addressQuery), [addressQuery]);
 
   useEffect(() => {
-    if (!cityOpen || normalizedCity.length < 2 || normalizedCity === value.city) return;
+    if (!cityOpen || normalizedCity.length < 1 || normalizedCity === value.city) return;
 
     const key = `municipality:${normalizedCity.toLowerCase()}`;
     const cached = cache.get(key);
@@ -346,7 +346,7 @@ export default function GuidedAddressSearch({
             ) : null}
           </div>
 
-          {cityOpen && normalizedCity.length >= 2 && normalizedCity !== value.city && (
+          {cityOpen && normalizedCity.length >= 1 && normalizedCity !== value.city && (
             <SuggestionPanel
               results={cityResults}
               loading={cityLoading}

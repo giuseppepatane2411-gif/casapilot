@@ -1,12 +1,15 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
   Building2,
+  ChartNoAxesCombined,
   Check,
   CircleAlert,
+  Clock3,
+  Database,
   House,
   KeyRound,
   LoaderCircle,
@@ -22,15 +25,24 @@ import type {
   PropertyValuationSuccess,
   ValuationOperation,
 } from "@/lib/guimmia/openai/types";
+import GuidedAddressSearch, {
+  type GuidedAddressValue,
+} from "@/components/property-wizard/GuidedAddressSearch";
+import PropertyLocationMap from "@/components/property-wizard/PropertyLocationMap";
 
 const initialForm: PropertyValuationInput = {
   operation: "SALE",
   property: {
     propertyType: "Appartamento",
+    country: "Italia",
     city: "",
     province: "",
     postalCode: "",
     address: "",
+    latitude: null,
+    longitude: null,
+    locationVerified: false,
+    locationLabel: "",
     surfaceSqm: 80,
     rooms: 3,
     bedrooms: 2,
@@ -59,9 +71,10 @@ const initialForm: PropertyValuationInput = {
 };
 
 const steps = [
-  { label: "Obiettivo e zona", short: "Immobile" },
-  { label: "Caratteristiche", short: "Dettagli" },
-  { label: "Recapiti e consenso", short: "Contatto" },
+  { label: "Il tuo obiettivo", short: "Obiettivo" },
+  { label: "Dove si trova", short: "Posizione" },
+  { label: "Com’è fatto", short: "Immobile" },
+  { label: "Ricevi la stima", short: "Risultato" },
 ];
 
 const conditionLabels: Record<PropertyCondition, string> = {
@@ -78,11 +91,6 @@ function money(value: number, period: "TOTAL" | "MONTH") {
     maximumFractionDigits: 0,
   }).format(value);
   return period === "MONTH" ? `${formatted}/mese` : formatted;
-}
-
-function estimatedCost(value: number) {
-  if (value < 0.01) return `< $0,01`;
-  return `$${value.toFixed(3).replace(".", ",")}`;
 }
 
 export default function PropertyValuationExperience() {
@@ -116,19 +124,24 @@ export default function PropertyValuationExperience() {
 
   const canContinue =
     step === 0
-      ? Boolean(
-          form.operation &&
-            form.property.propertyType &&
-            form.property.city.trim() &&
-            form.property.province.trim(),
-        )
+      ? Boolean(form.operation && form.property.propertyType)
       : step === 1
+      ? Boolean(
+          form.property.city.trim() &&
+            form.property.province.trim() &&
+            form.property.latitude !== null &&
+            form.property.longitude !== null &&
+            form.property.locationVerified,
+        )
+      : step === 2
         ? form.property.surfaceSqm >= 10 &&
           form.property.rooms >= 1 &&
+          form.property.bedrooms >= 0 &&
           form.property.bathrooms >= 0
         : Boolean(
             form.owner.name.trim() &&
               form.owner.email.includes("@") &&
+              form.owner.phone.trim() &&
               form.privacyAccepted &&
               form.automatedAnalysisAccepted,
           );
@@ -183,49 +196,34 @@ export default function PropertyValuationExperience() {
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[0.72fr_1.28fr] lg:gap-12">
-      <aside className="lg:sticky lg:top-28 lg:self-start">
+    <div className="mx-auto min-w-0 max-w-5xl">
+      <header className="mx-auto max-w-3xl text-center">
         <p className="inline-flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1.5 text-xs font-black uppercase tracking-[0.14em] text-blue-700">
-          <Sparkles size={15} aria-hidden="true" /> Prima sperimentazione Luna
+          <Sparkles size={15} aria-hidden="true" /> Stima immobiliare online Guimmia
         </p>
-        <h1 className="mt-5 text-4xl font-black leading-[1.02] tracking-[-0.045em] text-slate-950 sm:text-5xl">
-          Scopri una fascia indicativa per il tuo immobile.
+        <h1 className="mt-5 text-4xl font-black leading-[1.02] tracking-[-0.05em] text-slate-950 sm:text-5xl lg:text-6xl">
+          Quanto può valere il tuo immobile?
         </h1>
-        <p className="mt-5 text-base leading-8 text-slate-600 sm:text-lg">
-          Inserisci le caratteristiche principali. Guimmia consulta segnali pubblici
-          disponibili online e prepara un primo orientamento per vendita o affitto.
+        <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
+          Ricevi una fascia indicativa per vendere o affittare, costruita confrontando
+          zona, caratteristiche e dati pubblici di mercato.
         </p>
-
-        <div className="mt-8 space-y-4">
-          {[
-            [ShieldCheck, "I tuoi recapiti non vengono inviati a OpenAI."],
-            [Building2, "La fascia è indicativa e non sostituisce una perizia."],
-            [Check, "Il prezzo finale resta una decisione del proprietario."],
-          ].map(([Icon, text]) => {
-            const ItemIcon = Icon as typeof ShieldCheck;
-            return (
-              <div key={text as string} className="flex items-start gap-3 text-sm leading-6 text-slate-600">
-                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
-                  <ItemIcon size={17} aria-hidden="true" />
-                </span>
-                <span>{text as string}</span>
-              </div>
-            );
-          })}
+        <div className="mt-5 flex flex-wrap justify-center gap-2 text-xs font-extrabold text-slate-700 sm:text-sm">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2">
+            <Clock3 size={15} className="text-blue-600" aria-hidden="true" /> Circa 3 minuti
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2">
+            <Check size={15} className="text-emerald-600" aria-hidden="true" /> Gratuita e senza impegno
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2">
+            <ShieldCheck size={15} className="text-blue-600" aria-hidden="true" /> Prezzo deciso dal proprietario
+          </span>
         </div>
-
-        <div className="mt-8 rounded-3xl border border-blue-100 bg-blue-50 p-5 text-sm leading-6 text-blue-900">
-          <p className="font-black">Modalità di prova controllata</p>
-          <p className="mt-1 text-blue-800">
-            Luna analizza e propone. Nessun prezzo viene pubblicato e nessuna azione
-            commerciale viene eseguita automaticamente.
-          </p>
-        </div>
-      </aside>
+      </header>
 
       <form
         onSubmit={submit}
-        className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.08)]"
+        className="mx-auto mt-10 min-w-0 max-w-4xl overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.08)]"
       >
         <div className="border-b border-slate-100 px-5 py-5 sm:px-8">
           <div className="flex items-center justify-between gap-4">
@@ -240,7 +238,7 @@ export default function PropertyValuationExperience() {
               style={{ width: `${progress}%` }}
             />
           </div>
-          <div className="mt-3 grid grid-cols-3 text-center text-[11px] font-bold text-slate-400 sm:text-xs">
+          <div className="mt-3 grid grid-cols-4 text-center text-[10px] font-bold text-slate-400 sm:text-xs">
             {steps.map((item, index) => (
               <span key={item.short} className={index <= step ? "text-blue-600" : ""}>
                 {item.short}
@@ -254,9 +252,12 @@ export default function PropertyValuationExperience() {
             <FirstStep form={form} setForm={setForm} setProperty={setProperty} />
           ) : null}
           {step === 1 ? (
-            <SecondStep form={form} setProperty={setProperty} />
+            <LocationStep form={form} setForm={setForm} />
           ) : null}
           {step === 2 ? (
+            <SecondStep form={form} setProperty={setProperty} />
+          ) : null}
+          {step === 3 ? (
             <ThirdStep
               form={form}
               setForm={setForm}
@@ -266,7 +267,7 @@ export default function PropertyValuationExperience() {
           ) : null}
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-slate-100 bg-slate-50 px-5 py-5 sm:px-8">
+        <div className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <button
             type="button"
             onClick={() => {
@@ -274,7 +275,7 @@ export default function PropertyValuationExperience() {
               setStep((current) => Math.max(0, current - 1));
             }}
             disabled={step === 0 || pending}
-            className="inline-flex min-h-12 items-center gap-2 rounded-xl px-4 text-sm font-black text-slate-600 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-30"
+            className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-black text-slate-600 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-30 sm:w-auto"
           >
             <ArrowLeft size={17} aria-hidden="true" /> Indietro
           </button>
@@ -284,7 +285,7 @@ export default function PropertyValuationExperience() {
               type="button"
               onClick={() => setStep((current) => Math.min(steps.length - 1, current + 1))}
               disabled={!canContinue}
-              className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-slate-950 px-6 text-sm font-black text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-6 text-sm font-black text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
             >
               Continua <ArrowRight size={17} aria-hidden="true" />
             </button>
@@ -292,22 +293,39 @@ export default function PropertyValuationExperience() {
             <button
               type="submit"
               disabled={!canContinue || pending}
-              className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+              className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
             >
               {pending ? (
                 <>
                   <LoaderCircle className="animate-spin" size={18} aria-hidden="true" />
-                  Luna sta analizzando…
+                  Guimmia confronta i dati…
                 </>
               ) : (
                 <>
-                  <Sparkles size={18} aria-hidden="true" /> Genera la fascia indicativa
+                  <Sparkles size={18} aria-hidden="true" /> Calcola la mia stima
                 </>
               )}
             </button>
           )}
         </div>
       </form>
+
+      <section className="mx-auto mt-10 grid max-w-4xl gap-4 md:grid-cols-3" aria-label="Metodo di valutazione Guimmia">
+        {[
+          [Database, "Riferimento territoriale", "Quotazioni OMI disponibili per zona, tipologia e stato."],
+          [ChartNoAxesCombined, "Mercato attuale", "Annunci comparabili selezionati nella stessa microzona."],
+          [Building2, "Caratteristiche reali", "Superficie, condizioni, piano, dotazioni e altri correttivi."],
+        ].map(([Icon, title, description]) => {
+          const MethodIcon = Icon as typeof Database;
+          return (
+            <article key={title as string} className="rounded-2xl border border-slate-200 bg-white p-5">
+              <MethodIcon size={21} className="text-blue-600" aria-hidden="true" />
+              <h2 className="mt-3 font-black text-slate-950">{title as string}</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-600">{description as string}</p>
+            </article>
+          );
+        })}
+      </section>
     </div>
   );
 }
@@ -327,10 +345,10 @@ function FirstStep({
   return (
     <div>
       <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950">
-        Cosa vuoi fare con l’immobile?
+        Per cosa vuoi conoscere il valore?
       </h2>
       <p className="mt-2 text-sm leading-6 text-slate-600">
-        Vendita e affitto richiedono confronti e unità di misura differenti.
+        Guimmia preparerà una fascia di vendita oppure un canone mensile indicativo.
       </p>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -366,9 +384,9 @@ function FirstStep({
         ))}
       </div>
 
-      <div className="mt-8 grid gap-5 sm:grid-cols-2">
+      <div className="mt-8">
         <SelectField
-          label="Tipologia"
+          label="Che tipo di immobile è?"
           value={form.property.propertyType}
           onChange={(value) => setProperty("propertyType", value)}
           options={[
@@ -382,37 +400,117 @@ function FirstStep({
             "Terreno",
           ]}
         />
-        <TextField
-          label="Città o comune"
-          value={form.property.city}
-          onChange={(value) => setProperty("city", value)}
-          placeholder="Es. Catania"
-          autoComplete="address-level2"
-          required
+      </div>
+
+      <div className="mt-6 rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+        In questo passaggio non stai scegliendo il prezzo: stai indicando a Guimmia
+        quale mercato deve analizzare.
+      </div>
+    </div>
+  );
+}
+
+function LocationStep({
+  form,
+  setForm,
+}: {
+  form: PropertyValuationInput;
+  setForm: React.Dispatch<React.SetStateAction<PropertyValuationInput>>;
+}) {
+  const addressValue: GuidedAddressValue = {
+    country: form.property.country || "Italia",
+    city: form.property.city,
+    province: form.property.province,
+    postalCode: form.property.postalCode || "",
+    address: form.property.address || "",
+    latitude: form.property.latitude ?? null,
+    longitude: form.property.longitude ?? null,
+  };
+
+  function applyAddress(selection: GuidedAddressValue) {
+    setForm((current) => ({
+      ...current,
+      property: {
+        ...current.property,
+        country: selection.country || "Italia",
+        city: selection.city,
+        province: selection.province,
+        postalCode: selection.postalCode,
+        address: selection.address,
+        latitude: selection.latitude,
+        longitude: selection.longitude,
+        locationVerified: false,
+        locationLabel: "",
+      },
+    }));
+  }
+
+  return (
+    <div>
+      <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950">
+        Dove si trova l’immobile?
+      </h2>
+      <p className="mt-2 text-sm leading-6 text-slate-600">
+        La posizione esatta ci permette di distinguere Comune, quartiere e microzona.
+      </p>
+
+      <div className="mt-6 space-y-5">
+        <GuidedAddressSearch value={addressValue} onChange={applyAddress} />
+
+        <PropertyLocationMap
+          latitude={form.property.latitude ?? null}
+          longitude={form.property.longitude ?? null}
+          verified={form.property.locationVerified === true}
+          locationLabel={form.property.locationLabel || ""}
+          compact
+          searchQuery={[
+            form.property.address,
+            form.property.postalCode,
+            form.property.city,
+            form.property.province,
+            form.property.country || "Italia",
+          ]
+            .filter(Boolean)
+            .join(", ")}
+          onChange={({ latitude, longitude, verified, locationLabel }) => {
+            setForm((current) => ({
+              ...current,
+              property: {
+                ...current.property,
+                latitude,
+                longitude,
+                locationVerified: verified,
+                locationLabel,
+              },
+            }));
+          }}
         />
-        <TextField
-          label="Provincia"
-          value={form.property.province}
-          onChange={(value) => setProperty("province", value)}
-          placeholder="Es. CT"
-          autoComplete="address-level1"
-          required
-        />
-        <TextField
-          label="CAP"
-          value={form.property.postalCode ?? ""}
-          onChange={(value) => setProperty("postalCode", value)}
-          placeholder="Es. 95100"
-          autoComplete="postal-code"
-        />
-        <TextField
-          label="Via o zona"
-          value={form.property.address ?? ""}
-          onChange={(value) => setProperty("address", value)}
-          placeholder="Puoi indicare anche solo la zona"
-          autoComplete="street-address"
-          wide
-        />
+
+        <div
+          className={`flex items-start gap-3 rounded-2xl border p-4 text-sm leading-6 ${
+            form.property.locationVerified
+              ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+              : "border-amber-200 bg-amber-50 text-amber-900"
+          }`}
+        >
+          {form.property.locationVerified ? (
+            <ShieldCheck className="mt-0.5 shrink-0" size={19} aria-hidden="true" />
+          ) : (
+            <CircleAlert className="mt-0.5 shrink-0" size={19} aria-hidden="true" />
+          )}
+          <div>
+            <p className="font-black">
+              {form.property.locationVerified
+                ? "Posizione dell’immobile confermata"
+                : "Conferma la posizione per continuare"}
+            </p>
+            <p className="mt-1">
+              {form.property.locationVerified
+                ? "Guimmia userà questo punto per cercare confronti realmente vicini."
+                : "Scegli Comune e via, trova il punto sulla mappa e premi “Conferma questo punto”."}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -437,11 +535,11 @@ function SecondStep({
         Più i dati sono precisi, più Guimmia può restringere la fascia indicativa.
       </p>
 
-      <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        <NumberField label="Superficie m²" value={form.property.surfaceSqm} min={10} onChange={(value) => setProperty("surfaceSqm", Number(value))} />
-        <NumberField label="Locali" value={form.property.rooms} min={1} onChange={(value) => setProperty("rooms", Number(value))} />
-        <NumberField label="Camere" value={form.property.bedrooms} min={0} onChange={(value) => setProperty("bedrooms", Number(value))} />
-        <NumberField label="Bagni" value={form.property.bathrooms} min={0} onChange={(value) => setProperty("bathrooms", Number(value))} />
+      <div className="mt-7 grid min-w-0 gap-5 sm:grid-cols-2 2xl:grid-cols-3">
+        <NumberField label="Superficie m²" value={form.property.surfaceSqm} min={10} onChange={(value) => setProperty("surfaceSqm", value === "" ? 0 : value)} />
+        <NumberField label="Locali" value={form.property.rooms} min={1} onChange={(value) => setProperty("rooms", value === "" ? 0 : value)} />
+        <NumberField label="Camere" value={form.property.bedrooms} min={0} onChange={(value) => setProperty("bedrooms", value === "" ? -1 : value)} />
+        <NumberField label="Bagni" value={form.property.bathrooms} min={0} onChange={(value) => setProperty("bathrooms", value === "" ? -1 : value)} />
         <NumberField
           label="Piano"
           value={form.property.floor ?? ""}
@@ -568,14 +666,14 @@ function ThirdStep({
         A chi colleghiamo questa richiesta?
       </h2>
       <p className="mt-2 text-sm leading-6 text-slate-600">
-        Il risultato apparirà subito. I recapiti permettono a Guimmia di conservare la
-        richiesta, ma non vengono trasmessi a Luna.
+        La stima apparirà subito. I tuoi recapiti permettono a Guimmia di salvare la
+        richiesta e ricontattarti solo secondo il consenso espresso.
       </p>
 
       <div className="mt-7 grid gap-5 sm:grid-cols-2">
         <TextField label="Nome e cognome" value={form.owner.name} onChange={(value) => setOwner("name", value)} autoComplete="name" required />
         <TextField label="Email" type="email" value={form.owner.email} onChange={(value) => setOwner("email", value)} autoComplete="email" required />
-        <TextField label="Telefono" type="tel" value={form.owner.phone ?? ""} onChange={(value) => setOwner("phone", value)} autoComplete="tel" wide />
+        <TextField label="Telefono" type="tel" value={form.owner.phone} onChange={(value) => setOwner("phone", value)} autoComplete="tel" required wide />
       </div>
 
       <div className="sr-only" aria-hidden="true">
@@ -601,7 +699,7 @@ function ThirdStep({
           checked={form.automatedAnalysisAccepted}
           onChange={(value) => setForm((current) => ({ ...current, automatedAnalysisAccepted: value }))}
         >
-          Acconsento all’analisi automatizzata dei soli dati dell’immobile. So che il risultato è indicativo e richiede controllo umano. *
+          Acconsento all’analisi automatizzata dei soli dati dell’immobile. So che il risultato è indicativo e non stabilisce il prezzo finale. *
         </ConsentField>
       </div>
 
@@ -648,7 +746,7 @@ function ValuationResult({
               <Check size={15} aria-hidden="true" /> Analisi preliminare completata
             </p>
             <h1 className="mt-5 text-3xl font-black tracking-[-0.04em] sm:text-5xl">
-              La fascia indicativa di Guimmia
+              La stima indicativa del tuo immobile
             </h1>
           </div>
           <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm backdrop-blur">
@@ -660,15 +758,17 @@ function ValuationResult({
         </div>
 
         <div className="mt-9 grid gap-3 sm:grid-cols-3">
-          <RangeCard label="Fascia minima" value={money(response.result.range.low, response.result.period)} />
-          <RangeCard label="Riferimento centrale" value={money(response.result.range.suggested, response.result.period)} featured />
-          <RangeCard label="Fascia massima" value={money(response.result.range.high, response.result.period)} />
+          <RangeCard label="Limite prudente" value={money(response.result.range.low, response.result.period)} />
+          <RangeCard label="Valore indicativo" value={money(response.result.range.suggested, response.result.period)} featured />
+          <RangeCard label="Limite superiore" value={money(response.result.range.high, response.result.period)} />
         </div>
 
         <p className="mt-7 max-w-4xl text-base leading-8 text-slate-200">
           {response.result.summary}
         </p>
       </div>
+
+      <ValuationMethodEvidence response={response} />
 
       <MarketEvidence response={response} />
 
@@ -687,15 +787,11 @@ function ValuationResult({
       ) : null}
 
       <div className="border-t border-slate-200 bg-slate-50 p-6 sm:p-9 lg:px-12">
-        <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+        <div>
           <div>
             <h2 className="text-sm font-black uppercase tracking-[0.12em] text-slate-500">Metodo utilizzato</h2>
             <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600">{response.result.methodology}</p>
             <p className="mt-3 max-w-4xl text-sm font-bold leading-6 text-slate-800">{response.result.disclaimer}</p>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
-            <p><strong className="text-slate-800">Costo IA stimato:</strong> {estimatedCost(response.usage.estimatedCostUsd)}</p>
-            <p className="mt-1">{response.usage.webSearchCalls} ricerche · {response.quality.sourceCount} fonti · {response.usage.inputTokens + response.usage.outputTokens} token</p>
           </div>
         </div>
 
@@ -735,6 +831,108 @@ function ValuationResult({
         </div>
       </div>
     </div>
+  );
+}
+
+function ValuationMethodEvidence({
+  response,
+}: {
+  response: PropertyValuationSuccess;
+}) {
+  const benchmark = response.result.officialBenchmark;
+  const evidence = response.result.marketEvidence;
+  const unit =
+    benchmark.unit === "EUR_SQM_MONTH" ? "€/m² al mese" : "€/m²";
+  const observedUnit =
+    evidence.observedUnit === "EUR_SQM_MONTH" ? "€/m² al mese" : "€/m²";
+
+  return (
+    <section className="border-b border-slate-200 bg-white p-6 sm:p-9 lg:p-12">
+      <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">
+        Come nasce la stima
+      </p>
+      <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-slate-950">
+        Tre riferimenti, tenuti distinti
+      </h2>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+        Guimmia non tratta una singola cifra come verità: confronta il riferimento
+        territoriale, il mercato visibile e le caratteristiche dichiarate.
+      </p>
+
+      <div className="mt-7 grid gap-4 lg:grid-cols-3">
+        <article className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <div className="flex items-start justify-between gap-3">
+            <Database size={21} className="text-blue-600" aria-hidden="true" />
+            <span
+              className={`rounded-full px-2.5 py-1 text-[11px] font-black ${
+                benchmark.available
+                  ? "bg-emerald-100 text-emerald-800"
+                  : "bg-amber-100 text-amber-800"
+              }`}
+            >
+              {benchmark.available ? "Disponibile" : "Non verificata"}
+            </span>
+          </div>
+          <h3 className="mt-4 font-black text-slate-950">Fascia OMI ufficiale</h3>
+          {benchmark.available ? (
+            <>
+              <p className="mt-2 text-xl font-black text-blue-700">
+                {benchmark.low.toLocaleString("it-IT")}–
+                {benchmark.high.toLocaleString("it-IT")} {unit}
+              </p>
+              <p className="mt-2 text-xs leading-5 text-slate-500">
+                {benchmark.zone} · {benchmark.referencePeriod}
+              </p>
+            </>
+          ) : (
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Nessun valore puntuale è stato attribuito senza una fonte ufficiale
+              verificabile.
+            </p>
+          )}
+          <p className="mt-3 text-xs leading-5 text-slate-500">{benchmark.note}</p>
+        </article>
+
+        <article className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <ChartNoAxesCombined size={21} className="text-blue-600" aria-hidden="true" />
+          <h3 className="mt-4 font-black text-slate-950">Mercato online osservato</h3>
+          {evidence.observedMedian > 0 ? (
+            <p className="mt-2 text-xl font-black text-blue-700">
+              {evidence.observedMedian.toLocaleString("it-IT")} {observedUnit}
+            </p>
+          ) : (
+            <p className="mt-2 text-sm font-bold text-amber-700">Campione insufficiente</p>
+          )}
+          <p className="mt-3 text-xs leading-5 text-slate-500">
+            {evidence.comparableSignals.length} comparabili mostrati. Sono prezzi
+            richiesti negli annunci, non prezzi finali di compravendita.
+          </p>
+        </article>
+
+        <article className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <Building2 size={21} className="text-blue-600" aria-hidden="true" />
+          <h3 className="mt-4 font-black text-slate-950">Correttivi dell’immobile</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            {response.result.valuationMethod.surfaceBasis}
+          </p>
+          {response.result.valuationMethod.appliedFactors.length ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {response.result.valuationMethod.appliedFactors.slice(0, 5).map((factor) => (
+                <span
+                  key={factor}
+                  className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-600"
+                >
+                  {factor}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          <p className="mt-3 text-xs leading-5 text-slate-500">
+            {response.result.valuationMethod.note}
+          </p>
+        </article>
+      </div>
+    </section>
   );
 }
 
@@ -867,7 +1065,7 @@ function TextField({
   wide?: boolean;
 }) {
   return (
-    <label className={`grid gap-2 text-sm font-black text-slate-800 ${wide ? "sm:col-span-2" : ""}`}>
+    <label className={`grid min-w-0 gap-2 text-sm font-black text-slate-800 ${wide ? "sm:col-span-2" : ""}`}>
       {label}{required ? " *" : ""}
       <input
         type={type}
@@ -876,17 +1074,22 @@ function TextField({
         placeholder={placeholder}
         autoComplete={autoComplete}
         required={required}
-        className="min-h-12 rounded-xl border border-slate-200 px-4 font-normal text-slate-950 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-50"
+        className="min-h-12 w-full min-w-0 rounded-xl border border-slate-200 px-4 font-normal text-slate-950 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-50"
       />
     </label>
   );
+}
+
+function numberDraft(value: number | string, min: number) {
+  if (value === "") return "";
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric >= min ? String(value) : "";
 }
 
 function NumberField({
   label,
   value,
   min,
-  allowEmpty = false,
   onChange,
 }: {
   label: string;
@@ -895,18 +1098,36 @@ function NumberField({
   allowEmpty?: boolean;
   onChange: (value: number | "") => void;
 }) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [draft, setDraft] = useState(() => numberDraft(value, min));
+
+  useEffect(() => {
+    if (document.activeElement !== inputRef.current) {
+      setDraft(numberDraft(value, min));
+    }
+  }, [min, value]);
+
   return (
-    <label className="grid gap-2 text-sm font-black text-slate-800">
+    <label className="grid min-w-0 gap-2 text-sm font-black text-slate-800">
       {label}
       <input
+        ref={inputRef}
         type="number"
-        value={value}
+        value={draft}
         min={min}
         onChange={(event) => {
-          if (allowEmpty && event.target.value === "") onChange("");
-          else onChange(Number(event.target.value));
+          const nextValue = event.target.value;
+          setDraft(nextValue);
+          if (nextValue === "") {
+            onChange("");
+            return;
+          }
+          const parsed = Number(nextValue);
+          if (Number.isFinite(parsed)) onChange(parsed);
         }}
-        className="min-h-12 rounded-xl border border-slate-200 px-4 font-normal text-slate-950 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-50"
+        onFocus={(event) => event.currentTarget.select()}
+        aria-label={label}
+        className="min-h-12 w-full min-w-0 rounded-xl border border-slate-200 px-4 font-normal text-slate-950 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-50"
       />
     </label>
   );
@@ -924,12 +1145,12 @@ function SelectField({
   options: Array<string | { value: string; label: string }>;
 }) {
   return (
-    <label className="grid gap-2 text-sm font-black text-slate-800">
+    <label className="grid min-w-0 gap-2 text-sm font-black text-slate-800">
       {label}
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="min-h-12 rounded-xl border border-slate-200 bg-white px-4 font-normal text-slate-950 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-50"
+        className="min-h-12 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-4 font-normal text-slate-950 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-50"
       >
         {options.map((option) => {
           const item = typeof option === "string" ? { value: option, label: option } : option;

@@ -20,7 +20,7 @@ export default function PrivacyOverview() {
           className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-950"
         >
           <ArrowLeft size={17} />
-          Torna a CasaPilot
+          Torna a Guimmia
         </Link>
 
         <header className="mt-7 rounded-[32px] bg-slate-950 p-6 text-white shadow-xl shadow-slate-950/10 sm:p-10">
@@ -29,16 +29,16 @@ export default function PrivacyOverview() {
           </span>
           <p className="mt-6 text-sm font-semibold text-blue-300">Privacy e sicurezza</p>
           <h1 className="mt-2 text-3xl font-bold tracking-[-0.05em] sm:text-5xl">
-            Come CasaPilot gestisce le tue informazioni.
+            Come Guimmia gestisce le tue informazioni.
           </h1>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300 sm:text-base">
-            CasaPilot separa i dati dell’account dalle informazioni della pratica.
+            Guimmia separa i dati dell’account dalle informazioni della pratica.
             Questa pagina descrive in modo chiaro cosa viene salvato, dove e con quale finalità.
           </p>
         </header>
 
         <div className="mt-7 space-y-5">
-          <PrivacySection icon={Cloud} title="Account CasaPilot">
+          <PrivacySection icon={Cloud} title="Account Guimmia">
             Quando la registrazione è attiva, email, dati anagrafici e tipo di profilo
             vengono gestiti dall’infrastruttura sicura dell’account per autenticazione e accesso. I professionisti
             possono inserire dati di attività e abilitazione; lo stato di verifica viene gestito
@@ -53,19 +53,19 @@ export default function PrivacyOverview() {
 
           <PrivacySection icon={MapPin} title="Ricerca indirizzi e mappa">
             Quando utilizzi i suggerimenti automatici, il testo necessario viene inviato ai servizi
-            geografici usati da CasaPilot per proporre Comuni, vie, CAP e coordinate. La mappa usa
+            geografici usati da Guimmia per proporre Comuni, vie, CAP e coordinate. La mappa usa
             tasselli OpenStreetMap. Puoi sempre compilare l’indirizzo manualmente e scegliere il punto
             direttamente sulla mappa.
           </PrivacySection>
 
-          <PrivacySection icon={Database} title="Pilot e organizzazione della pratica">
-            Pilot utilizza i dati della pratica per ordinare priorità, documenti e prossimi passi.
+          <PrivacySection icon={Database} title="Guimmia e organizzazione della pratica">
+            Guimmia utilizza i dati della pratica per ordinare priorità, documenti e prossimi passi.
             Le indicazioni sono informative e organizzative: non sostituiscono verifiche tecniche,
             fiscali o legali affidate a professionisti abilitati.
           </PrivacySection>
 
           <PrivacySection icon={Download} title="Backup e trasferimento">
-            Dalle impostazioni puoi esportare un file JSON con pratiche, checklist e memoria di Pilot.
+            Dalle impostazioni puoi esportare un file JSON con pratiche, checklist e memoria di Guimmia.
             PDF e immagini dell’Archivio locale non sono inclusi: conserva sempre gli originali in un
             luogo sicuro. Anche il backup JSON può contenere dati sensibili e non deve essere condiviso
             pubblicamente.
@@ -109,7 +109,7 @@ export default function PrivacyOverview() {
         </section>
 
         <p className="mt-8 text-center text-xs text-slate-400">
-          Informativa tecnica di CasaPilot · ultimo aggiornamento agosto 2026
+          Informativa tecnica di Guimmia · ultimo aggiornamento agosto 2026
         </p>
       </div>
     </main>
@@ -139,3 +139,4 @@ function PrivacySection({
     </section>
   );
 }
+

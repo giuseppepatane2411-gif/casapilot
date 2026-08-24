@@ -210,7 +210,7 @@ export const WIZARD_STEPS = [
     id: 1,
     label: "Obiettivo",
     title: "Cosa vuoi fare con l’immobile?",
-    description: "Scegli il tuo obiettivo: CasaPilot adatterà automaticamente i passi successivi.",
+    description: "Scegli il tuo obiettivo: Guimmia adatterà automaticamente i passi successivi.",
   },
   {
     id: 2,

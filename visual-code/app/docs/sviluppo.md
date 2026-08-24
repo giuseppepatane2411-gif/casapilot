@@ -6,7 +6,7 @@
 - Installato Tailwind
 - Installato shadcn/ui
 - Creata Home iniziale
-- Scelta identità CasaPilot
+- Scelta identità Guimmia
 - Logo con bussola
-- Definito CasaPilot Score
+- Definito Guimmia Score
 - Definita la vision di Pilot

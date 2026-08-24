@@ -140,7 +140,7 @@ export default function TranslatedMessage({
       {message.translationStatus === "provider_required" &&
       message.originalLanguage !== viewerLanguage ? (
         <p className="mt-2 text-xs leading-5 opacity-75">
-          Traduzione completa non disponibile nel test locale. CasaPilot mostra
+          Traduzione completa non disponibile nel test locale. Guimmia mostra
           l'originale senza inventare il contenuto.
         </p>
       ) : null}
@@ -168,7 +168,7 @@ export default function TranslatedMessage({
 
       {message.contactDataProtected ? (
         <p className="mt-2 text-xs opacity-75">
-          CasaPilot ha protetto un recapito prima dello sblocco.
+          Guimmia ha protetto un recapito prima dello sblocco.
         </p>
       ) : null}
     </div>

@@ -92,7 +92,7 @@ export default function OwnerRegistrationPage() {
             Confermo di avere titolo o delega per gestire i dati dell’immobile e accetto le condizioni d’uso della versione dimostrativa.
           </label>
 
-          <button type="submit" disabled={!accepted || !email || !name || (ownerType === "person" ? !surname : !legalName || !vatNumber)} className="mt-7 flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300">Continua con Pilot</button>
+          <button type="submit" disabled={!accepted || !email || !name || (ownerType === "person" ? !surname : !legalName || !vatNumber)} className="mt-7 flex min-h-12 w-full items-center justify-center rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300">Continua con Guimmia</button>
         </form>
       </div>
     </main>

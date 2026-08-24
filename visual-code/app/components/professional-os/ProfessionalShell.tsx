@@ -32,7 +32,7 @@ export default function ProfessionalShell({ children }: { children: ReactNode })
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white">
               <Icon name="pilot" className="h-5 w-5" />
             </span>
-            CasaPilot Pro
+            Guimmia Pro
           </Link>
           <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
             Modalità professionista
@@ -62,7 +62,7 @@ export default function ProfessionalShell({ children }: { children: ReactNode })
               <Icon name="pilot" className="h-6 w-6" />
             </span>
             <span>
-              <span className="block text-lg font-semibold tracking-tight">CasaPilot Pro</span>
+              <span className="block text-lg font-semibold tracking-tight">Guimmia Pro</span>
               <span className="block text-xs text-slate-500">Sistema professionisti</span>
             </span>
           </Link>

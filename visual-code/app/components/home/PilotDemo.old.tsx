@@ -12,7 +12,7 @@ export default function PilotDemo() {
 
           <div>
             <h3 className="font-semibold text-slate-900">
-              Pilot
+              Guimmia
             </h3>
 
             <p className="text-sm text-slate-500">

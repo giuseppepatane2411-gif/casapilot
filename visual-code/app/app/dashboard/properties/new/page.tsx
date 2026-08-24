@@ -5,7 +5,7 @@ import PropertyWizard from "@/components/property-wizard/PropertyWizard";
 
 export const metadata: Metadata = {
   title: "Nuovo percorso",
-  description: "Crea una nuova pratica immobiliare con CasaPilot.",
+  description: "Crea una nuova pratica immobiliare con Guimmia.",
 };
 
 export default function NewPropertyPage() {

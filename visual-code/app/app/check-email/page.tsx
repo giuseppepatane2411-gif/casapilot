@@ -5,7 +5,7 @@ import AuthShell from "@/components/auth/AuthShell";
 
 export const metadata: Metadata = {
   title: "Conferma email",
-  description: "Conferma l’indirizzo email associato al tuo account CasaPilot.",
+  description: "Conferma l’indirizzo email associato al tuo account Guimmia.",
 };
 
 export default function CheckEmailPage() {

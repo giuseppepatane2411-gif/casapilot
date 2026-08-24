@@ -30,9 +30,9 @@ export default function Hub() {
     <Page>
       <ProfessionalNav />
       <Heading
-        eyebrow="Rete CasaPilot"
+        eyebrow="Rete Guimmia"
         title="Che cosa devi risolvere?"
-        description="Scegli il risultato che vuoi ottenere. Pilot trasforma il bisogno in una richiesta chiara, la invia a un massimo di tre professionisti e protegge il primo contatto."
+        description="Scegli il risultato che vuoi ottenere. Guimmia trasforma il bisogno in una richiesta chiara, la invia a un massimo di tre professionisti e protegge il primo contatto."
       />
 
       <div className="mb-7 grid gap-5 lg:grid-cols-2">
@@ -50,7 +50,7 @@ export default function Hub() {
             Gestisci l'immobile anche se sei lontano o parli poco italiano.
           </p>
           <p className="mt-2 text-sm leading-6 text-violet-800">
-            CasaPilot può tradurre la comunicazione, segnalare i servizi
+            Guimmia può tradurre la comunicazione, segnalare i servizi
             gestibili a distanza e preferire professionisti adatti alla tua
             situazione, senza creare un percorso separato.
           </p>
@@ -112,7 +112,7 @@ export default function Hub() {
         </h2>
         <p className="mt-2 text-sm text-blue-800">
           Descrivi il problema con parole tue, anche nella lingua che preferisci.
-          Pilot suggerirà il servizio e potrai correggerlo prima dell'invio.
+          Guimmia suggerirà il servizio e potrai correggerlo prima dell'invio.
         </p>
         <Link
           href="/dashboard/professionals/request"
@@ -124,3 +124,4 @@ export default function Hub() {
     </Page>
   );
 }
+

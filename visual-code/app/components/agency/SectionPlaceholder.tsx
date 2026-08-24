@@ -1,0 +1,3 @@
+export default function SectionPlaceholder({ eyebrow,title,description,items }:{ eyebrow:string; title:string; description:string; items:string[] }){
+  return <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm"><p className="text-xs font-black uppercase tracking-[.14em] text-blue-600">{eyebrow}</p><h1 className="mt-2 text-3xl font-black text-slate-950">{title}</h1><p className="mt-3 max-w-3xl leading-7 text-slate-600">{description}</p><div className="mt-6 grid gap-3 md:grid-cols-2">{items.map(item=><div key={item} className="rounded-2xl bg-slate-50 p-4 font-bold text-slate-700">{item}</div>)}</div></section>;
+}

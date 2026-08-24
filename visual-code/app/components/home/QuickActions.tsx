@@ -17,7 +17,7 @@ const actions = [
     icon: KeyRound,
   },
   {
-    title: "Lavorare con CasaPilot",
+    title: "Lavorare con Guimmia",
     description: "Crea il profilo professionale, indica le zone servite e avvia il percorso di verifica.",
     href: "/register?type=professional",
     icon: Briefcase,

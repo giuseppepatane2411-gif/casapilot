@@ -77,7 +77,7 @@ export default function StepSummary({ data, onEditStep }: StepSummaryProps) {
       <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
         <p className="font-bold text-slate-950">Cosa succede dopo?</p>
         <p className="mt-1 text-sm leading-6 text-slate-600">
-          CasaPilot ti porterà direttamente alla prima cosa utile da fare. Non dovrai scegliere da solo da dove iniziare.
+          Guimmia ti porterà direttamente alla prima cosa utile da fare. Non dovrai scegliere da solo da dove iniziare.
         </p>
       </div>
     </div>

@@ -66,7 +66,7 @@ export default function CompareQuotes({ leadId }: { leadId: string }) {
         <Heading
           eyebrow="Confronto"
           title={findService(lead.serviceId)?.name ?? "Preventivi"}
-          description="CasaPilot confronta prezzo, contenuto, verifiche e fattibilità operativa. La lingua o la distanza non sostituiscono mai la qualità del servizio."
+          description="Guimmia confronta prezzo, contenuto, verifiche e fattibilità operativa. La lingua o la distanza non sostituiscono mai la qualità del servizio."
         />
       </div>
 
@@ -111,7 +111,7 @@ export default function CompareQuotes({ leadId }: { leadId: string }) {
                 {commonLanguage ? (
                   <Badge tone="success">Lingua in comune</Badge>
                 ) : remote && lead.remoteContext.translationEnabled ? (
-                  <Badge tone="blue">Traduzione Pilot</Badge>
+                  <Badge tone="blue">Traduzione Guimmia</Badge>
                 ) : null}
                 <Badge
                   tone={
@@ -238,7 +238,7 @@ export default function CompareQuotes({ leadId }: { leadId: string }) {
           <div className="rounded-3xl border border-blue-200 bg-blue-50 p-6">
             <h2 className="font-semibold text-blue-950">Incarico creato</h2>
             <p className="mt-2 text-sm text-blue-800">
-              CasaPilot continuerà a monitorare passaggi, responsabilità,
+              Guimmia continuerà a monitorare passaggi, responsabilità,
               presenza e documenti fino alla conclusione del lavoro.
             </p>
             <Link
@@ -253,3 +253,4 @@ export default function CompareQuotes({ leadId }: { leadId: string }) {
     </Page>
   );
 }
+

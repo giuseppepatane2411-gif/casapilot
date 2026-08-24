@@ -1,4 +1,4 @@
-# CasaPilot Score
+# Guimmia Score
 
 ## Cos'è
 

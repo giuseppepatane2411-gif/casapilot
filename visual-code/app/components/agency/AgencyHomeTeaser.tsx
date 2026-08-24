@@ -1,0 +1,5 @@
+"use client";
+import Link from "next/link";
+export default function AgencyHomeTeaser(){
+  return <section className="bg-slate-50 py-14"><div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"><div className="rounded-[34px] bg-slate-950 p-7 text-white sm:p-10"><p className="text-sm font-black uppercase tracking-[.16em] text-blue-300">Agenzia immobiliare online</p><div className="mt-4 grid gap-7 lg:grid-cols-[1fr_auto] lg:items-end"><div><h2 className="max-w-4xl text-3xl font-black tracking-[-.04em] sm:text-5xl">Immobili, documenti, visite e contratti. Un solo percorso.</h2><p className="mt-4 max-w-3xl text-lg leading-8 text-slate-300">Guimmia ti accompagna nella vendita o nell'affitto ed è disponibile 24/7.</p></div><div className="flex flex-wrap gap-3"><Link href="/immobili" className="rounded-2xl bg-blue-600 px-5 py-3 font-black">Vedi gli immobili</Link><Link href="/vendere" className="rounded-2xl border border-white/20 px-5 py-3 font-black">Vendi con Guimmia</Link></div></div></div></div></section>;
+}

@@ -10,13 +10,13 @@ import {
 const steps = [
   {
     icon: Bot,
-    title: "Parla con Pilot",
+    title: "Parla con Guimmia",
     description:
-      "Descrivi quello che vuoi fare. Pilot comprende la tua situazione e crea il percorso più adatto.",
+      "Descrivi quello che vuoi fare. Guimmia comprende la tua situazione e crea il percorso più adatto.",
   },
   {
     icon: FileCheck2,
-    title: "Pilot prepara tutto",
+    title: "Guimmia prepara tutto",
     description:
       "Documenti, controlli, scadenze e fascicolo dell'immobile vengono organizzati automaticamente.",
   },
@@ -24,7 +24,7 @@ const steps = [
     icon: Users,
     title: "Coinvolgi i professionisti",
     description:
-      "Quando la pratica richiede supporto, CasaPilot ti collega alle categorie professionali pertinenti e distingue chiaramente i profili verificati.",
+      "Quando la pratica richiede supporto, Guimmia ti collega alle categorie professionali pertinenti e distingue chiaramente i profili verificati.",
   },
 ];
 
@@ -43,7 +43,7 @@ export default function HowItWorks() {
           </span>
 
           <h2 className="mt-6 text-5xl font-semibold tracking-[-0.04em] text-slate-950">
-            Pilot lavora al posto tuo.
+            Guimmia lavora al posto tuo.
           </h2>
 
           <p className="mt-8 text-xl leading-9 text-slate-500">

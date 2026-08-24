@@ -29,7 +29,7 @@ export default function PilotCard({
         <div className="flex items-center justify-between">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold">
             <Sparkles size={14} />
-            Pilot
+            Guimmia
           </span>
           <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10">
             <Bot size={20} />
@@ -50,7 +50,7 @@ export default function PilotCard({
           href={href}
           className="group mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-slate-950 transition-all hover:-translate-y-0.5 hover:bg-blue-50"
         >
-          Apri Pilot
+          Apri Guimmia
           <ArrowRight
             size={16}
             className="transition-transform group-hover:translate-x-0.5"
@@ -60,3 +60,4 @@ export default function PilotCard({
     </section>
   );
 }
+

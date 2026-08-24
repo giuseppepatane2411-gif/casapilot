@@ -1,0 +1,2 @@
+export interface SupportMessage { category:"ACCESS"|"SAFETY"|"PAYMENT"|"HOUSE_RULES"|"GENERAL"; text:string; generatedBy:"HUMAN"|"AI"|"TEMPLATE"; humanApproved:boolean; }
+export function canSendSupportMessage(message:SupportMessage){if(["SAFETY","PAYMENT"].includes(message.category)&&message.generatedBy==="AI"&&!message.humanApproved)return{allowed:false,reasonCodes:["HUMAN_APPROVAL_REQUIRED"]};return{allowed:true,reasonCodes:[] as string[]}}

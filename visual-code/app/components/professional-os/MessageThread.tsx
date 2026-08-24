@@ -82,7 +82,7 @@ export default function MessageThread({
         value={text}
         onChange={(event) => setText(event.target.value)}
         rows={3}
-        placeholder="Scrivi in italiano. Pilot conserverà l'originale e applicherà la regola corretta in base al contenuto."
+        placeholder="Scrivi in italiano. Guimmia conserverà l'originale e applicherà la regola corretta in base al contenuto."
         className="mt-4 w-full rounded-xl border border-slate-200 p-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
       />
       <div className="mt-3 flex justify-end">
@@ -92,9 +92,10 @@ export default function MessageThread({
       </div>
       <p className="mt-3 text-xs leading-5 text-slate-500">
         Una traduzione non sostituisce il testo originale. Per contenuti legali,
-        economici o documenti ufficiali CasaPilot richiede un controllo più
+        economici o documenti ufficiali Guimmia richiede un controllo più
         prudente.
       </p>
     </section>
   );
 }
+

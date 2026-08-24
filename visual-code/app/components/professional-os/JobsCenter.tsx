@@ -64,7 +64,7 @@ export default function JobsCenter() {
       <Heading
         eyebrow="Dopo lo sblocco"
         title="Incarichi"
-        description="CasaPilot continua a seguire il lavoro dopo l’accettazione per misurare il valore reale della lead e abilitare recensioni verificate."
+        description="Guimmia continua a seguire il lavoro dopo l’accettazione per misurare il valore reale della lead e abilitare recensioni verificate."
       />
 
       {!state || state.jobs.length === 0 ? (

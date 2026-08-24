@@ -1,0 +1,16 @@
+import type { BrainRule } from "../types";
+import { makeSaleRule } from "../sale-operations/ruleFactory";
+export const phaseP15Rules:BrainRule[]=[
+  makeSaleRule({"id":"P15_CLOSING_NOT_COMPLETED","module":"SALE_ARCHIVE","phase":"PHASE_15_ARCHIVE","title":"Closing Not Completed","factPath":"sale.p15.closing_not_completed.status","decisionLevel":"REVIEW","severity":"blocking","gate":"CLOSING"}),
+  makeSaleRule({"id":"P15_FINAL_DOCUMENTS_MISSING","module":"SALE_ARCHIVE","phase":"PHASE_15_ARCHIVE","title":"Final Documents Missing","factPath":"sale.p15.final_documents_missing.status","decisionLevel":"REVIEW","severity":"blocking","gate":"CLOSING"}),
+  makeSaleRule({"id":"P15_PAYMENT_RECONCILIATION_MISSING","module":"SALE_ARCHIVE","phase":"PHASE_15_ARCHIVE","title":"Payment Reconciliation Missing","factPath":"sale.p15.payment_reconciliation_missing.status","decisionLevel":"REVIEW","severity":"blocking","gate":"CLOSING"}),
+  makeSaleRule({"id":"P15_KEY_HANDOVER_UNCONFIRMED","module":"SALE_ARCHIVE","phase":"PHASE_15_ARCHIVE","title":"Key Handover Unconfirmed","factPath":"sale.p15.key_handover_unconfirmed.status","decisionLevel":"REVIEW","severity":"blocking","gate":"CLOSING"}),
+  makeSaleRule({"id":"P15_CONSENT_RETENTION_UNRESOLVED","module":"SALE_ARCHIVE","phase":"PHASE_15_ARCHIVE","title":"Consent Retention Unresolved","factPath":"sale.p15.consent_retention_unresolved.status","decisionLevel":"REVIEW","severity":"blocking","gate":"CLOSING"}),
+  makeSaleRule({"id":"P15_OPEN_TASKS_REMAIN","module":"SALE_ARCHIVE","phase":"PHASE_15_ARCHIVE","title":"Open Tasks Remain","factPath":"sale.p15.open_tasks_remain.status","decisionLevel":"REVIEW","severity":"blocking","gate":"CLOSING"}),
+  makeSaleRule({"id":"P15_AUDIT_TRAIL_INCOMPLETE","module":"SALE_ARCHIVE","phase":"PHASE_15_ARCHIVE","title":"Audit Trail Incomplete","factPath":"sale.p15.audit_trail_incomplete.status","decisionLevel":"REVIEW","severity":"blocking","gate":"CLOSING"}),
+  makeSaleRule({"id":"P15_EVENT_HISTORY_CONFLICT","module":"SALE_ARCHIVE","phase":"PHASE_15_ARCHIVE","title":"Event History Conflict","factPath":"sale.p15.event_history_conflict.status","decisionLevel":"REVIEW","severity":"blocking","gate":"CLOSING"}),
+  makeSaleRule({"id":"P15_CLIENT_SUMMARY_MISSING","module":"SALE_ARCHIVE","phase":"PHASE_15_ARCHIVE","title":"Client Summary Missing","factPath":"sale.p15.client_summary_missing.status","decisionLevel":"REVIEW","severity":"blocking","gate":"CLOSING"}),
+  makeSaleRule({"id":"P15_PROFESSIONAL_HANDOFF_OPEN","module":"SALE_ARCHIVE","phase":"PHASE_15_ARCHIVE","title":"Professional Handoff Open","factPath":"sale.p15.professional_handoff_open.status","decisionLevel":"PROFESSIONAL_REQUIRED","severity":"blocking","gate":"CLOSING"}),
+  makeSaleRule({"id":"P15_HUMAN_CLOSURE_MISSING","module":"SALE_ARCHIVE","phase":"PHASE_15_ARCHIVE","title":"Human Closure Missing","factPath":"sale.p15.human_closure_missing.status","decisionLevel":"AGENT_REQUIRED","severity":"critical","gate":"CLOSING"}),
+  makeSaleRule({"id":"P15_COMPLETE","module":"SALE_ARCHIVE","phase":"PHASE_15_ARCHIVE","title":"Complete","factPath":"sale.p15.complete.status","ready":true,"decisionLevel":"AUTO","severity":"info","gate":"CLOSING"})
+];

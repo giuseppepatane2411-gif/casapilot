@@ -1,4 +1,4 @@
-# CASAPILOT MASTER PLAN
+# GUIMMIA MASTER PLAN
 
 Versione: 0.1
 
@@ -8,7 +8,7 @@ Obiettivo: MVP funzionante in 30 giorni
 
 # VISIONE
 
-CasaPilot è l'assistente immobiliare intelligente che accompagna persone e professionisti durante ogni fase di una pratica immobiliare.
+Guimmia è l'assistente immobiliare intelligente che accompagna persone e professionisti durante ogni fase di una pratica immobiliare.
 
 Pilot non è un chatbot.
 
@@ -110,7 +110,7 @@ Collegare Pilot.
 
 ## FASE 4
 
-Calcolo automatico CasaPilot Score.
+Calcolo automatico Guimmia Score.
 
 ---
 

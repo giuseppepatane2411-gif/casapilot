@@ -125,7 +125,7 @@ export default function ProfileCenter() {
                 }
                 description={
                   identity.pauseAllLeads
-                    ? "Pilot non proporrà nuove richieste."
+                    ? "Guimmia non proporrà nuove richieste."
                     : "Restano validi i limiti dei singoli servizi."
                 }
                 selected={!identity.pauseAllLeads}
@@ -227,7 +227,7 @@ export default function ProfileCenter() {
 
             {state.offerings.length === 0 ? (
               <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
-                Nessun servizio configurato. Pilot non può assegnarti lead.
+                Nessun servizio configurato. Guimmia non può assegnarti lead.
               </div>
             ) : (
               <div className="mt-5 space-y-4">
@@ -340,3 +340,4 @@ export default function ProfileCenter() {
     </Page>
   );
 }
+

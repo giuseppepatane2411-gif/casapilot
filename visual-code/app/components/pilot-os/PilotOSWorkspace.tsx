@@ -35,12 +35,12 @@ export default function PilotOSWorkspace() {
     <div className="mx-auto max-w-4xl space-y-5">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-blue-600">Pilot</p>
+          <p className="text-sm font-semibold text-blue-600">ia</p>
           <h1 className="mt-1 text-3xl font-bold tracking-[-0.04em] text-slate-950 sm:text-4xl">
             Chiedi quello che non è chiaro.
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-            Scrivi come parleresti a una persona. Pilot userà ciò che sa del tuo immobile per orientarti.
+            Scrivi come parleresti a una persona. Guimmia userà ciò che sa del tuo immobile per orientarti.
           </p>
         </div>
 
@@ -62,7 +62,7 @@ export default function PilotOSWorkspace() {
       </header>
 
       <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-        <span className="font-bold">Pilot sta guardando:</span> {activeJourney.property.name}
+        <span className="font-bold">Guimmia sta guardando:</span> {activeJourney.property.name}
       </div>
 
       <PilotChat key={activeJourney.id} context={context} />
@@ -100,7 +100,7 @@ function EmptyPilot() {
     <section className="mx-auto max-w-3xl rounded-[30px] border border-slate-200 bg-white p-8 text-center shadow-sm">
       <h1 className="text-3xl font-bold text-slate-950">Prima raccontaci del tuo immobile.</h1>
       <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-500">
-        Appena avremo le informazioni essenziali, Pilot potrà aiutarti con dubbi, documenti e prossimi passi.
+        Appena avremo le informazioni essenziali, Guimmia potrà aiutarti con dubbi, documenti e prossimi passi.
       </p>
       <Link
         href="/dashboard/properties/new"
@@ -111,3 +111,4 @@ function EmptyPilot() {
     </section>
   );
 }
+

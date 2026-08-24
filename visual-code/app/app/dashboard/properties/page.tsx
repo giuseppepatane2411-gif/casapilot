@@ -4,7 +4,7 @@ import PropertiesList from "@/components/property-journey/PropertiesList";
 
 export const metadata: Metadata = {
   title: "I miei immobili",
-  description: "Gestisci le tue pratiche immobiliari con CasaPilot.",
+  description: "Gestisci le tue pratiche immobiliari con Guimmia.",
 };
 
 export default function PropertiesPage() {

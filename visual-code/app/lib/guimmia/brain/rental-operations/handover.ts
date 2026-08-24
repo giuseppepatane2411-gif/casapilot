@@ -1,0 +1,4 @@
+import { applyTransition, handoverMachine, type HandoverState, type HandoverEvent, type TransitionCommand } from "./state-machine";
+export interface HandoverEvidence { inventoryItems:number; keyEvents:number; applicableMeters:number; capturedMeters:number; depositReconciled:boolean; partiesConfirmed:boolean; }
+export function handoverReadiness(i:HandoverEvidence){const blockers:string[]=[];if(i.inventoryItems<1)blockers.push("INVENTORY_REQUIRED");if(i.keyEvents<1)blockers.push("KEY_EVENT_REQUIRED");if(i.capturedMeters<i.applicableMeters)blockers.push("METER_READING_REQUIRED");if(!i.depositReconciled)blockers.push("DEPOSIT_NOT_RECONCILED");if(!i.partiesConfirmed)blockers.push("PARTY_SIGNOFF_REQUIRED");return{ready:blockers.length===0,blockers}}
+export function transitionHandover(state:HandoverState,command:TransitionCommand<HandoverEvent>){return applyTransition(handoverMachine,state,command)}

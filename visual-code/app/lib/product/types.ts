@@ -27,9 +27,9 @@ export type ProductState = {
   events: ProductEvent[];
 };
 
-export type CasaPilotBackup = {
+export type GuimmiaBackup = {
   version: 4;
-  product: "CasaPilot";
+  product: "Guimmia";
   release: "casapilot-1.0";
   exportedAt: string;
   activeJourneyId: string | null;

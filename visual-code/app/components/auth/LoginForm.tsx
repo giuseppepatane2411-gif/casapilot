@@ -129,7 +129,7 @@ export default function LoginForm() {
         disabled={loading}
         className="group inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-2xl bg-slate-950 px-6 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {loading ? "Accesso…" : "Accedi a CasaPilot"}
+        {loading ? "Accesso…" : "Accedi a Guimmia"}
         {!loading && (
           <ArrowRight size={17} className="transition-transform group-hover:translate-x-0.5" />
         )}

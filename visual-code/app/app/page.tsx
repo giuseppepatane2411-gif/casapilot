@@ -1,3 +1,4 @@
+﻿import AgencyHomeTeaser from "@/components/agency/AgencyHomeTeaser";
 import Link from "next/link";
 
 import Navbar from "@/components/Navbar";
@@ -99,23 +100,23 @@ function ArrowIcon() {
 const steps = [
   [
     "1",
-    "Parla con Pilot",
+    "Parla con Guimmia",
     "Descrivi liberamente ciò che vuoi fare con il tuo immobile.",
   ],
   [
     "2",
-    "Pilot organizza",
+    "Guimmia organizza",
     "Raccoglie le informazioni e ti fa soltanto le domande necessarie.",
   ],
   [
     "3",
     "Tu controlli",
-    "Verifichi e correggi la bozza preparata da Pilot prima di salvarla.",
+    "Verifichi e correggi la bozza preparata da Guimmia prima di salvarla.",
   ],
   [
     "4",
     "Attiva il percorso",
-    "Quando serve, CasaPilot coinvolge professionisti compatibili della tua zona.",
+    "Quando serve, Guimmia coinvolge professionisti compatibili della tua zona.",
   ],
 ];
 
@@ -148,8 +149,8 @@ export default function HomePage() {
               </h2>
 
               <p className="mt-3 flex-1 leading-7 text-slate-600">
-                Descrivi il tuo immobile e racconta a Pilot qual è il tuo
-                obiettivo. Pilot prepara il percorso, raccoglie le informazioni
+                Descrivi il tuo immobile e racconta a Guimmia qual è il tuo
+                obiettivo. Guimmia prepara il percorso, raccoglie le informazioni
                 necessarie e, quando serve, ti mette in contatto con
                 professionisti qualificati della tua zona.
               </p>
@@ -158,7 +159,7 @@ export default function HomePage() {
                 href="/dashboard/pilot?message=Vorrei%20vendere%20il%20mio%20immobile"
                 className="mt-7 inline-flex items-center gap-2 font-semibold text-emerald-700"
               >
-                Inizia con Pilot <ArrowIcon />
+                Inizia con Guimmia <ArrowIcon />
               </Link>
             </article>
 
@@ -172,8 +173,8 @@ export default function HomePage() {
               </h2>
 
               <p className="mt-3 flex-1 leading-7 text-slate-600">
-                Descrivi l’immobile e racconta a Pilot come vuoi affittarlo.
-                Pilot prepara il percorso, organizza le informazioni necessarie
+                Descrivi l’immobile e racconta a Guimmia come vuoi affittarlo.
+                Guimmia prepara il percorso, organizza le informazioni necessarie
                 e, quando serve, ti mette in contatto con professionisti
                 qualificati della tua zona.
               </p>
@@ -182,7 +183,7 @@ export default function HomePage() {
                 href="/dashboard/pilot?message=Vorrei%20affittare%20il%20mio%20immobile"
                 className="mt-7 inline-flex items-center gap-2 font-semibold text-amber-700"
               >
-                Inizia con Pilot <ArrowIcon />
+                Inizia con Guimmia <ArrowIcon />
               </Link>
             </article>
 
@@ -192,7 +193,7 @@ export default function HomePage() {
               </span>
 
               <h2 className="mt-6 text-2xl font-semibold tracking-tight">
-                Fai crescere la tua attività con CasaPilot
+                Fai crescere la tua attività con Guimmia
               </h2>
 
               <p className="mt-3 flex-1 leading-7 text-slate-600">
@@ -219,12 +220,12 @@ export default function HomePage() {
               </span>
 
               <h2 className="mt-6 text-2xl font-semibold tracking-tight">
-                Parla con Pilot
+                Parla con Guimmia
               </h2>
 
               <p className="mt-3 flex-1 leading-7 text-slate-600">
                 Non sai da dove iniziare? Descrivi liberamente la situazione.
-                Pilot capirà cosa ti serve e ti farà una domanda alla volta.
+                Guimmia capirà cosa ti serve e ti farà una domanda alla volta.
               </p>
 
               <Link
@@ -252,7 +253,7 @@ export default function HomePage() {
               </h2>
 
               <p className="mt-4 text-lg leading-8 text-slate-600">
-                Pilot non sostituisce le tue decisioni: prepara, organizza e ti
+                Guimmia non sostituisce le tue decisioni: prepara, organizza e ti
                 mostra sempre cosa controllare.
               </p>
             </div>
@@ -286,7 +287,7 @@ export default function HomePage() {
               </p>
 
               <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-                Porta la tua attività dentro CasaPilot
+                Porta la tua attività dentro Guimmia
               </h2>
 
               <p className="mt-3 max-w-3xl leading-7 text-slate-600">
@@ -300,11 +301,14 @@ export default function HomePage() {
               href="/professionals"
               className="inline-flex min-h-12 items-center justify-center rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700"
             >
-              Scopri CasaPilot Pro
+              Scopri Guimmia Pro
             </Link>
           </div>
         </section>
-      </main>
+      
+      <AgencyHomeTeaser />
+</main>
     </>
   );
 }
+

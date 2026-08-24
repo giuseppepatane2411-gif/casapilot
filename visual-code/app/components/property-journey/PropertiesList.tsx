@@ -62,7 +62,7 @@ export default function PropertiesList() {
           </span>
           <h2 className="mt-5 text-2xl font-bold text-slate-950">Crea il tuo primo immobile</h2>
           <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-500">
-            Bastano poche informazioni. Poi CasaPilot preparerà il tuo percorso.
+            Bastano poche informazioni. Poi Guimmia preparerà il tuo percorso.
           </p>
           <Link
             href="/dashboard/properties/new"

@@ -183,8 +183,8 @@ export default function ServiceSetupWizard({
             <p className="mt-3 leading-7 text-slate-600">
               {policy.regulated ||
               compatibility === "requires_review"
-                ? "Il servizio è stato inviato alla verifica. Pilot non lo userà per assegnare lead finché i requisiti non saranno approvati."
-                : "Il servizio è attivo. Pilot può ora confrontare questi parametri con le nuove richieste."}
+                ? "Il servizio è stato inviato alla verifica. Guimmia non lo userà per assegnare lead finché i requisiti non saranno approvati."
+                : "Il servizio è attivo. Guimmia può ora confrontare questi parametri con le nuove richieste."}
             </p>
 
             <div className="mt-6 rounded-2xl border border-slate-200 p-5">
@@ -293,11 +293,11 @@ export default function ServiceSetupWizard({
           {step === 0 ? (
             <section>
               <h2 className="text-xl font-semibold">
-                Pilot deve poter verificare l’idoneità
+                Guimmia deve poter verificare l’idoneità
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 La selezione non attiva automaticamente un servizio
-                regolamentato. CasaPilot controlla professione e documenti.
+                regolamentato. Guimmia controlla professione e documenti.
               </p>
 
               <div className="mt-6 rounded-2xl bg-slate-50 p-5">
@@ -467,7 +467,7 @@ export default function ServiceSetupWizard({
                     Come può essere gestito a distanza?
                   </h2>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Pilot parte da una policy coerente con il tipo di servizio.
+                    Guimmia parte da una policy coerente con il tipo di servizio.
                     Puoi confermarla o dichiarare una capacità diversa, senza
                     rendere il servizio una categoria separata.
                   </p>
@@ -515,7 +515,7 @@ export default function ServiceSetupWizard({
               <div className="mt-6 rounded-2xl border border-violet-200 bg-violet-50 p-5 text-sm text-violet-900">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="font-semibold">Policy CasaPilot del servizio</p>
+                    <p className="font-semibold">Policy Guimmia del servizio</p>
                     <p className="mt-1 text-xs leading-5 text-violet-700">
                       Fattibilità: {remotePolicy.feasibility.replaceAll("_", " ")} ·
                       firma: {remotePolicy.signatureMode.replaceAll("_", " ")} ·
@@ -948,7 +948,7 @@ export default function ServiceSetupWizard({
                 </label>
                 <label>
                   <span className="mb-2 block text-sm font-semibold">
-                    Note interne per Pilot
+                    Note interne per Guimmia
                   </span>
                   <textarea
                     value={offering.internalNotes}
@@ -970,7 +970,7 @@ export default function ServiceSetupWizard({
                 Controllo finale
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Pilot utilizzerà soltanto dati confermati e servizi attivi.
+                Guimmia utilizzerà soltanto dati confermati e servizi attivi.
               </p>
 
               <div className="mt-6 rounded-2xl border border-slate-200 p-5">
@@ -1011,7 +1011,7 @@ export default function ServiceSetupWizard({
                   : policy.regulated ||
                       compatibility === "requires_review"
                     ? "In verifica, prima dell'attivazione."
-                    : "Attivo nel matching di Pilot."}
+                    : "Attivo nel matching di Guimmia."}
               </div>
             </section>
           ) : null}
@@ -1055,3 +1055,4 @@ export default function ServiceSetupWizard({
     </Page>
   );
 }
+

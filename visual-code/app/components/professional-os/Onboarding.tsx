@@ -304,7 +304,7 @@ export default function Onboarding() {
               <p className="mt-2 text-sm leading-6 text-slate-600">
                 Le lingue sono un vantaggio nel matching, non un requisito per
                 accedere alla piattaforma. Il livello è dichiarato dal
-                professionista; Pilot può tradurre quando manca una lingua in
+                professionista; Guimmia può tradurre quando manca una lingua in
                 comune.
               </p>
 
@@ -438,14 +438,14 @@ export default function Onboarding() {
                 ))}
               </div>
               <div className="mt-6 rounded-2xl bg-slate-50 p-5 text-sm leading-6 text-slate-700">
-                <p>✓ Il primo contatto resta dentro CasaPilot.</p>
+                <p>✓ Il primo contatto resta dentro Guimmia.</p>
                 <p>✓ Configurerò soltanto servizi che posso svolgere.</p>
                 <p>✓ Indicherò correttamente presenza, delega e report.</p>
                 <p>✓ Non presenterò traduzioni automatiche come atti ufficiali.</p>
               </div>
               <div className="mt-4">
                 <ToggleCard
-                  title="Accetto le regole CasaPilot"
+                  title="Accetto le regole Guimmia"
                   selected={acceptedRules}
                   onClick={() => setAcceptedRules((value) => !value)}
                 />
@@ -485,3 +485,4 @@ export default function Onboarding() {
     </Page>
   );
 }
+

@@ -45,7 +45,7 @@ export default function StepLocation({ data, onChange }: StepLocationProps) {
           <div>
             <p className="font-bold text-slate-950">Indirizzo e posizione sono due cose diverse</p>
             <p className="mt-1 text-sm leading-6 text-slate-600">
-              Prima troviamo Comune e via. Subito dopo controllerai il punto sulla mappa: così CasaPilot non salva un immobile nel posto sbagliato anche quando il civico non viene riconosciuto perfettamente.
+              Prima troviamo Comune e via. Subito dopo controllerai il punto sulla mappa: così Guimmia non salva un immobile nel posto sbagliato anche quando il civico non viene riconosciuto perfettamente.
             </p>
           </div>
         </div>
@@ -87,7 +87,7 @@ export default function StepLocation({ data, onChange }: StepLocationProps) {
             </p>
             <p className="mt-1 text-sm leading-6 text-slate-600">
               {data.locationVerified
-                ? "CasaPilot ha salvato il punto scelto. Se modifichi indirizzo o mappa, ti chiederemo di confermarlo di nuovo."
+                ? "Guimmia ha salvato il punto scelto. Se modifichi indirizzo o mappa, ti chiederemo di confermarlo di nuovo."
                 : "Puoi continuare anche senza confermare, ma per creare annunci precisi sarà importante verificare la posizione."}
             </p>
           </div>

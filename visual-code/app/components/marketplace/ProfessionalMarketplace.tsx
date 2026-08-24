@@ -157,7 +157,7 @@ export default function ProfessionalMarketplace() {
       setAmount("");
       setSummary("");
       setEstimatedDays("");
-      setMessage("Preventivo inviato attraverso CasaPilot.");
+      setMessage("Preventivo inviato attraverso Guimmia.");
       await load();
     }
 
@@ -174,7 +174,7 @@ export default function ProfessionalMarketplace() {
               Marketplace Professionisti
             </div>
             <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-              Richieste pertinenti, preventivi dentro CasaPilot.
+              Richieste pertinenti, preventivi dentro Guimmia.
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
               Il Marketplace mantiene separati profilo, richiesta e preventivo. I recapiti diretti

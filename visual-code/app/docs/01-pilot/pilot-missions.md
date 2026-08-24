@@ -27,9 +27,9 @@ Every Mission becomes the operational center of Pilot OS.
 
 ## Core Principle
 
-People do not open CasaPilot because they want to chat.
+People do not open Guimmia because they want to chat.
 
-They open CasaPilot because they want to achieve something.
+They open Guimmia because they want to achieve something.
 
 Examples:
 
@@ -362,7 +362,7 @@ Every document.
 
 Every professional.
 
-Every action inside CasaPilot exists for one single purpose:
+Every action inside Guimmia exists for one single purpose:
 
 **Move the Mission one step closer to completion.**
 
@@ -4317,7 +4317,7 @@ Missing user decisions or incomplete information.
 
 EXTERNAL
 
-Dependencies outside CasaPilot.
+Dependencies outside Guimmia.
 
 ---
 
@@ -9966,7 +9966,7 @@ The Presentation Engine prepares content for multiple destinations.
 
 Examples.
 
-CasaPilot Listing
+Guimmia Listing
 
 ↓
 
@@ -11321,7 +11321,7 @@ Learning is the mechanism that allows Pilot to evolve continuously while remaini
 
 ## Purpose
 
-The Mission Marketplace Engine is responsible for connecting Mission needs with trusted services, professionals and products available through the CasaPilot ecosystem.
+The Mission Marketplace Engine is responsible for connecting Mission needs with trusted services, professionals and products available through the Guimmia ecosystem.
 
 Its purpose is to transform Mission requirements into immediate solutions.
 
@@ -14026,7 +14026,7 @@ Pilot helps users understand not only what they will receive, but also what they
 
 ## Purpose
 
-The Mission Reputation Engine is responsible for measuring, maintaining and improving trust across the entire CasaPilot ecosystem.
+The Mission Reputation Engine is responsible for measuring, maintaining and improving trust across the entire Guimmia ecosystem.
 
 Its purpose is to evaluate the reliability, quality and consistency of every participant involved in a Mission.
 
@@ -17306,7 +17306,7 @@ Pilot transforms progress into completed Missions.
 
 This is the purpose of Pilot OS.
 
-This is the philosophy of CasaPilot.
+This is the philosophy of Guimmia.
 
 Mission First.
 

@@ -272,7 +272,7 @@ export default function PropertyManagementPanel({ journey }: PropertyManagementP
               <div>
                 <p className="font-bold text-rose-950">Vuoi davvero ripartire da zero?</p>
                 <p className="mt-1 text-sm leading-6 text-rose-800">
-                  Verranno eliminati da questo browser l’immobile, il suo percorso, la memoria di Pilot e i file collegati nell’Archivio locale. Questa operazione non si può annullare.
+                  Verranno eliminati da questo browser l’immobile, il suo percorso, la memoria di Guimmia e i file collegati nell’Archivio locale. Questa operazione non si può annullare.
                 </p>
               </div>
             </div>
@@ -323,3 +323,4 @@ function Field({
     </label>
   );
 }
+

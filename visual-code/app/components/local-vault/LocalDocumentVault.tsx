@@ -192,7 +192,7 @@ export default function LocalDocumentVault() {
 
   async function deleteFile(document: LocalVaultDocument) {
     const confirmed = window.confirm(
-      `Eliminare ${document.name} dall’archivio locale? La checklist resterà invariata perché potresti possedere ancora il documento fuori da CasaPilot.`,
+      `Eliminare ${document.name} dall’archivio locale? La checklist resterà invariata perché potresti possedere ancora il documento fuori da Guimmia.`,
     );
     if (!confirmed) return;
 
@@ -316,14 +316,14 @@ export default function LocalDocumentVault() {
             <p className="text-sm font-semibold text-blue-600">Checklist operativa</p>
             <h2 className="mt-1 text-2xl font-bold text-slate-950">Allega i documenti che possiedi</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              Il caricamento segna automaticamente il documento come disponibile e aggiorna Pilot.
+              Il caricamento segna automaticamente il documento come disponibile e aggiorna Guimmia.
             </p>
           </div>
           <Link
             href="/dashboard/pilot"
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 text-sm font-bold text-slate-700 hover:border-blue-200 hover:text-blue-700"
           >
-            Torna a Pilot
+            Torna a Guimmia
             <ArrowRight size={16} />
           </Link>
         </div>
@@ -534,3 +534,4 @@ function formatBytes(bytes: number) {
   const value = bytes / 1024 ** index;
   return `${value >= 10 || index === 0 ? value.toFixed(0) : value.toFixed(1)} ${units[index]}`;
 }
+

@@ -96,7 +96,7 @@ export default function StepProperty({
             className="mt-2 h-13 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
           />
           <span className="mt-2 block text-xs text-slate-500">
-            Se lo lasci vuoto, CasaPilot creerà automaticamente un nome.
+            Se lo lasci vuoto, Guimmia creerà automaticamente un nome.
           </span>
         </label>
 

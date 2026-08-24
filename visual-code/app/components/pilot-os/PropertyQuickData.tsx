@@ -42,7 +42,7 @@ export default function PropertyQuickData({
     addPilotTimelineEvent(journey.id, {
       title: "Profilo immobile aggiornato",
       description:
-        "Pilot ha ricalcolato contesto, prontezza e prossime missioni.",
+        "Guimmia ha ricalcolato contesto, prontezza e prossime missioni.",
       type: "mission",
     });
     setSaved(true);
@@ -56,7 +56,7 @@ export default function PropertyQuickData({
     >
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold text-blue-600">Contesto Pilot</p>
+          <p className="text-sm font-semibold text-blue-600">Contesto Guimmia</p>
           <h2 className="mt-1 text-xl font-bold text-slate-950">
             Dati essenziali
           </h2>
@@ -66,7 +66,7 @@ export default function PropertyQuickData({
         </span>
       </div>
       <p className="mt-3 text-sm leading-6 text-slate-500">
-        Completa questi dati: Pilot aggiornerà immediatamente analisi e priorità.
+        Completa questi dati: Guimmia aggiornerà immediatamente analisi e priorità.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-5 space-y-4">
@@ -155,3 +155,4 @@ function Field({ label, icon: Icon, children }: FieldProps) {
     </label>
   );
 }
+

@@ -20,8 +20,8 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: {
-    default: "CasaPilot",
-    template: "%s | CasaPilot",
+    default: "Guimmia",
+    template: "%s | Guimmia",
   },
   description:
     "L’assistente immobiliare intelligente che ti guida nella vendita e nell’affitto del tuo immobile.",

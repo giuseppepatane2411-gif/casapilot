@@ -9,7 +9,7 @@ export default function Header() {
         </h1>
 
         <p className="mt-1 text-slate-500">
-          Benvenuto su CasaPilot.
+          Benvenuto su Guimmia.
         </p>
 
       </div>

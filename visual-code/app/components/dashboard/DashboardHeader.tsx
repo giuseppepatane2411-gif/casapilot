@@ -14,7 +14,7 @@ function getSection(pathname: string) {
     return { title: "Documenti", subtitle: "Cosa hai e cosa manca" };
   }
   if (pathname.startsWith("/dashboard/pilot")) {
-    return { title: "Pilot", subtitle: "Chiedi quello che non è chiaro" };
+    return { title: "Guimmia", subtitle: "Chiedi quello che non è chiaro" };
   }
   if (pathname.startsWith("/dashboard/professionals")) {
     return { title: "Professionisti", subtitle: "Supporto per la pratica" };
@@ -61,3 +61,4 @@ export default function DashboardHeader({ onOpenMobileMenu }: DashboardHeaderPro
     </header>
   );
 }
+

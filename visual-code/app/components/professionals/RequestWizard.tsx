@@ -182,7 +182,7 @@ export default function RequestWizard({
     }
     return {
       category: "Passaggio 1",
-      free: "Pilot ti aiuta",
+      free: "Guimmia ti aiuta",
       service: "Passaggio 2",
       property: "Passaggio 3",
       remote: "Presenza e lingua",
@@ -334,7 +334,7 @@ export default function RequestWizard({
       {phase === "free" ? (
         <Frame
           title="Descrivi il problema"
-          helper="Non servono termini tecnici. Pilot conserva il testo originale."
+          helper="Non servono termini tecnici. Guimmia conserva il testo originale."
           label={label}
           actions={
             <>
@@ -366,7 +366,7 @@ export default function RequestWizard({
           {suggested && service ? (
             <div className="mt-5 rounded-2xl border border-blue-200 bg-blue-50 p-5">
               <p className="text-sm font-semibold text-blue-950">
-                Pilot suggerisce
+                Guimmia suggerisce
               </p>
               <p className="mt-1 text-lg font-semibold">{service.name}</p>
               <p className="mt-1 text-sm text-slate-600">
@@ -418,7 +418,7 @@ export default function RequestWizard({
       {phase === "property" ? (
         <Frame
           title="A quale immobile si riferisce?"
-          helper="CasaPilot riutilizzerà i dati già presenti."
+          helper="Guimmia riutilizzerà i dati già presenti."
           label={label}
           actions={
             <>
@@ -462,7 +462,7 @@ export default function RequestWizard({
       {phase === "remote" && remote ? (
         <Frame
           title="Puoi essere presente presso l'immobile?"
-          helper="La distanza non cambia il percorso: aiuta Pilot a scegliere professionisti e servizi gestibili correttamente."
+          helper="La distanza non cambia il percorso: aiuta Guimmia a scegliere professionisti e servizi gestibili correttamente."
           label={label}
           actions={
             <>
@@ -549,7 +549,7 @@ export default function RequestWizard({
                 }}
                 className="mt-3 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm"
               >
-                <option value="automatic">Pilot decide quando tradurre</option>
+                <option value="automatic">Guimmia decide quando tradurre</option>
                 <option value="direct_preferred">Preferisco una lingua in comune</option>
                 <option value="translation_allowed">La traduzione va bene</option>
                 <option value="direct_only">Solo comunicazione diretta</option>
@@ -770,7 +770,7 @@ export default function RequestWizard({
       {phase === "done" ? (
         <Frame
           title="Richiesta inviata"
-          helper="CasaPilot sta cercando i professionisti compatibili."
+          helper="Guimmia sta cercando i professionisti compatibili."
           label={label}
           actions={
             <>
@@ -807,3 +807,4 @@ export default function RequestWizard({
     </Page>
   );
 }
+

@@ -40,7 +40,7 @@ export default function AuthShell({
                   Tutta la pratica, un passo alla volta.
                 </h1>
                 <p className="mt-4 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
-                  Crea il tuo profilo, organizza gli immobili e lascia che Pilot
+                  Crea il tuo profilo, organizza gli immobili e lascia che Guimmia
                   scelga la prossima azione utile in base al tuo obiettivo.
                 </p>
 
@@ -80,3 +80,4 @@ export default function AuthShell({
     </main>
   );
 }
+

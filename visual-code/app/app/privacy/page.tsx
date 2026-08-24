@@ -4,7 +4,7 @@ import PrivacyOverview from "@/components/privacy/PrivacyOverview";
 
 export const metadata: Metadata = {
   title: "Privacy e dati",
-  description: "Come CasaPilot gestisce account, pratiche e documenti.",
+  description: "Come Guimmia gestisce account, pratiche e documenti.",
 };
 
 export default function PrivacyPage() {

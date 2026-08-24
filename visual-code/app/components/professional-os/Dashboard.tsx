@@ -81,7 +81,7 @@ export default function Dashboard() {
   return (
     <Page>
       <Heading
-        eyebrow="CasaPilot Professional OS"
+        eyebrow="Guimmia Professional OS"
         title={
           state.identity
             ? `Bentornato, ${state.identity.displayName}`
@@ -110,7 +110,7 @@ export default function Dashboard() {
               <p className="mt-2 max-w-2xl text-sm leading-6 text-blue-800">
                 Il profilo professionale è separato dagli immobili. Dopo
                 l'identità configurerai i singoli servizi con parametri
-                utilizzabili da Pilot.
+                utilizzabili da Guimmia.
               </p>
             </div>
             <LinkButton href="/professionista/onboarding">
@@ -195,7 +195,7 @@ export default function Dashboard() {
                 Migliori richieste per te
               </h2>
               <p className="mt-1 text-sm text-slate-600">
-                Pilot applica prima i blocchi e poi ordina per compatibilità.
+                Guimmia applica prima i blocchi e poi ordina per compatibilità.
               </p>
             </div>
             <Link
@@ -219,7 +219,7 @@ export default function Dashboard() {
           ) : ranked.length === 0 ? (
             <EmptyState
               title="Nessuna lead compatibile"
-              description="Pilot continuerà a confrontare le nuove richieste con i tuoi parametri."
+              description="Guimmia continuerà a confrontare le nuove richieste con i tuoi parametri."
             />
           ) : (
             <div className="space-y-4">
@@ -296,7 +296,7 @@ export default function Dashboard() {
             </div>
             <p className="mt-3 text-sm leading-6 text-blue-800">
               La prima ondata coinvolge fino a tre candidati idonei. Se
-              rifiutano o scade il tempo, Pilot usa la lista di riserva senza
+              rifiutano o scade il tempo, Guimmia usa la lista di riserva senza
               inviare la lead a decine di professionisti.
             </p>
           </Panel>
@@ -329,3 +329,4 @@ export default function Dashboard() {
     </Page>
   );
 }
+

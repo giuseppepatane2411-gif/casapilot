@@ -111,7 +111,7 @@ export default function PropertyJourneyDetail({ journeyId }: PropertyJourneyDeta
       <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
         <div>
           <p className="text-sm font-semibold text-blue-600">Informazioni dell’immobile</p>
-          <h2 className="mt-1 text-2xl font-bold text-slate-950">Quello che CasaPilot sa già</h2>
+          <h2 className="mt-1 text-2xl font-bold text-slate-950">Quello che Guimmia sa già</h2>
           <p className="mt-2 text-sm leading-6 text-slate-500">
             Questi dati servono a personalizzare documenti e prossimi passi.
           </p>
@@ -165,7 +165,7 @@ export default function PropertyJourneyDetail({ journeyId }: PropertyJourneyDeta
           <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400 group-hover:text-blue-100">Percorso</p>
           <p className="mt-2 text-xl font-bold">Continua dal prossimo passo</p>
           <p className="mt-2 text-sm leading-6 text-slate-300 group-hover:text-blue-100">
-            CasaPilot ti mostra una sola priorità alla volta.
+            Guimmia ti mostra una sola priorità alla volta.
           </p>
           <span className="mt-5 inline-flex items-center gap-2 text-sm font-bold">
             Vai al percorso

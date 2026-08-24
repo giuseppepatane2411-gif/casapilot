@@ -54,7 +54,7 @@ async function reversePhoton(latitude: number, longitude: number): Promise<Rever
       headers: {
         Accept: "application/json",
         "Accept-Language": "it-IT,it;q=0.9",
-        "User-Agent": "CasaPilot/1.0",
+        "User-Agent": "Guimmia/1.0",
       },
       cache: "no-store",
     });

@@ -153,7 +153,7 @@ export default function ProfessionalOnboardingCloud() {
       return false;
     }
 
-    const primaryProfession = selectedLabels[0] ?? "Professionista CasaPilot";
+    const primaryProfession = selectedLabels[0] ?? "Professionista Guimmia";
     const { error: profileError } = await supabase
       .from("professional_profiles")
       .update({
@@ -214,7 +214,7 @@ export default function ProfessionalOnboardingCloud() {
       return;
     }
     if (step === 3 && selectedServices.length === 0) {
-      setMessage("Seleziona almeno un servizio dalle macro-categorie CasaPilot.");
+      setMessage("Seleziona almeno un servizio dalle macro-categorie Guimmia.");
       return;
     }
     if (step === 4 && serviceAreas.length === 0) {
@@ -269,9 +269,9 @@ export default function ProfessionalOnboardingCloud() {
       const payload = (await response.json()) as { text?: string; notice?: string; error?: string };
       if (!response.ok || !payload.text) throw new Error(payload.error || "generation_failed");
       setBio(payload.text);
-      setNotice(payload.notice ?? "Bozza creata con Pilot. Controllala e modificala prima di salvarla.");
+      setNotice(payload.notice ?? "Bozza creata con Guimmia. Controllala e modificala prima di salvarla.");
     } catch {
-      setMessage("Pilot non è riuscito a preparare la descrizione. Puoi continuare a scriverla manualmente.");
+      setMessage("Guimmia non è riuscito a preparare la descrizione. Puoi continuare a scriverla manualmente.");
     } finally {
       setGenerating(false);
     }
@@ -292,7 +292,7 @@ export default function ProfessionalOnboardingCloud() {
         return;
       }
       setVerificationStatus("submitted");
-      setNotice("Profilo inviato a CasaPilot per la verifica.");
+      setNotice("Profilo inviato a Guimmia per la verifica.");
     } else {
       setNotice("Profilo salvato. Puoi inviarlo per verifica quando è completo.");
     }
@@ -341,7 +341,7 @@ export default function ProfessionalOnboardingCloud() {
 
           {step === 1 && (
             <div className="space-y-5">
-              <div><h2 className="text-2xl font-bold text-slate-950">Sede dell’attività</h2><p className="mt-2 text-sm leading-6 text-slate-500">Scrivi via e civico: CasaPilot mostra i suggerimenti reali e compila automaticamente Comune, CAP e Provincia.</p></div>
+              <div><h2 className="text-2xl font-bold text-slate-950">Sede dell’attività</h2><p className="mt-2 text-sm leading-6 text-slate-500">Scrivi via e civico: Guimmia mostra i suggerimenti reali e compila automaticamente Comune, CAP e Provincia.</p></div>
               <ItalianAddressAutocomplete label="Indirizzo" value={addressQuery} onChange={setAddressQuery} onSelect={selectAddress} mode="address" city={city} province={province} postcode={postalCode} />
               <div className="grid gap-4 sm:grid-cols-3"><ReadOnlyCard label="CAP" value={postalCode || "—"} /><ReadOnlyCard label="Comune" value={city || "—"} /><ReadOnlyCard label="Provincia" value={province || "—"} /></div>
               {streetAddress && <p className="flex items-center gap-2 rounded-2xl bg-emerald-50 p-4 text-sm font-semibold text-emerald-800"><MapPin size={17} />{[streetAddress, postalCode, city, province].filter(Boolean).join(", ")}</p>}
@@ -350,17 +350,17 @@ export default function ProfessionalOnboardingCloud() {
 
           {step === 2 && (
             <div className="space-y-5">
-              <div><h2 className="text-2xl font-bold text-slate-950">Descrivi la tua attività</h2><p className="mt-2 text-sm leading-6 text-slate-500">Scrivi liberamente come lavori. Pilot può trasformare gli appunti in una presentazione professionale, senza inventare qualifiche.</p></div>
+              <div><h2 className="text-2xl font-bold text-slate-950">Descrivi la tua attività</h2><p className="mt-2 text-sm leading-6 text-slate-500">Scrivi liberamente come lavori. Guimmia può trasformare gli appunti in una presentazione professionale, senza inventare qualifiche.</p></div>
               <label className="block"><span className="text-sm font-bold text-slate-700">Anni di esperienza</span><input type="number" min={0} max={80} value={years} onChange={(e) => setYears(Number(e.target.value) || 0)} className="mt-2 min-h-12 w-full rounded-2xl border border-slate-200 px-4" /></label>
               <label className="block"><span className="text-sm font-bold text-slate-700">Raccontaci in poche parole cosa fai</span><textarea value={activityNotes} onChange={(e) => setActivityNotes(e.target.value)} rows={5} placeholder="Es. siamo un’impresa familiare, ci occupiamo di ristrutturazioni, bagni e cucine..." className="mt-2 w-full rounded-2xl border border-slate-200 p-4 text-sm leading-6 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" /></label>
-              <button type="button" onClick={() => void improveBio()} disabled={generating} className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-blue-600 px-5 text-sm font-bold text-white disabled:opacity-50">{generating ? <Loader2 size={17} className="animate-spin" /> : <Sparkles size={17} />}{generating ? "Pilot sta preparando la bozza…" : "Migliora con Pilot"}</button>
+              <button type="button" onClick={() => void improveBio()} disabled={generating} className="inline-flex min-h-11 items-center gap-2 rounded-2xl bg-blue-600 px-5 text-sm font-bold text-white disabled:opacity-50">{generating ? <Loader2 size={17} className="animate-spin" /> : <Sparkles size={17} />}{generating ? "Guimmia sta preparando la bozza…" : "Migliora con Guimmia"}</button>
               <label className="block"><span className="text-sm font-bold text-slate-700">Presentazione pubblicabile</span><textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={7} placeholder="La descrizione finale resta sempre modificabile e viene pubblicata solo dopo la tua approvazione." className="mt-2 w-full rounded-2xl border border-slate-200 p-4 text-sm leading-6 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" /></label>
             </div>
           )}
 
           {step === 3 && (
             <div className="space-y-6">
-              <div><h2 className="text-2xl font-bold text-slate-950">Categorie e servizi CasaPilot</h2><p className="mt-2 text-sm leading-6 text-slate-500">Le macro-categorie sono definite da CasaPilot: Pilot userà questi dati strutturati per cercare i professionisti corretti.</p></div>
+              <div><h2 className="text-2xl font-bold text-slate-950">Categorie e servizi Guimmia</h2><p className="mt-2 text-sm leading-6 text-slate-500">Le macro-categorie sono definite da Guimmia: Guimmia userà questi dati strutturati per cercare i professionisti corretti.</p></div>
               <div className="flex gap-2 overflow-x-auto pb-1">{macros.map((macro) => <button key={macro.id} type="button" onClick={() => setSelectedMacro(macro.id)} className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold ${selectedMacro === macro.id ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-600"}`}>{macro.label}</button>)}</div>
               <div className="grid gap-3 sm:grid-cols-2">{visibleServices.map((service) => { const selected = selectedServices.includes(service.id); return <button key={service.id} type="button" onClick={() => toggleService(service.id)} className={`rounded-2xl border p-4 text-left transition ${selected ? "border-blue-500 bg-blue-50 ring-4 ring-blue-100" : "border-slate-200 hover:border-blue-200"}`}><span className="flex items-start justify-between gap-3"><span><span className="block font-bold text-slate-950">{service.label}</span>{service.description && <span className="mt-1 block text-xs leading-5 text-slate-500">{service.description}</span>}</span>{selected && <CheckCircle2 size={18} className="shrink-0 text-blue-600" />}</span></button>; })}</div>
               {selectedLabels.length > 0 && <div className="rounded-2xl bg-slate-50 p-4"><p className="text-xs font-bold uppercase tracking-wide text-slate-400">Servizi selezionati</p><div className="mt-2 flex flex-wrap gap-2">{selectedLabels.map((label) => <span key={label} className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm">{label}</span>)}</div></div>}
@@ -369,7 +369,7 @@ export default function ProfessionalOnboardingCloud() {
 
           {step === 4 && (
             <div className="space-y-5">
-              <div><h2 className="text-2xl font-bold text-slate-950">Zone operative</h2><p className="mt-2 text-sm leading-6 text-slate-500">Aggiungi Comuni e zone reali. Pilot userà queste informazioni nel matching geografico.</p></div>
+              <div><h2 className="text-2xl font-bold text-slate-950">Zone operative</h2><p className="mt-2 text-sm leading-6 text-slate-500">Aggiungi Comuni e zone reali. Guimmia userà queste informazioni nel matching geografico.</p></div>
               <ItalianAddressAutocomplete label="Aggiungi un Comune" value={areaQuery} onChange={setAreaQuery} onSelect={addArea} mode="municipality" placeholder="Es. Catania" />
               <div className="flex flex-wrap gap-2">{serviceAreas.map((area) => <button key={area} type="button" onClick={() => setServiceAreas((current) => current.filter((value) => value !== area))} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:border-rose-200 hover:text-rose-700">{area} ×</button>)}</div>
             </div>
@@ -377,7 +377,7 @@ export default function ProfessionalOnboardingCloud() {
 
           {step === 5 && (
             <div className="space-y-6">
-              <div><h2 className="text-2xl font-bold text-slate-950">Controlla prima dell’invio</h2><p className="mt-2 text-sm leading-6 text-slate-500">Nessun dato viene pubblicato automaticamente. Dopo l’invio il profilo passa alla verifica CasaPilot.</p></div>
+              <div><h2 className="text-2xl font-bold text-slate-950">Controlla prima dell’invio</h2><p className="mt-2 text-sm leading-6 text-slate-500">Nessun dato viene pubblicato automaticamente. Dopo l’invio il profilo passa alla verifica Guimmia.</p></div>
               <div className="grid gap-3 sm:grid-cols-2"><Summary label="Attività" value={displayName} /><Summary label="Ragione sociale" value={legalName || fullName} /><Summary label="Sede" value={[streetAddress, city, province].filter(Boolean).join(", ")} /><Summary label="Servizi" value={selectedLabels.join(", ")} /><Summary label="Zone" value={serviceAreas.join(", ")} /><Summary label="Descrizione" value={bio} wide /></div>
               <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">Le verifiche documentali e le abilitazioni saranno gestite in modo distinto dal profilo pubblico. Il badge “verificato” non viene mai assegnato automaticamente.</div>
               <div className="flex flex-col gap-3 sm:flex-row"><button type="button" onClick={() => void finish(false)} disabled={saving} className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-700"><Save size={17} />Salva profilo</button><button type="button" onClick={() => void finish(true)} disabled={saving || verificationStatus !== "draft"} className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 text-sm font-bold text-white disabled:opacity-50">Invia per verifica<ArrowRight size={17} /></button></div>
@@ -397,3 +397,4 @@ export default function ProfessionalOnboardingCloud() {
 function Field({ label, value, onChange, wide = false }: { label: string; value: string; onChange: (value: string) => void; wide?: boolean }) { return <label className={`block ${wide ? "sm:col-span-2" : ""}`}><span className="text-sm font-bold text-slate-700">{label}</span><input value={value} onChange={(e) => onChange(e.target.value)} className="mt-2 min-h-12 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" /></label>; }
 function ReadOnlyCard({ label, value }: { label: string; value: string }) { return <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p className="text-xs font-bold uppercase tracking-wide text-slate-400">{label}</p><p className="mt-1 text-sm font-bold text-slate-800">{value || "—"}</p></div>; }
 function Summary({ label, value, wide = false }: { label: string; value: string; wide?: boolean }) { return <div className={`rounded-2xl border border-slate-200 p-4 ${wide ? "sm:col-span-2" : ""}`}><p className="text-xs font-bold uppercase tracking-wide text-slate-400">{label}</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{value || "—"}</p></div>; }
+

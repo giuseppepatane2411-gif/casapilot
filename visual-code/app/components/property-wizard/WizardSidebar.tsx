@@ -36,7 +36,7 @@ export default function WizardSidebar({
           Rispondi solo a quello che sai.
         </h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          Se ti manca un documento non è un problema: CasaPilot lo inserirà tra le cose da fare dopo.
+          Se ti manca un documento non è un problema: Guimmia lo inserirà tra le cose da fare dopo.
         </p>
       </section>
 

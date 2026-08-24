@@ -6,7 +6,7 @@ import LoginForm from "@/components/auth/LoginForm";
 
 export const metadata: Metadata = {
   title: "Accedi",
-  description: "Accedi al tuo spazio personale CasaPilot.",
+  description: "Accedi al tuo spazio personale Guimmia.",
 };
 
 export default function LoginPage() {

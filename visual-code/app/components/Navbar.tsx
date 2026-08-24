@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -13,7 +13,7 @@ const navigation = [
     href: "/#come-funziona",
   },
   {
-    label: "Pilot",
+    label: "Guimmia",
     href: "/pilot",
   },
   {
@@ -127,3 +127,4 @@ export default function Navbar() {
     </header>
   );
 }
+

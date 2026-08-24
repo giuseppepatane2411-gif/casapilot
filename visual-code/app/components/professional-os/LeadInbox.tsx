@@ -101,7 +101,7 @@ export default function LeadInbox() {
       ) : ranked.length === 0 ? (
         <EmptyState
           title="Nessuna richiesta in questa vista"
-          description="Pilot mostrerà soltanto lead che rispettano i parametri attivi."
+          description="Guimmia mostrerà soltanto lead che rispettano i parametri attivi."
           action={
             <LinkButton href="/professionista/servizi" variant="secondary">
               Controlla i servizi
@@ -184,3 +184,4 @@ export default function LeadInbox() {
     </Page>
   );
 }
+

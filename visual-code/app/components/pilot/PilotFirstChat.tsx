@@ -48,7 +48,7 @@ const emptyDraft = (): PropertyDraft => ({
 const initialMessage: ChatMessage = {
   id: "pilot_welcome",
   sender: "pilot",
-  text: "Ciao! Sono Pilot. Raccontami cosa vuoi fare con il tuo immobile: puoi scriverlo liberamente, organizzerò io le informazioni.",
+  text: "Ciao! Sono Guimmia. Raccontami cosa vuoi fare con il tuo immobile: puoi scriverlo liberamente, organizzerò io le informazioni.",
   createdAt: new Date().toISOString(),
 };
 
@@ -148,7 +148,7 @@ export default function PilotFirstChat() {
         if (parsed.draft) setDraft(parsed.draft);
       }
     } catch {
-      // A damaged local demo session must not block Pilot.
+      // A damaged local demo session must not block Guimmia.
     } finally {
       setLoaded(true);
     }
@@ -312,7 +312,7 @@ export default function PilotFirstChat() {
             <div className="flex items-center gap-3">
               <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-sm"><CompassIcon className="h-6 w-6" /></span>
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight">Pilot</h1>
+                <h1 className="text-2xl font-semibold tracking-tight">ia</h1>
                 <p className="text-sm text-slate-500"><span className="mr-1 inline-block h-2 w-2 rounded-full bg-emerald-500" />Online · inizia dalla conversazione</p>
               </div>
             </div>
@@ -327,7 +327,7 @@ export default function PilotFirstChat() {
           <section className="flex min-h-[680px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-100 px-5 py-4">
               <p className="font-semibold">Raccontami liberamente cosa vuoi fare</p>
-              <p className="mt-1 text-sm text-slate-500">Pilot raccoglie i dati nel dialogo e prepara la bozza senza obbligarti a compilare un modulo iniziale.</p>
+              <p className="mt-1 text-sm text-slate-500">Guimmia raccoglie i dati nel dialogo e prepara la bozza senza obbligarti a compilare un modulo iniziale.</p>
             </div>
 
             <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-6">
@@ -362,7 +362,7 @@ export default function PilotFirstChat() {
           <aside className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-600">Bozza preparata da Pilot</p>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-600">Bozza preparata da Guimmia</p>
                 <h2 className="mt-2 text-xl font-semibold">Scheda immobile</h2>
                 <p className="mt-1 text-sm text-slate-500">Correggi liberamente i dati prima di confermare.</p>
               </div>
@@ -399,10 +399,11 @@ export default function PilotFirstChat() {
 
             <button type="button" onClick={saveDraft} className="mt-6 flex min-h-12 w-full items-center justify-center rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700">Conferma e salva la scheda</button>
             {savedNotice ? <p className={`mt-3 text-center text-sm font-semibold ${savedNotice.startsWith("Scheda") ? "text-emerald-700" : "text-red-600"}`}>{savedNotice}</p> : null}
-            <p className="mt-4 text-xs leading-5 text-slate-500">Pilot può interpretare male un dettaglio. Per questo nessun dato diventa definitivo senza il tuo controllo.</p>
+            <p className="mt-4 text-xs leading-5 text-slate-500">Guimmia può interpretare male un dettaglio. Per questo nessun dato diventa definitivo senza il tuo controllo.</p>
           </aside>
         </div>
       </div>
     </main>
   );
 }
+

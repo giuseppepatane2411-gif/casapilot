@@ -20,7 +20,7 @@ export default function PilotReadinessCard({
     <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold text-blue-600">Pilot Readiness</p>
+          <p className="text-sm font-semibold text-blue-600">Guimmia Readiness</p>
           <h2 className="mt-1 text-xl font-bold text-slate-950">
             {context.readiness.label}
           </h2>
@@ -124,3 +124,4 @@ function ReadinessBar({ icon: Icon, label, value }: ReadinessBarProps) {
     </div>
   );
 }
+

@@ -39,7 +39,7 @@ export default function DocumentsOverview() {
         </span>
         <h1 className="mt-5 text-2xl font-bold text-slate-950">Prima aggiungiamo il tuo immobile.</h1>
         <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-slate-500">
-          Dopo poche domande CasaPilot preparerà la checklist dei documenti che ti servono.
+          Dopo poche domande Guimmia preparerà la checklist dei documenti che ti servono.
         </p>
         <Link
           href="/dashboard/properties/new"
@@ -146,7 +146,7 @@ export default function DocumentsOverview() {
             <div>
               <h2 className="font-bold text-emerald-950">Checklist iniziale completa.</h2>
               <p className="mt-1 text-sm leading-6 text-emerald-800">
-                Torna al percorso: CasaPilot ti mostrerà il prossimo passo utile.
+                Torna al percorso: Guimmia ti mostrerà il prossimo passo utile.
               </p>
             </div>
           </div>
@@ -197,13 +197,13 @@ export default function DocumentsOverview() {
       >
         <div>
           <p className="text-sm font-bold">Non sai cosa fare dopo?</p>
-          <p className="mt-1 text-xs text-slate-300">Torna al Percorso: CasaPilot sceglie la priorità per te.</p>
+          <p className="mt-1 text-xs text-slate-300">Torna al Percorso: Guimmia sceglie la priorità per te.</p>
         </div>
         <ArrowRight size={18} className="shrink-0 transition-transform group-hover:translate-x-1" />
       </Link>
 
       <p className="text-xs leading-5 text-slate-400">
-        CasaPilot organizza la checklist, ma le verifiche tecniche, fiscali e legali vanno confermate con un professionista abilitato quando necessario.
+        Guimmia organizza la checklist, ma le verifiche tecniche, fiscali e legali vanno confermate con un professionista abilitato quando necessario.
       </p>
     </div>
   );

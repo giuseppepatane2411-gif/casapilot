@@ -94,7 +94,7 @@ function ActiveDashboard({
             <div>
               <p className="font-bold text-emerald-950">Il tuo percorso è pronto.</p>
               <p className="mt-1 text-sm leading-6 text-emerald-800">
-                Non devi imparare CasaPilot: completa il passo evidenziato e il successivo comparirà da solo.
+                Non devi imparare Guimmia: completa il passo evidenziato e il successivo comparirà da solo.
               </p>
             </div>
           </div>
@@ -108,7 +108,7 @@ function ActiveDashboard({
             Una cosa alla volta.
           </h1>
           <p className="mt-2 text-sm leading-6 text-slate-500 sm:text-base">
-            CasaPilot tiene il resto in ordine mentre tu pensi solo al prossimo passo.
+            Guimmia tiene il resto in ordine mentre tu pensi solo al prossimo passo.
           </p>
         </div>
         <Link
@@ -149,7 +149,7 @@ function ActiveDashboard({
             <div className="rounded-2xl bg-emerald-50 p-4">
               <p className="text-xs font-bold uppercase tracking-[0.1em] text-emerald-700">Quando hai finito</p>
               <p className="mt-2 text-sm leading-6 text-emerald-800">
-                Torna qui: CasaPilot aggiornerà il percorso e ti mostrerà automaticamente cosa viene dopo.
+                Torna qui: Guimmia aggiornerà il percorso e ti mostrerà automaticamente cosa viene dopo.
               </p>
             </div>
           </div>
@@ -239,7 +239,7 @@ function EmptyDashboard() {
   return (
     <div className="mx-auto max-w-4xl space-y-6 py-2 sm:py-6">
       <section className="text-center">
-        <p className="text-sm font-semibold text-blue-600">Benvenuto in CasaPilot</p>
+        <p className="text-sm font-semibold text-blue-600">Benvenuto in Guimmia</p>
         <h1 className="mx-auto mt-2 max-w-3xl text-3xl font-bold tracking-[-0.045em] text-slate-950 sm:text-5xl">
           Cosa vuoi fare con il tuo immobile?
         </h1>
@@ -265,7 +265,7 @@ function EmptyDashboard() {
 
       <section className="rounded-[22px] border border-slate-200 bg-white px-5 py-4 text-center shadow-sm">
         <p className="text-sm font-semibold text-slate-600">
-          1. Raccontaci l’immobile <span className="mx-2 text-slate-300">→</span> 2. CasaPilot prepara il percorso <span className="mx-2 text-slate-300">→</span> 3. Segui un passo alla volta
+          1. Raccontaci l’immobile <span className="mx-2 text-slate-300">→</span> 2. Guimmia prepara il percorso <span className="mx-2 text-slate-300">→</span> 3. Segui un passo alla volta
         </p>
       </section>
 

@@ -1,0 +1,35 @@
+import type { DocumentTypeDefinition } from "./types";
+
+export const DOCUMENT_CATALOG: DocumentTypeDefinition[] = [
+  { code: "IDENTITY_DOCUMENT", label: "Documento di identit\u00e0", category: "IDENTITY", sensitivity: "HIGH", extractionProfile: "identity-v2", description: "Documento identificativo del soggetto." },
+  { code: "TAX_CODE_DOCUMENT", label: "Codice fiscale / tessera sanitaria", category: "IDENTITY", sensitivity: "HIGH", extractionProfile: "tax-code-v1", description: "Documento di supporto all'identificazione fiscale quando necessario al processo." },
+  { code: "MANDATE", label: "Mandato / incarico", category: "MANDATE", sensitivity: "HIGH", extractionProfile: "contract-v2", description: "Incarico professionale firmato e versionato." },
+  { code: "PRIVACY_ACK", label: "Informativa / presa visione privacy", category: "MANDATE", sensitivity: "HIGH", extractionProfile: "privacy-ack-v1", description: "Tracciato di informativa/accettazione secondo policy corrente." },
+  { code: "AML_RECORD", label: "Evidenza processo AML", category: "MANDATE", sensitivity: "HIGH", extractionProfile: "aml-record-v1", description: "Evidenza del processo AML separata dai documenti di vendita." },
+  { code: "TITLE_DEED", label: "Atto di provenienza", category: "TITLE", sensitivity: "HIGH", extractionProfile: "title-deed-v2", description: "Titolo usato per riconciliare titolari e diritti." },
+  { code: "LAND_REGISTRY_INSPECTION", label: "Ispezione / formalit\u00e0 registri immobiliari", category: "REGISTRY", sensitivity: "HIGH", extractionProfile: "land-registry-v1", description: "Evidenza di pubblicit\u00e0 immobiliare/formalit\u00e0 da usare nei moduli dedicati." },
+  { code: "CADASTRAL_REPORT", label: "Visura catastale", category: "CADASTRAL", sensitivity: "PERSONAL", extractionProfile: "cadastre-report-v2", description: "Dati catastali dell'unit\u00e0." },
+  { code: "HISTORICAL_CADASTRAL_REPORT", label: "Visura catastale storica", category: "CADASTRAL", sensitivity: "PERSONAL", extractionProfile: "cadastre-history-v1", description: "Storico catastale quando utile al controllo." },
+  { code: "CADASTRAL_PLAN", label: "Planimetria catastale", category: "CADASTRAL", sensitivity: "PERSONAL", extractionProfile: "cadastre-plan-v2", description: "Rappresentazione catastale da instradare a P04." },
+  { code: "URBAN_ACCESS_REQUEST", label: "Accesso atti / richiesta documenti urbanistici", category: "URBAN", sensitivity: "PERSONAL", extractionProfile: "urban-access-v1", description: "Richiesta/ricevuta di accesso atti quando i titoli non sono disponibili." },
+  { code: "URBAN_TITLES", label: "Titoli e pratiche edilizie", category: "URBAN", sensitivity: "PERSONAL", extractionProfile: "urban-title-v2", description: "Documentazione urbanistica disponibile; sufficienza valutata in P04." },
+  { code: "AGIBILITY", label: "Agibilit\u00e0 / documentazione collegata", category: "URBAN", sensitivity: "PERSONAL", extractionProfile: "agibility-v2", description: "Documentazione relativa all'agibilit\u00e0 quando presente/rilevante." },
+  { code: "TECHNICAL_REPORT", label: "Relazione tecnica", category: "URBAN", sensitivity: "PERSONAL", extractionProfile: "technical-report-v2", description: "Relazione prodotta da tecnico abilitato quando prevista dal processo." },
+  { code: "APE", label: "APE", category: "ENERGY", sensitivity: "PERSONAL", extractionProfile: "ape-v2", description: "Attestato energetico quando il ruleset corrente ne determina l'applicabilit\u00e0." },
+  { code: "CONDOMINIUM_ADMIN_CERT", label: "Attestazione / situazione amministratore", category: "CONDOMINIUM", sensitivity: "HIGH", extractionProfile: "condo-admin-v1", description: "Documentazione amministratore relativa a spese/situazione contabile quando acquisita." },
+  { code: "CONDOMINIUM_MINUTES", label: "Verbali condominiali", category: "CONDOMINIUM", sensitivity: "PERSONAL", extractionProfile: "condo-minutes-v2", description: "Verbali rilevanti disponibili." },
+  { code: "CONDOMINIUM_RULES", label: "Regolamento condominiale", category: "CONDOMINIUM", sensitivity: "PERSONAL", extractionProfile: "condo-rules-v1", description: "Regolamento quando utile alla pratica." },
+  { code: "CONDOMINIUM_EXPENSES", label: "Prospetto spese / lavori", category: "CONDOMINIUM", sensitivity: "HIGH", extractionProfile: "condo-expenses-v1", description: "Spese ordinarie/straordinarie e lavori dichiarati/documentati." },
+  { code: "LEASE_CONTRACT", label: "Contratto di locazione", category: "LEASE", sensitivity: "HIGH", extractionProfile: "lease-v2", description: "Contratto e allegati se immobile locato." },
+  { code: "TENANT_NOTICES", label: "Comunicazioni rilevanti al conduttore", category: "LEASE", sensitivity: "HIGH", extractionProfile: "tenant-notice-v1", description: "Comunicazioni utili al percorso di vendita quando esistono." },
+  { code: "MORTGAGE_STATEMENT", label: "Documentazione mutuo / debito residuo", category: "FINANCE", sensitivity: "HIGH", extractionProfile: "mortgage-v2", description: "Documentazione sul finanziamento collegato all'immobile." },
+  { code: "MORTGAGE_PAYOFF_QUOTE", label: "Conteggio estintivo / documento banca", category: "FINANCE", sensitivity: "HIGH", extractionProfile: "mortgage-payoff-v1", description: "Documento bancario quando richiesto nel percorso di estinzione." },
+  { code: "SUCCESSION_DECLARATION", label: "Documentazione successoria", category: "TITLE", sensitivity: "HIGH", extractionProfile: "succession-v2", description: "Documentazione della provenienza successoria." },
+  { code: "SUCCESSION_ACCEPTANCE_EVIDENCE", label: "Accettazione / trascrizione collegata alla successione", category: "REGISTRY", sensitivity: "HIGH", extractionProfile: "succession-acceptance-v1", description: "Evidenza da instradare alla verifica notarile nei casi pertinenti." },
+  { code: "DONATION_DEED", label: "Atto di donazione", category: "TITLE", sensitivity: "HIGH", extractionProfile: "donation-v2", description: "Atto di provenienza donativa." },
+  { code: "POWER_OF_ATTORNEY", label: "Procura / poteri", category: "TITLE", sensitivity: "HIGH", extractionProfile: "authority-v2", description: "Documento dei poteri di chi agisce per altri." },
+  { code: "COMPANY_AUTHORITY_DOCS", label: "Documenti societ\u00e0 / poteri", category: "COMPANY", sensitivity: "HIGH", extractionProfile: "company-authority-v2", description: "Documenti della persona giuridica e del rappresentante." },
+  { code: "TAX_BONUS_DOCS", label: "Documentazione interventi agevolati", category: "TAX", sensitivity: "HIGH", extractionProfile: "tax-bonus-v2", description: "Documentazione storica che pu\u00f2 attivare verifiche fiscali correnti." },
+];
+
+export const documentTypeByCode = new Map(DOCUMENT_CATALOG.map(item => [item.code, item] as const));

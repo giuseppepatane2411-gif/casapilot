@@ -1,0 +1,1 @@
+import type{AgencyOperationalAction}from"./types";export function buildAgencyActionQueue(actions:AgencyOperationalAction[]){const rank={CRITICAL:0,HIGH:1,NORMAL:2};return[...actions].sort((a,b)=>rank[a.priority]-rank[b.priority]||(a.dueAt??"9999").localeCompare(b.dueAt??"9999")||a.code.localeCompare(b.code))}

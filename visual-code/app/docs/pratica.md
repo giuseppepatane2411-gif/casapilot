@@ -2,7 +2,7 @@
 
 ## Cos'è
 
-La pratica è il cuore di CasaPilot.
+La pratica è il cuore di Guimmia.
 
 Ogni obiettivo dell'utente genera una pratica.
 
@@ -49,7 +49,7 @@ CAP
 
 ## Stato avanzamento
 
-CasaPilot Score
+Guimmia Score
 
 Passaggi completati
 

@@ -145,7 +145,7 @@ export default function DashboardSidebar({
             Impostazioni
           </Link>
           <p className="mt-3 px-3 text-[11px] leading-5 text-slate-400">
-            CasaPilot · il tuo assistente immobiliare intelligente.
+            Guimmia · il tuo assistente immobiliare intelligente.
           </p>
         </div>
       </aside>

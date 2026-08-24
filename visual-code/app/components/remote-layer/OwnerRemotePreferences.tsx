@@ -27,9 +27,9 @@ const COMMUNICATION_OPTIONS: Array<{
 }> = [
   {
     value: "automatic",
-    title: "Lascia decidere a Pilot",
+    title: "Lascia decidere a Guimmia",
     description:
-      "Pilot usa la lingua in comune quando esiste e attiva la traduzione soltanto quando serve.",
+      "Guimmia usa la lingua in comune quando esiste e attiva la traduzione soltanto quando serve.",
   },
   {
     value: "direct_preferred",
@@ -41,13 +41,13 @@ const COMMUNICATION_OPTIONS: Array<{
     value: "translation_allowed",
     title: "La traduzione va bene",
     description:
-      "CasaPilot può mediare la conversazione mantenendo sempre disponibile il testo originale.",
+      "Guimmia può mediare la conversazione mantenendo sempre disponibile il testo originale.",
   },
   {
     value: "direct_only",
     title: "Solo comunicazione diretta",
     description:
-      "Pilot mostrerà soltanto professionisti con una lingua in comune.",
+      "Guimmia mostrerà soltanto professionisti con una lingua in comune.",
   },
 ];
 
@@ -110,7 +110,7 @@ export default function OwnerRemotePreferencesPage() {
       <Heading
         eyebrow="Preferenze riutilizzabili"
         title="Lingua, comunicazione e presenza"
-        description="Queste impostazioni non creano un percorso separato: aiutano Pilot ad adattare richieste, chat e professionisti quando gestisci un immobile da lontano o preferisci un'altra lingua."
+        description="Queste impostazioni non creano un percorso separato: aiutano Guimmia ad adattare richieste, chat e professionisti quando gestisci un immobile da lontano o preferisci un'altra lingua."
       />
 
       <div className="mx-auto max-w-4xl space-y-6 rounded-3xl border border-slate-200 bg-white p-6 sm:p-8">
@@ -121,7 +121,7 @@ export default function OwnerRemotePreferencesPage() {
                 Lingua e residenza
               </h2>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                Pilot usa questi dati per interfaccia, messaggi, orari e spiegazioni.
+                Guimmia usa questi dati per interfaccia, messaggi, orari e spiegazioni.
               </p>
             </div>
             <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
@@ -233,7 +233,7 @@ export default function OwnerRemotePreferencesPage() {
             Presenza presso l'immobile
           </h2>
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            Pilot userà queste informazioni soltanto quando il servizio richiede accesso, firma o sopralluogo.
+            Guimmia userà queste informazioni soltanto quando il servizio richiede accesso, firma o sopralluogo.
           </p>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -307,3 +307,4 @@ export default function OwnerRemotePreferencesPage() {
     </Page>
   );
 }
+

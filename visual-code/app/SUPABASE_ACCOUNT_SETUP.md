@@ -1,4 +1,4 @@
-# CasaPilot · attivazione account e profili professionali
+# Guimmia · attivazione account e profili professionali
 
 Questa guida collega a Supabase le funzioni già presenti nell’interfaccia:
 
@@ -73,7 +73,7 @@ Per le anteprime Vercel aggiungi anche il dominio di preview soltanto durante i 
 
 ## 5. Mantieni attiva la conferma email
 
-In **Authentication → Providers → Email** lascia attiva la conferma dell’indirizzo. CasaPilot include:
+In **Authentication → Providers → Email** lascia attiva la conferma dell’indirizzo. Guimmia include:
 
 ```text
 /check-email
@@ -81,7 +81,7 @@ In **Authentication → Providers → Email** lascia attiva la conferma dell’i
 
 con reinvio controllato del messaggio e collegamento all’accesso.
 
-Prima del lancio pubblico configura un mittente SMTP del dominio CasaPilot e personalizza almeno i modelli:
+Prima del lancio pubblico configura un mittente SMTP del dominio Guimmia e personalizza almeno i modelli:
 
 - conferma registrazione;
 - recupero password;
@@ -104,7 +104,7 @@ Configura in Supabase requisiti uguali o più severi. Valuta anche protezione da
 Da PowerShell:
 
 ```powershell
-cd C:\Users\Lenovo\Desktop\CasaPilot\visual-code\app
+cd C:\Users\Lenovo\Desktop\Guimmia\visual-code\app
 npm.cmd install
 npm.cmd run dev
 ```

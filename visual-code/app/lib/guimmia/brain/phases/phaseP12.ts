@@ -1,0 +1,20 @@
+import type { BrainRule } from "../types";
+import { makeSaleRule } from "../sale-operations/ruleFactory";
+export const phaseP12Rules:BrainRule[]=[
+  makeSaleRule({"id":"P12_NEGOTIATION_CONTEXT_MISSING","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Negotiation Context Missing","factPath":"sale.p12.negotiation_context_missing.status","decisionLevel":"REVIEW","severity":"blocking","gate":"OFFER"}),
+  makeSaleRule({"id":"P12_OFFER_GATE_NOT_READY","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Offer Gate Not Ready","factPath":"sale.p12.offer_gate_not_ready.status","decisionLevel":"REVIEW","severity":"critical","gate":"OFFER"}),
+  makeSaleRule({"id":"P12_PARTY_IDENTITY_MISSING","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Party Identity Missing","factPath":"sale.p12.party_identity_missing.status","decisionLevel":"REVIEW","severity":"blocking","gate":"OFFER"}),
+  makeSaleRule({"id":"P12_PARTY_AUTHORITY_UNKNOWN","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Party Authority Unknown","factPath":"sale.p12.party_authority_unknown.status","decisionLevel":"REVIEW","severity":"blocking","gate":"OFFER"}),
+  makeSaleRule({"id":"P12_PROPERTY_REFERENCE_MISMATCH","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Property Reference Mismatch","factPath":"sale.p12.property_reference_mismatch.status","decisionLevel":"REVIEW","severity":"blocking","gate":"OFFER"}),
+  makeSaleRule({"id":"P12_PRICE_MISSING","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Price Missing","factPath":"sale.p12.price_missing.status","decisionLevel":"REVIEW","severity":"blocking","gate":"OFFER"}),
+  makeSaleRule({"id":"P12_DEPOSIT_TERMS_MISSING","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Deposit Terms Missing","factPath":"sale.p12.deposit_terms_missing.status","decisionLevel":"REVIEW","severity":"blocking","gate":"OFFER"}),
+  makeSaleRule({"id":"P12_FINANCING_CONDITION_UNCLEAR","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Financing Condition Unclear","factPath":"sale.p12.financing_condition_unclear.status","decisionLevel":"REVIEW","severity":"blocking","gate":"OFFER"}),
+  makeSaleRule({"id":"P12_DUE_DILIGENCE_CONDITION_UNCLEAR","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Due Diligence Condition Unclear","factPath":"sale.p12.due_diligence_condition_unclear.status","decisionLevel":"REVIEW","severity":"blocking","gate":"OFFER"}),
+  makeSaleRule({"id":"P12_EXPIRY_MISSING","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Expiry Missing","factPath":"sale.p12.expiry_missing.status","decisionLevel":"REVIEW","severity":"blocking","gate":"OFFER"}),
+  makeSaleRule({"id":"P12_REQUIRED_DOCUMENT_MISSING","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Required Document Missing","factPath":"sale.p12.required_document_missing.status","decisionLevel":"REVIEW","severity":"blocking","gate":"OFFER"}),
+  makeSaleRule({"id":"P12_VERSION_FINGERPRINT_MISSING","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Version Fingerprint Missing","factPath":"sale.p12.version_fingerprint_missing.status","decisionLevel":"REVIEW","severity":"blocking","gate":"OFFER"}),
+  makeSaleRule({"id":"P12_HUMAN_REVIEW_MISSING","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Human Review Missing","factPath":"sale.p12.human_review_missing.status","decisionLevel":"AGENT_REQUIRED","severity":"critical","gate":"OFFER"}),
+  makeSaleRule({"id":"P12_AI_ACCEPTANCE_FORBIDDEN","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Ai Acceptance Forbidden","factPath":"sale.p12.ai_acceptance_forbidden.status","decisionLevel":"AGENT_REQUIRED","severity":"critical","gate":"OFFER"}),
+  makeSaleRule({"id":"P12_ACCEPTANCE_EVIDENCE_MISSING","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Acceptance Evidence Missing","factPath":"sale.p12.acceptance_evidence_missing.status","decisionLevel":"AGENT_REQUIRED","severity":"blocking","gate":"OFFER"}),
+  makeSaleRule({"id":"P12_READY","module":"SALE_OFFER","phase":"PHASE_12_OFFER","title":"Ready","factPath":"sale.p12.ready.status","ready":true,"decisionLevel":"AUTO","severity":"info","gate":"OFFER"})
+];

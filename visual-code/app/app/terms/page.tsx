@@ -4,7 +4,7 @@ import { ArrowLeft, FileCheck2, Info, Scale, ShieldCheck } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Condizioni d’uso",
-  description: "Condizioni generali per l’utilizzo di CasaPilot.",
+  description: "Condizioni generali per l’utilizzo di Guimmia.",
 };
 
 export default function TermsPage() {
@@ -13,7 +13,7 @@ export default function TermsPage() {
       <div className="mx-auto w-full max-w-4xl">
         <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-slate-950">
           <ArrowLeft size={17} />
-          Torna a CasaPilot
+          Torna a Guimmia
         </Link>
 
         <header className="mt-7 rounded-[32px] bg-slate-950 p-6 text-white shadow-xl shadow-slate-950/10 sm:p-10">
@@ -21,7 +21,7 @@ export default function TermsPage() {
             <Scale size={23} />
           </span>
           <p className="mt-6 text-sm font-semibold text-blue-300">Condizioni d’uso</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-[-0.05em] sm:text-5xl">Regole chiare per usare CasaPilot.</h1>
+          <h1 className="mt-2 text-3xl font-bold tracking-[-0.05em] sm:text-5xl">Regole chiare per usare Guimmia.</h1>
           <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300 sm:text-base">
             L’utilizzo del servizio comporta l’accettazione delle condizioni riportate in questa pagina.
           </p>
@@ -29,16 +29,16 @@ export default function TermsPage() {
 
         <div className="mt-7 space-y-5">
           <TermSection icon={FileCheck2} title="Finalità del servizio">
-            CasaPilot aiuta a organizzare dati, documenti, attività e prossimi passi relativi a immobili e operazioni immobiliari. Le informazioni fornite hanno carattere organizzativo e informativo.
+            Guimmia aiuta a organizzare dati, documenti, attività e prossimi passi relativi a immobili e operazioni immobiliari. Le informazioni fornite hanno carattere organizzativo e informativo.
           </TermSection>
           <TermSection icon={Info} title="Limiti delle indicazioni">
-            Pilot, checklist e punteggi non sostituiscono pareri, certificazioni o verifiche di professionisti abilitati. L’utente resta responsabile della correttezza dei dati inseriti e delle decisioni assunte.
+            Guimmia, checklist e punteggi non sostituiscono pareri, certificazioni o verifiche di professionisti abilitati. L’utente resta responsabile della correttezza dei dati inseriti e delle decisioni assunte.
           </TermSection>
           <TermSection icon={ShieldCheck} title="Account e sicurezza">
             L’utente deve fornire dati veritieri, custodire le credenziali e segnalare accessi non autorizzati. I professionisti non possono dichiararsi verificati autonomamente: la verifica è un processo separato.
           </TermSection>
           <TermSection icon={Scale} title="Uso corretto">
-            È vietato utilizzare CasaPilot per attività illecite, per impersonare terzi, caricare contenuti non autorizzati o tentare di aggirare le misure di sicurezza del servizio.
+            È vietato utilizzare Guimmia per attività illecite, per impersonare terzi, caricare contenuti non autorizzati o tentare di aggirare le misure di sicurezza del servizio.
           </TermSection>
         </div>
 
@@ -52,7 +52,7 @@ export default function TermsPage() {
           </Link>
         </section>
 
-        <p className="mt-8 text-center text-xs text-slate-400">Condizioni d’uso CasaPilot · versione 1 agosto 2026</p>
+        <p className="mt-8 text-center text-xs text-slate-400">Condizioni d’uso Guimmia · versione 1 agosto 2026</p>
       </div>
     </main>
   );
@@ -81,3 +81,4 @@ function TermSection({
     </section>
   );
 }
+

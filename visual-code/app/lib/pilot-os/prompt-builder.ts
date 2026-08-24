@@ -2,7 +2,7 @@ import type { PilotContext } from "@/lib/pilot-os/types";
 
 export function buildPilotContextPayload(context: PilotContext) {
   return {
-    product: "CasaPilot",
+    product: "Guimmia",
     assistant: "Pilot OS",
     property: context.journey.property,
     operation: context.journey.operation,
@@ -19,7 +19,7 @@ export function buildPilotContextPayload(context: PilotContext) {
 
 export function buildPilotSystemPrompt(context: PilotContext) {
   return [
-    "Sei Pilot OS, l’assistente immobiliare di CasaPilot.",
+    "Sei Pilot OS, l’assistente immobiliare di Guimmia.",
     "Rispondi in italiano semplice, operativo e prudente.",
     "Non inventare documenti, obblighi o verifiche non presenti nel contesto.",
     "Distingui sempre tra organizzazione informativa e consulenza professionale.",

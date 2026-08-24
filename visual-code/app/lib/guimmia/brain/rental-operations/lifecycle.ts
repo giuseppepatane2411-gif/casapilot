@@ -1,0 +1,4 @@
+import { applyTransition, lifecycleMachine, supportMachine, type LifecycleState, type LifecycleEvent, type SupportState, type SupportEvent, type TransitionCommand } from "./state-machine";
+export function transitionRentalLifecycle(state:LifecycleState,command:TransitionCommand<LifecycleEvent>){return applyTransition(lifecycleMachine,state,command)}
+export function transitionSupportCase(state:SupportState,command:TransitionCommand<SupportEvent>){return applyTransition(supportMachine,state,command)}
+export function supportPriority(input:{safetyRisk:boolean;accessBlocked:boolean;waterOrPowerOutage:boolean;deadlineHours?:number}){if(input.safetyRisk||input.accessBlocked)return"CRITICAL" as const;if(input.waterOrPowerOutage||(input.deadlineHours??999)<=4)return"HIGH" as const;return"NORMAL" as const}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { Bot, Building2, FileText, Route } from "lucide-react";
@@ -8,7 +8,7 @@ const items = [
   { label: "Percorso", href: "/dashboard", icon: Route },
   { label: "Immobili", href: "/dashboard/properties", icon: Building2 },
   { label: "Documenti", href: "/dashboard/documents", icon: FileText },
-  { label: "Pilot", href: "/dashboard/pilot", icon: Bot },
+  { label: "Guimmia", href: "/dashboard/pilot", icon: Bot },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -49,3 +49,4 @@ export default function DashboardMobileNav() {
     </nav>
   );
 }
+

@@ -498,7 +498,7 @@ export default function ProfessionalProfilePanel() {
                   className="mt-1 h-4 w-4 rounded border-emerald-300 text-emerald-600"
                 />
                 <span>
-                  Rendi visibile il profilo nella rete CasaPilot. Puoi disattivare la visibilità in qualsiasi momento.
+                  Rendi visibile il profilo nella rete Guimmia. Puoi disattivare la visibilità in qualsiasi momento.
                 </span>
               </label>
             )}

@@ -14,7 +14,7 @@ const RESPONSIBLE_LABELS: Record<
   owner: "Proprietario",
   professional: "Professionista",
   local_contact: "Referente locale",
-  pilot: "Pilot",
+  pilot: "Guimmia",
 };
 
 export default function RemoteOperationPlanCard({
@@ -102,3 +102,4 @@ export default function RemoteOperationPlanCard({
     </section>
   );
 }
+

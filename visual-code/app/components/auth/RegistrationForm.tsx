@@ -234,7 +234,7 @@ export default function RegistrationForm() {
       {step === 0 && (
         <div className="space-y-6">
           <section>
-            <p className="text-sm font-bold text-slate-950">Come userai CasaPilot?</p>
+            <p className="text-sm font-bold text-slate-950">Come userai Guimmia?</p>
             <p className="mt-1 text-sm leading-6 text-slate-500">
               Proprietari e professionisti hanno percorsi separati.
             </p>
@@ -328,7 +328,7 @@ export default function RegistrationForm() {
           </label>
           <label className="flex items-start gap-3 rounded-2xl border border-slate-200 p-4 text-sm leading-6 text-slate-600">
             <input type="checkbox" checked={marketingConsent} onChange={(event) => setMarketingConsent(event.target.checked)} className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600" />
-            <span>Desidero ricevere aggiornamenti utili su CasaPilot. Il consenso è facoltativo e revocabile.</span>
+            <span>Desidero ricevere aggiornamenti utili su Guimmia. Il consenso è facoltativo e revocabile.</span>
           </label>
         </div>
       )}

@@ -24,12 +24,12 @@ export default function PilotConversation({
 
       </div>
 
-      {/* Risposta Pilot */}
+      {/* Risposta Guimmia */}
 
       <div className="rounded-[34px] border border-slate-200 bg-white p-10 shadow-[0_25px_70px_rgba(15,23,42,.08)]">
 
         <span className="text-sm font-semibold uppercase tracking-[0.20em] text-blue-600">
-          CASAPILOT
+          GUIMMIA
         </span>
 
         <h2 className="mt-4 text-3xl font-semibold text-slate-900">

@@ -16,7 +16,7 @@ import {
   readProductState,
   replaceProductState,
 } from "@/lib/product/storage";
-import type { CasaPilotBackup } from "@/lib/product/types";
+import type { GuimmiaBackup } from "@/lib/product/types";
 import { clearLocalVault } from "@/lib/local-vault/db";
 import { PILOT_MEMORY_STORAGE_KEY } from "@/lib/pilot-os/store";
 import {
@@ -54,9 +54,9 @@ export default function LocalDataSettings() {
   } | null>(null);
 
   function exportData() {
-    const payload: CasaPilotBackup = {
+    const payload: GuimmiaBackup = {
       version: 4,
-      product: "CasaPilot",
+      product: "Guimmia",
       release: "casapilot-1.0",
       exportedAt: new Date().toISOString(),
       activeJourneyId: readActiveJourneyId(),
@@ -64,7 +64,7 @@ export default function LocalDataSettings() {
       wizardDraft: readWizardDraft(),
       pilotMemory: readJsonObject(
         PILOT_MEMORY_STORAGE_KEY,
-      ) as CasaPilotBackup["pilotMemory"],
+      ) as GuimmiaBackup["pilotMemory"],
       productState: readProductState(),
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
@@ -89,7 +89,7 @@ export default function LocalDataSettings() {
 
     try {
       const text = await file.text();
-      const parsed = JSON.parse(text) as Partial<CasaPilotBackup> & {
+      const parsed = JSON.parse(text) as Partial<GuimmiaBackup> & {
         journeys?: unknown;
       };
 
@@ -140,7 +140,7 @@ export default function LocalDataSettings() {
 
       setMessage({
         tone: "success",
-        text: `${parsed.journeys.length} pratiche importate. CasaPilot verrà ricaricato.`,
+        text: `${parsed.journeys.length} pratiche importate. Guimmia verrà ricaricato.`,
       });
       window.setTimeout(() => {
         window.location.href = "/dashboard";
@@ -151,7 +151,7 @@ export default function LocalDataSettings() {
         text:
           error instanceof Error
             ? error.message
-            : "Il file non è un backup CasaPilot valido.",
+            : "Il file non è un backup Guimmia valido.",
       });
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -160,7 +160,7 @@ export default function LocalDataSettings() {
 
   async function clearData() {
     const confirmed = window.confirm(
-      "Vuoi cancellare pratiche, bozze, memoria di Pilot, preferenze, dati tecnici e file dell’Archivio locale? L’operazione non può essere annullata.",
+      "Vuoi cancellare pratiche, bozze, memoria di Guimmia, preferenze, dati tecnici e file dell’Archivio locale? L’operazione non può essere annullata.",
     );
 
     if (!confirmed) return;
@@ -219,7 +219,7 @@ export default function LocalDataSettings() {
               Archivio locale completo
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              Il backup include immobili, checklist, bozza del wizard, memoria di Pilot, timeline, conversazioni, preferenze e dati tecnici. I file salvati sul dispositivo restano esclusi: conserva sempre gli originali.
+              Il backup include immobili, checklist, bozza del wizard, memoria di Guimmia, timeline, conversazioni, preferenze e dati tecnici. I file salvati sul dispositivo restano esclusi: conserva sempre gli originali.
             </p>
           </div>
         </div>
@@ -228,7 +228,7 @@ export default function LocalDataSettings() {
           <DataAction
             icon={Download}
             title="Esporta backup"
-            description="Scarica un unico file JSON con lo stato completo di CasaPilot."
+            description="Scarica un unico file JSON con lo stato completo di Guimmia."
             actionLabel="Esporta tutto"
             onClick={exportData}
             primary
@@ -335,3 +335,4 @@ function DataAction({
     </article>
   );
 }
+

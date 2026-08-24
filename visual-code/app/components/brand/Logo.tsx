@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Compass } from "lucide-react";
 
 type LogoProps = {
@@ -19,7 +19,7 @@ export default function Logo({
   return (
     <Link
       href="/"
-      aria-label="Vai alla Home di CasaPilot"
+      aria-label="Vai alla Home di Guimmia"
       className={`
         group
         inline-flex
@@ -86,8 +86,8 @@ export default function Logo({
               sm:text-[24px]
             "
           >
-            Casa
-            <span className="text-blue-600">Pilot</span>
+            Guimm
+            <span className="text-blue-600">ia</span>
           </span>
 
           {showTagline && (

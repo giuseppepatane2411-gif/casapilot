@@ -4,7 +4,7 @@ import LocalDataSettings from "@/components/settings/LocalDataSettings";
 
 export const metadata: Metadata = {
   title: "Impostazioni",
-  description: "Esporta, importa o cancella i dati locali di CasaPilot.",
+  description: "Esporta, importa o cancella i dati locali di Guimmia.",
 };
 
 export default function SettingsPage() {

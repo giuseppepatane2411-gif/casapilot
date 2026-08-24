@@ -1,4 +1,4 @@
-# DATABASE CASAPILOT
+# DATABASE GUIMMIA
 
 ## Utente
 
@@ -78,7 +78,7 @@ La pratica può avere:
 
 ---
 
-## CasaPilot Score
+## Guimmia Score
 
 Ogni pratica possiede un punteggio.
 

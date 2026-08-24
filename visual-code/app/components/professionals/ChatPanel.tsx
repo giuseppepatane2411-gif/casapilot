@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import {
@@ -119,7 +119,7 @@ export default function ChatPanel({
 
       <div className="mt-3 grid gap-2 text-xs leading-5 text-slate-500 sm:grid-cols-2">
         <p>
-          Pilot classifica il contenuto prima di tradurlo. I messaggi ordinari
+          Guimmia classifica il contenuto prima di tradurlo. I messaggi ordinari
           possono essere tradotti automaticamente.
         </p>
         <p>
@@ -130,3 +130,4 @@ export default function ChatPanel({
     </div>
   );
 }
+

@@ -6,7 +6,7 @@ import RegistrationForm from "@/components/auth/RegistrationForm";
 
 export const metadata: Metadata = {
   title: "Registrati",
-  description: "Crea il tuo account CasaPilot come privato o professionista.",
+  description: "Crea il tuo account Guimmia come privato o professionista.",
 };
 
 export default function RegisterPage() {
@@ -14,7 +14,7 @@ export default function RegisterPage() {
     <AuthShell
       eyebrow="Registrazione"
       title="Crea il tuo account."
-      description="Scegli il profilo più adatto. Un privato organizza le proprie pratiche; un professionista costruisce la propria presenza nella rete CasaPilot."
+      description="Scegli il profilo più adatto. Un privato organizza le proprie pratiche; un professionista costruisce la propria presenza nella rete Guimmia."
     >
       <Suspense fallback={<div className="h-96 animate-pulse rounded-3xl bg-slate-100" />}>
         <RegistrationForm />

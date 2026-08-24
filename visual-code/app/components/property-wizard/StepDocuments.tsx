@@ -19,7 +19,7 @@ export default function StepDocuments({
       <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
         <Info size={18} className="mt-0.5 shrink-0" />
         <p>
-          Questa è una checklist iniziale e indicativa. Se non sei sicuro, lascia il documento non selezionato: Pilot ti aiuterà a verificarlo.
+          Questa è una checklist iniziale e indicativa. Se non sei sicuro, lascia il documento non selezionato: Guimmia ti aiuterà a verificarlo.
         </p>
       </div>
 
@@ -71,3 +71,4 @@ export default function StepDocuments({
     </div>
   );
 }
+

@@ -1,0 +1,16 @@
+import type { BrainRule } from "../types";
+import { makeSaleRule } from "../sale-operations/ruleFactory";
+export const phaseP08Rules:BrainRule[]=[
+  makeSaleRule({"id":"P08_MARKET_READINESS_MISSING","module":"SALE_PUBLISHING","phase":"PHASE_08_PUBLISHING","title":"Market Readiness Missing","factPath":"sale.p08.market_readiness_missing.status","decisionLevel":"REVIEW","severity":"blocking","gate":"PUBLICATION"}),
+  makeSaleRule({"id":"P08_PUBLICATION_GATE_NOT_READY","module":"SALE_PUBLISHING","phase":"PHASE_08_PUBLISHING","title":"Publication Gate Not Ready","factPath":"sale.p08.publication_gate_not_ready.status","decisionLevel":"REVIEW","severity":"critical","gate":"PUBLICATION"}),
+  makeSaleRule({"id":"P08_LISTING_VERSION_MISSING","module":"SALE_PUBLISHING","phase":"PHASE_08_PUBLISHING","title":"Listing Version Missing","factPath":"sale.p08.listing_version_missing.status","decisionLevel":"REVIEW","severity":"blocking","gate":"PUBLICATION"}),
+  makeSaleRule({"id":"P08_HUMAN_APPROVAL_MISSING","module":"SALE_PUBLISHING","phase":"PHASE_08_PUBLISHING","title":"Human Approval Missing","factPath":"sale.p08.human_approval_missing.status","decisionLevel":"AGENT_REQUIRED","severity":"critical","gate":"PUBLICATION"}),
+  makeSaleRule({"id":"P08_CHANNEL_NOT_AUTHORIZED","module":"SALE_PUBLISHING","phase":"PHASE_08_PUBLISHING","title":"Channel Not Authorized","factPath":"sale.p08.channel_not_authorized.status","decisionLevel":"REVIEW","severity":"blocking","gate":"PUBLICATION"}),
+  makeSaleRule({"id":"P08_CHANNEL_PAYLOAD_MISMATCH","module":"SALE_PUBLISHING","phase":"PHASE_08_PUBLISHING","title":"Channel Payload Mismatch","factPath":"sale.p08.channel_payload_mismatch.status","decisionLevel":"REVIEW","severity":"blocking","gate":"PUBLICATION"}),
+  makeSaleRule({"id":"P08_DUPLICATE_ACTIVE_LISTING","module":"SALE_PUBLISHING","phase":"PHASE_08_PUBLISHING","title":"Duplicate Active Listing","factPath":"sale.p08.duplicate_active_listing.status","decisionLevel":"REVIEW","severity":"blocking","gate":"PUBLICATION"}),
+  makeSaleRule({"id":"P08_PUBLICATION_IDEMPOTENCY_MISSING","module":"SALE_PUBLISHING","phase":"PHASE_08_PUBLISHING","title":"Publication Idempotency Missing","factPath":"sale.p08.publication_idempotency_missing.status","decisionLevel":"REVIEW","severity":"blocking","gate":"PUBLICATION"}),
+  makeSaleRule({"id":"P08_PORTAL_ERROR_UNRESOLVED","module":"SALE_PUBLISHING","phase":"PHASE_08_PUBLISHING","title":"Portal Error Unresolved","factPath":"sale.p08.portal_error_unresolved.status","decisionLevel":"REVIEW","severity":"blocking","gate":"PUBLICATION"}),
+  makeSaleRule({"id":"P08_UPSTREAM_CHANGE_DETECTED","module":"SALE_PUBLISHING","phase":"PHASE_08_PUBLISHING","title":"Upstream Change Detected","factPath":"sale.p08.upstream_change_detected.status","decisionLevel":"REVIEW","severity":"blocking","gate":"PUBLICATION"}),
+  makeSaleRule({"id":"P08_PAUSE_REASON_MISSING","module":"SALE_PUBLISHING","phase":"PHASE_08_PUBLISHING","title":"Pause Reason Missing","factPath":"sale.p08.pause_reason_missing.status","decisionLevel":"REVIEW","severity":"blocking","gate":"PUBLICATION"}),
+  makeSaleRule({"id":"P08_ACTIVE","module":"SALE_PUBLISHING","phase":"PHASE_08_PUBLISHING","title":"Active","factPath":"sale.p08.active.status","ready":true,"decisionLevel":"AUTO","severity":"info","gate":"PUBLICATION"})
+];

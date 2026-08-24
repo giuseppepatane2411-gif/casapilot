@@ -4,7 +4,7 @@ import ProfessionalProfilePanel from "@/components/account/ProfessionalProfilePa
 
 export const metadata: Metadata = {
   title: "Profilo professionale",
-  description: "Gestisci attività, territorio e verifica del tuo profilo professionale CasaPilot.",
+  description: "Gestisci attività, territorio e verifica del tuo profilo professionale Guimmia.",
 };
 
 export default function ProfessionalProfilePage() {

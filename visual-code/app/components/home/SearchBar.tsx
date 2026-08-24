@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { ArrowUpRight, Bot } from "lucide-react";
 
@@ -79,9 +79,9 @@ export default function SearchBar({
               sm:rounded-full
               sm:px-0
             "
-            aria-label="Avvia Pilot"
+            aria-label="Avvia Guimmia"
           >
-            <span className="sm:hidden">Parla con Pilot</span>
+            <span className="sm:hidden">Parla con Guimmia</span>
             <ArrowUpRight size={23} aria-hidden="true" />
           </button>
         </div>

@@ -1,6 +1,6 @@
 # Vision
 
-## Perché nasce CasaPilot
+## Perché nasce Guimmia
 
 ## Il problema che vogliamo risolvere
 

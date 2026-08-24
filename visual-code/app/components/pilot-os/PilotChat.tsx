@@ -42,7 +42,7 @@ export default function PilotChat({ context }: PilotChatProps) {
     setInput("");
     savePilotMessages(context.journey.id, nextMessages);
     addPilotTimelineEvent(context.journey.id, {
-      title: "Pilot consultato",
+      title: "Guimmia consultato",
       description: `Domanda: “${trimmed.slice(0, 80)}${trimmed.length > 80 ? "…" : ""}”`,
       type: "conversation",
     });
@@ -66,7 +66,7 @@ export default function PilotChat({ context }: PilotChatProps) {
             </span>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold">Parla con Pilot</h2>
+                <h2 className="text-xl font-bold">Parla con Guimmia</h2>
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
               </div>
               <p className="mt-1 text-xs text-slate-400">
@@ -145,9 +145,10 @@ export default function PilotChat({ context }: PilotChatProps) {
           </button>
         </form>
         <p className="mt-2 px-1 text-[11px] leading-5 text-slate-400">
-          Pilot organizza informazioni e priorità; le verifiche tecniche, fiscali e legali restano affidate ai professionisti abilitati.
+          Guimmia organizza informazioni e priorità; le verifiche tecniche, fiscali e legali restano affidate ai professionisti abilitati.
         </p>
       </div>
     </section>
   );
 }
+

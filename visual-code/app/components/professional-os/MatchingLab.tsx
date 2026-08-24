@@ -208,7 +208,7 @@ export default function MatchingLab() {
   return (
     <Page>
       <Heading
-        eyebrow="Amministrazione CasaPilot"
+        eyebrow="Amministrazione Guimmia"
         title="Laboratorio del matching"
         description="Simula requisiti bloccanti, lingua, distanza, punteggio e distribuzione a ondate prima di attivare il matching reale."
       />

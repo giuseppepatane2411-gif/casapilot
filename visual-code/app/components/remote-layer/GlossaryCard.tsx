@@ -17,7 +17,7 @@ export default function GlossaryCard({
   return (
     <section className="rounded-3xl border border-blue-200 bg-blue-50 p-6">
       <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-600">
-        Spiegazione di Pilot · {LANGUAGE_LABELS[language]}
+        Spiegazione di Guimmia · {LANGUAGE_LABELS[language]}
       </p>
       <div className="mt-4 space-y-4">
         {entries.map((entry) => (
@@ -44,3 +44,4 @@ export default function GlossaryCard({
     </section>
   );
 }
+

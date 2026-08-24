@@ -47,12 +47,12 @@ export default function OwnerMarketplace() {
       p_postal_code: location?.postalCode || null,
       p_property_ref: null,
     });
-    if (error) setMessage(error.message); else { setTitle(""); setDescription(""); setLocationQuery(""); setLocation(null); setMessage("Richiesta creata. CasaPilot potrà associare fino a 3 professionisti pertinenti."); await load(); }
+    if (error) setMessage(error.message); else { setTitle(""); setDescription(""); setLocationQuery(""); setLocation(null); setMessage("Richiesta creata. Guimmia potrà associare fino a 3 professionisti pertinenti."); await load(); }
     setSubmitting(false);
   }
 
   return <div className="space-y-7">
-    <section className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-sm sm:p-8"><div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between"><div className="max-w-3xl"><div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-blue-700"><BriefcaseBusiness size={15}/>Marketplace CasaPilot</div><h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Una richiesta strutturata, fino a 3 professionisti pertinenti.</h1><p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">Pilot userà categorie e servizi definiti da CasaPilot, non parole libere inserite dai professionisti.</p></div><div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-bold text-emerald-900"><ShieldCheck size={17} className="inline mr-2"/>Matching documentabile</div></div></section>
+    <section className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-sm sm:p-8"><div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between"><div className="max-w-3xl"><div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-blue-700"><BriefcaseBusiness size={15}/>Marketplace Guimmia</div><h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Una richiesta strutturata, fino a 3 professionisti pertinenti.</h1><p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">Guimmia userà categorie e servizi definiti da Guimmia, non parole libere inserite dai professionisti.</p></div><div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-bold text-emerald-900"><ShieldCheck size={17} className="inline mr-2"/>Matching documentabile</div></div></section>
     {message && <div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-800">{message}</div>}
     <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
       <form onSubmit={submit} className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6"><h2 className="text-2xl font-bold text-slate-950">Nuova richiesta</h2><div className="mt-5 space-y-4">
@@ -67,3 +67,4 @@ export default function OwnerMarketplace() {
     </section>
   </div>;
 }
+

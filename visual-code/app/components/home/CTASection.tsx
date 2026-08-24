@@ -28,7 +28,7 @@ export default function CTASection() {
           <div className="relative z-10 max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-blue-600 shadow-sm sm:text-sm">
               <Sparkles size={15} aria-hidden="true" />
-              Inizia con CasaPilot
+              Inizia con Guimmia
             </div>
 
             <h2 className="mt-6 text-3xl font-semibold leading-tight tracking-[-0.045em] text-slate-950 sm:text-4xl lg:text-5xl">

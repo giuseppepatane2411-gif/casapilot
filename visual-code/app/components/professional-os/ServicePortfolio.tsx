@@ -68,7 +68,7 @@ export default function ServicePortfolio() {
         />
         <EmptyState
           title="Profilo professionale non configurato"
-          description="Pilot non può valutare compatibilità e requisiti senza sapere chi sei e dove operi."
+          description="Guimmia non può valutare compatibilità e requisiti senza sapere chi sei e dove operi."
           action={
             <LinkButton href="/professionista/onboarding">
               Configura il profilo
@@ -82,7 +82,7 @@ export default function ServicePortfolio() {
   return (
     <Page>
       <Heading
-        eyebrow="Il motore di Pilot"
+        eyebrow="Il motore di Guimmia"
         title="Portfolio dei servizi"
         description="Ogni cartella contiene i servizi della categoria. Ciascuno possiede requisiti, copertura, capacità, prezzo, SLA, presenza richiesta e livello di gestione a distanza."
         action={
@@ -106,7 +106,7 @@ export default function ServicePortfolio() {
           </span>
           <div>
             <h2 className="font-semibold text-blue-950">
-              Pilot non usa più soltanto il nome della professione
+              Guimmia non usa più soltanto il nome della professione
             </h2>
             <p className="mt-2 text-sm leading-6 text-blue-800">
               Prima applica i requisiti bloccanti del singolo servizio. Poi
@@ -219,3 +219,4 @@ export default function ServicePortfolio() {
     </Page>
   );
 }
+

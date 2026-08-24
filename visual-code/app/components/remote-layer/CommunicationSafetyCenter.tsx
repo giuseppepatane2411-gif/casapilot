@@ -42,7 +42,7 @@ export default function CommunicationSafetyCenter() {
       <Heading
         eyebrow="Controllo amministrativo"
         title="Laboratorio comunicazione"
-        description="Verifica come CasaPilot tratta messaggi ordinari, tecnici, economici, legali e documenti ufficiali prima di collegare un provider reale."
+        description="Verifica come Guimmia tratta messaggi ordinari, tecnici, economici, legali e documenti ufficiali prima di collegare un provider reale."
       />
 
       <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
@@ -104,7 +104,7 @@ export default function CommunicationSafetyCenter() {
                 }
                 className="min-h-12 w-full rounded-xl border border-slate-200 bg-white px-4"
               >
-                <option value="automatic">Pilot decide</option>
+                <option value="automatic">Guimmia decide</option>
                 <option value="direct_preferred">Diretta preferita</option>
                 <option value="translation_allowed">Traduzione consentita</option>
                 <option value="direct_only">Solo diretta</option>
@@ -125,7 +125,7 @@ export default function CommunicationSafetyCenter() {
         <aside className="space-y-5">
           <section className="rounded-3xl border border-blue-200 bg-blue-50 p-6 text-blue-950">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-600">
-              Decisione di Pilot
+              Decisione di Guimmia
             </p>
             <dl className="mt-4 space-y-3 text-sm">
               <div className="flex justify-between gap-4">
@@ -190,3 +190,4 @@ export default function CommunicationSafetyCenter() {
     </Page>
   );
 }
+

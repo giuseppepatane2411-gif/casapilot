@@ -39,7 +39,7 @@ export default function MissionCommandCenter({
         id: `document-${selectedMission.documentId}`,
         title: `${document?.title ?? "Documento"} disponibile`,
         description:
-          "CasaPilot ha aggiornato la checklist e scelto la prossima azione.",
+          "Guimmia ha aggiornato la checklist e scelto la prossima azione.",
         type: "document",
       });
       markProductMilestone("mission-completed");

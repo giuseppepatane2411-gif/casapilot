@@ -36,12 +36,12 @@ export default function Hero() {
             <div className="flex justify-center">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-semibold text-white backdrop-blur-md sm:px-4 sm:text-sm">
                 <Sparkles size={15} aria-hidden="true" />
-                Pilot è pronto a guidarti
+                Guimmia è pronta a guidarti
               </div>
             </div>
 
             <h1 className="mx-auto mt-6 max-w-4xl text-center text-[38px] font-semibold leading-[0.98] tracking-[-0.055em] text-white sm:mt-8 sm:text-6xl lg:text-[76px]">
-              Il tuo assistente
+              La tua guida
               <span className="block text-blue-100">
                 immobiliare intelligente.
               </span>
@@ -49,7 +49,7 @@ export default function Hero() {
 
             <p className="mx-auto mt-5 max-w-3xl text-center text-base leading-7 text-blue-100/90 sm:mt-7 sm:text-xl sm:leading-9">
               Vendi o affitta il tuo immobile senza perderti tra documenti,
-              scadenze e burocrazia. Racconta a Pilot cosa vuoi fare e lasciati
+              scadenze e burocrazia. Racconta a Guimmia cosa vuoi fare e lasciati
               guidare passo dopo passo.
             </p>
 
@@ -81,3 +81,4 @@ export default function Hero() {
     </section>
   );
 }
+

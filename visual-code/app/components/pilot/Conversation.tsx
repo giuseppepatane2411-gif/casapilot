@@ -22,7 +22,7 @@ export default function Conversation({
         </div>
       )}
 
-      {/* Risposta Pilot */}
+      {/* Risposta Guimmia */}
 
       <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
 

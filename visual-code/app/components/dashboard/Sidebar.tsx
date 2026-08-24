@@ -5,7 +5,7 @@ export default function Sidebar() {
     <aside className="w-72 border-r border-slate-200 bg-white p-6">
 
       <h1 className="text-3xl font-extrabold">
-        Casa<span className="text-blue-600">Pilot</span>
+        Casa<span className="text-blue-600">ia</span>
       </h1>
 
       <p className="mt-2 text-sm text-slate-500">

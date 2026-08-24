@@ -183,7 +183,7 @@ async function searchPhoton(query: string, limit = 10) {
       headers: {
         Accept: "application/json",
         "Accept-Language": "it-IT,it;q=0.9",
-        "User-Agent": "CasaPilot/1.0",
+        "User-Agent": "Guimmia/1.0",
       },
       cache: "no-store",
     });
@@ -436,7 +436,7 @@ export async function GET(request: NextRequest) {
       { headers: { "Cache-Control": "private, max-age=0, must-revalidate" } },
     );
   } catch (error) {
-    console.error("CasaPilot location search failed", error);
+    console.error("Guimmia location search failed", error);
     return NextResponse.json(
       { suggestions: [], message: "location-search-unavailable" },
       { status: 502 },

@@ -3,7 +3,7 @@ export default function Features() {
     {
       title: "Vendi",
       description:
-        "Pilot ti guida dalla preparazione dei documenti fino al rogito.",
+        "Guimmia ti guida dalla preparazione dei documenti fino al rogito.",
       icon: "🏠",
     },
     {
@@ -39,7 +39,7 @@ export default function Features() {
           </h2>
 
           <p className="mt-6 text-lg text-slate-600">
-            CasaPilot non è solo un archivio documentale.
+            Guimmia non è solo un archivio documentale.
             È l’assistente immobiliare digitale che accompagna utenti,
             proprietari, inquilini e professionisti in ogni pratica.
           </p>

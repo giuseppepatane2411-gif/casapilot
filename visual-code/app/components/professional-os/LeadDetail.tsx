@@ -170,7 +170,7 @@ export default function LeadDetail({ leadId }: { leadId: string }) {
                   <Icon name="pilot" className="h-5 w-5" />
                 </span>
                 <div>
-                  <h2 className="font-semibold">Perché Pilot ha preso questa decisione</h2>
+                  <h2 className="font-semibold">Perché Guimmia ha preso questa decisione</h2>
                   <p className="text-sm text-slate-500">Il punteggio viene dopo i requisiti bloccanti.</p>
                 </div>
               </div>
@@ -272,3 +272,4 @@ export default function LeadDetail({ leadId }: { leadId: string }) {
     </Page>
   );
 }
+

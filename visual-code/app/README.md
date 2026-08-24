@@ -1,6 +1,6 @@
-# CasaPilot
+# Guimmia
 
-CasaPilot è un’applicazione Next.js per organizzare vendita e locazione di immobili attraverso percorsi guidati, checklist documentali, mappa verificata, Pilot e profili professionali.
+Guimmia è un’applicazione Next.js per organizzare vendita e locazione di immobili attraverso percorsi guidati, checklist documentali, mappa verificata, Pilot e profili professionali.
 
 ## Avvio locale
 
@@ -49,4 +49,4 @@ npm.cmd run build
 
 ## Prodotto
 
-Versione applicativa: **CasaPilot 1.0**
+Versione applicativa: **Guimmia 1.0**

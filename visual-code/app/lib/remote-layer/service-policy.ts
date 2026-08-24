@@ -253,7 +253,7 @@ export function getRemoteServicePolicy(serviceId: string): RemoteServicePolicy {
         {
           id: "report",
           title: "Report finale",
-          description: "Foto, note e risultato vengono condivisi dentro CasaPilot.",
+          description: "Foto, note e risultato vengono condivisi dentro Guimmia.",
           responsible: "professional",
           ownerPresenceRequired: false,
           canUseDelegation: false,

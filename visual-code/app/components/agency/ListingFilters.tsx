@@ -5,10 +5,11 @@ export default function ListingFilters({
 }) {
   return (
     <form action="/immobili" className="grid gap-3 rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_14px_40px_rgba(15,23,42,.08)] lg:grid-cols-6">
-      <select name="operazione" defaultValue={values.operazione ?? ""} className="h-12 rounded-2xl border border-slate-200 bg-white px-4 font-bold outline-none focus:border-blue-600">
-        <option value="">Vendita + affitto</option>
-        <option value="sale">Vendita</option>
-        <option value="rent">Affitto</option>
+      <select name="mercato" defaultValue={values.mercato ?? ""} className="h-12 rounded-2xl border border-slate-200 bg-white px-4 font-bold outline-none focus:border-blue-600">
+        <option value="">Tutti gli immobili</option>
+        <option value="buy">Comprare</option>
+        <option value="rent">Affittare</option>
+        <option value="holiday">Vacanze</option>
       </select>
       <input name="citta" defaultValue={values.citta ?? ""} placeholder="Città" className="h-12 rounded-2xl border border-slate-200 px-4 font-semibold outline-none focus:border-blue-600" />
       <select name="tipologia" defaultValue={values.tipologia ?? ""} className="h-12 rounded-2xl border border-slate-200 bg-white px-4 font-bold outline-none focus:border-blue-600">
@@ -17,6 +18,7 @@ export default function ListingFilters({
         <option>Attico</option>
         <option>Villa</option>
         <option>Casa indipendente</option>
+        <option>Casa vacanze</option>
         <option>Terreno</option>
         <option>Locale commerciale</option>
       </select>

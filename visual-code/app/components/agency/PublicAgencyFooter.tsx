@@ -8,14 +8,15 @@ export default function PublicAgencyFooter() {
         <div>
           <GuimmiaWordmark tagline />
           <p className="mt-4 max-w-md text-sm leading-6 text-slate-500">
-            Guimmia accompagna proprietari e utenti nel percorso immobiliare:
-            preparazione, pubblicazione, professionisti, visite e prossimi passi.
+            La nostra agenzia immobiliare online ti accompagna nella vendita,
+            nell’affitto e nella ricerca della casa giusta.
           </p>
         </div>
         <div>
           <p className="text-sm font-black text-slate-900">Immobiliare</p>
           <div className="mt-3 space-y-2 text-sm text-slate-600">
             <Link className="block hover:text-blue-600" href="/immobili">Immobili</Link>
+            <Link className="block hover:text-blue-600" href="/immobili?mercato=holiday">Vacanze</Link>
             <Link className="block hover:text-blue-600" href="/vendere">Vendere</Link>
             <Link className="block hover:text-blue-600" href="/affittare">Affittare</Link>
           </div>
@@ -24,7 +25,7 @@ export default function PublicAgencyFooter() {
           <p className="text-sm font-black text-slate-900">Guimmia</p>
           <div className="mt-3 space-y-2 text-sm text-slate-600">
             <Link className="block hover:text-blue-600" href="/prezzi">Prezzi</Link>
-            <Link className="block hover:text-blue-600" href="/guimmia">Guimmia 24/7</Link>
+            <Link className="block hover:text-blue-600" href="/guimmia">Chiedi a Guimmia</Link>
             <Link className="block hover:text-blue-600" href="/privacy">Privacy</Link>
             <Link className="block hover:text-blue-600" href="/terms">Termini</Link>
           </div>

@@ -1,8 +1,13 @@
 import "server-only";
-import type { AgencyListing, Operation } from "@/lib/agency/types";
+import type {
+  AgencyListing,
+  ListingMarket,
+  Operation,
+} from "@/lib/agency/types";
 
 type Filters = {
   operation?: "" | Operation;
+  market?: "" | ListingMarket;
   city?: string;
   propertyType?: string;
   minPrice?: number;
@@ -32,7 +37,7 @@ const DEMO: AgencyListing[] = [
     elevator: true,
     energy_class: "D",
     features: ["Terrazza", "Ascensore", "Luminoso"],
-    cover_image_url: null,
+    cover_image_url: "/images/guimmia/listing-attico-catania.webp",
     visibility_tier: "top",
     featured: true,
     published_at: new Date().toISOString(),
@@ -57,7 +62,7 @@ const DEMO: AgencyListing[] = [
     elevator: true,
     energy_class: "C",
     features: ["Arredato", "Balcone", "Ascensore"],
-    cover_image_url: null,
+    cover_image_url: "/images/guimmia/listing-bilocale-milano.webp",
     visibility_tier: "standard",
     featured: true,
     published_at: new Date().toISOString(),
@@ -82,12 +87,45 @@ const DEMO: AgencyListing[] = [
     elevator: false,
     energy_class: "B",
     features: ["Giardino", "Posto auto", "Indipendente"],
-    cover_image_url: null,
+    cover_image_url: "/images/guimmia/listing-villa-palermo.webp",
     visibility_tier: "standard",
     featured: false,
     published_at: new Date().toISOString(),
   },
+  {
+    id: "44444444-4444-4444-8444-444444444444",
+    slug: "casa-oceano-tenerife",
+    operation: "rent",
+    property_type: "Casa vacanze",
+    title: "Casa sull’oceano con terrazza e piscina",
+    description:
+      "Una proposta dimostrativa dedicata al percorso di affitto turistico Guimmia.",
+    price_cents: 16500,
+    rent_period: "day",
+    city: "Tenerife",
+    province: "SC",
+    zone: "Costa sud",
+    bedrooms: 2,
+    bathrooms: 2,
+    rooms: 3,
+    surface_sqm: 94,
+    floor: "Terra",
+    elevator: false,
+    energy_class: "B",
+    features: ["Vista oceano", "Piscina", "Terrazza"],
+    cover_image_url: "/images/guimmia/listing-vacanza-tenerife.webp",
+    visibility_tier: "top",
+    featured: true,
+    published_at: new Date().toISOString(),
+  },
 ];
+
+export function getListingMarket(listing: AgencyListing): ListingMarket {
+  if (listing.operation === "sale") return "buy";
+  return listing.rent_period === "day" || listing.rent_period === "week"
+    ? "holiday"
+    : "rent";
+}
 
 function config() {
   return {
@@ -100,6 +138,7 @@ function config() {
 
 function demoFiltered(filters: Filters) {
   return DEMO.filter((x) => {
+    if (filters.market && getListingMarket(x) !== filters.market) return false;
     if (filters.operation && x.operation !== filters.operation) return false;
     if (filters.city && !x.city.toLowerCase().includes(filters.city.toLowerCase())) return false;
     if (filters.propertyType && x.property_type !== filters.propertyType) return false;
@@ -108,6 +147,10 @@ function demoFiltered(filters: Filters) {
     if (filters.minRooms && (x.rooms ?? 0) < filters.minRooms) return false;
     return true;
   }).slice(0, filters.limit ?? 24);
+}
+
+export function getDemoListings(filters: Filters = {}) {
+  return demoFiltered(filters);
 }
 
 export async function getAgencyListings(filters: Filters = {}) {
@@ -119,7 +162,17 @@ export async function getAgencyListings(filters: Filters = {}) {
   q.set("status", "eq.published");
   q.set("order", "featured.desc,visibility_tier.desc,published_at.desc");
   q.set("limit", String(filters.limit ?? 24));
-  if (filters.operation) q.set("operation", `eq.${filters.operation}`);
+  if (filters.market === "buy") {
+    q.set("operation", "eq.sale");
+  } else if (filters.market === "rent") {
+    q.set("operation", "eq.rent");
+    q.set("or", "(rent_period.eq.month,rent_period.is.null)");
+  } else if (filters.market === "holiday") {
+    q.set("operation", "eq.rent");
+    q.set("rent_period", "in.(day,week)");
+  } else if (filters.operation) {
+    q.set("operation", `eq.${filters.operation}`);
+  }
   if (filters.city) q.set("city", `ilike.*${filters.city}*`);
   if (filters.propertyType) q.set("property_type", `eq.${filters.propertyType}`);
   if (filters.minPrice) q.set("price_cents", `gte.${Math.round(filters.minPrice * 100)}`);
@@ -163,10 +216,10 @@ export async function getAgencyListing(slug: string) {
     });
     if (!r.ok) return { item: DEMO.find((x) => x.slug === slug) ?? null, source: "demo" as const };
     const rows = (await r.json()) as AgencyListing[];
-    const item = rows[0] ?? null;
+    const item = rows[0] ?? DEMO.find((x) => x.slug === slug) ?? null;
     return {
       item: item ? { ...item, features: Array.isArray(item.features) ? item.features : [] } : null,
-      source: "supabase" as const,
+      source: rows[0] ? ("supabase" as const) : ("demo" as const),
     };
   } catch {
     return { item: DEMO.find((x) => x.slug === slug) ?? null, source: "demo" as const };

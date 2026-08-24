@@ -1,4 +1,5 @@
 export type Operation = "sale" | "rent";
+export type ListingMarket = "buy" | "rent" | "holiday";
 
 export type AgencyListing = {
   id: string;

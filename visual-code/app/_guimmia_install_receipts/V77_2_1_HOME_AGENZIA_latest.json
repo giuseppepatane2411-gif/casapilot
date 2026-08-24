@@ -1,0 +1,17 @@
+{
+    "schemaVersion":  1,
+    "package":  "GUIMMIA_V77_2_1_HOME_AGENZIA_VETRINA_REV2",
+    "version":  "77.2.1",
+    "packageRevision":  2,
+    "installedAt":  "2026-08-24T14:41:37.2641537Z",
+    "projectRoot":  "C:\\Users\\Lenovo\\Desktop\\CasaPilot\\visual-code\\app",
+    "backupPath":  "C:\\Users\\Lenovo\\Desktop\\CasaPilot\\visual-code\\_guimmia_backups\\V77_2_1_HOME_AGENZIA_VETRINA_REV2_20260824_164024_143",
+    "backupInfo":  "C:\\Users\\Lenovo\\Desktop\\CasaPilot\\visual-code\\_guimmia_backups\\V77_2_1_HOME_AGENZIA_VETRINA_REV2_20260824_164024_143\\BACKUP_INFO.json",
+    "installedPayloadHashVerified":  true,
+    "packageSelfTestsPassed":  true,
+    "applicationBuildPassed":  true,
+    "databaseMigrationRequired":  false,
+    "executionMode":  "DRY_RUN",
+    "automaticActionsEnabled":  false,
+    "humanAuthorityPreserved":  true
+}

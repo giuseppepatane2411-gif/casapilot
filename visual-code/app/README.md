@@ -2,6 +2,8 @@
 
 Guimmia è un’applicazione Next.js per organizzare vendita e locazione di immobili attraverso percorsi guidati, checklist documentali, mappa verificata, Pilot e profili professionali.
 
+La V77.3 REV2 introduce il primo collegamento controllato a GPT-5.6 Luna per la stima preliminare di vendita e affitto: comparabili pubblici, qualità delle evidenze, budget mensile, limite per richiesta e autorità umana obbligatoria. Le chiavi `OPENAI_API_KEY` e `SUPABASE_SECRET_KEY` devono essere configurate esclusivamente sul server o nelle variabili d’ambiente Vercel.
+
 ## Avvio locale
 
 ```powershell

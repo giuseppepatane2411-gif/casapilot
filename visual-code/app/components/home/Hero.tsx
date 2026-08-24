@@ -148,16 +148,16 @@ export default function Hero({
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
               <span className="text-sm font-semibold text-white/70">Sei proprietario?</span>
               <Link
-                href="/vendere"
+                href="/valuta-immobile"
                 className="inline-flex items-center gap-2 text-sm font-extrabold text-white transition hover:text-blue-200"
               >
-                Vendi con Guimmia <ArrowRight size={16} aria-hidden="true" />
+                Valuta il tuo immobile <ArrowRight size={16} aria-hidden="true" />
               </Link>
               <Link
-                href="/affittare"
+                href="/vendere"
                 className="inline-flex items-center gap-2 text-sm font-extrabold text-white transition hover:text-blue-200 sm:ml-3"
               >
-                Affida il tuo immobile <ArrowRight size={16} aria-hidden="true" />
+                Vendi con Guimmia <ArrowRight size={16} aria-hidden="true" />
               </Link>
             </div>
           </div>

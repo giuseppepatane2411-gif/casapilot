@@ -11,13 +11,14 @@ export default function AffittarePage() {
           <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
             <p className="text-sm font-black uppercase tracking-[.16em] text-blue-600">Affittare con Guimmia</p>
             <h1 className="mt-5 max-w-4xl text-5xl font-black tracking-[-.055em] text-slate-950 sm:text-7xl">
-              Dall'annuncio al contratto, con Guimmia al tuo fianco.
+              Dall’annuncio al contratto, con Guimmia al tuo fianco.
             </h1>
             <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-600">
               Organizza documenti, annuncio, richieste, visite, contratto e adempimenti in un unico percorso.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/registrazione/proprietario" className="rounded-2xl bg-blue-600 px-6 py-3.5 font-black text-white">Affitta con Guimmia</Link>
+              <Link href="/valuta-immobile" className="rounded-2xl bg-blue-600 px-6 py-3.5 font-black text-white">Stima il canone</Link>
+              <Link href="/registrazione/proprietario" className="rounded-2xl border border-slate-300 bg-white px-6 py-3.5 font-black text-slate-900">Affitta con Guimmia</Link>
               <Link href="/guimmia?intent=rent" className="rounded-2xl border border-slate-300 bg-white px-6 py-3.5 font-black text-slate-900">Parla con Guimmia</Link>
             </div>
           </div>

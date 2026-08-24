@@ -24,7 +24,8 @@ export default function VenderePage() {
               Annuncio, burocrazia, richieste, visite, offerte e contratti in un unico percorso, con Guimmia disponibile 24/7.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/registrazione/proprietario" className="rounded-2xl bg-blue-600 px-6 py-3.5 font-black text-white">Inizia il percorso</Link>
+              <Link href="/valuta-immobile" className="rounded-2xl bg-blue-600 px-6 py-3.5 font-black text-white">Valuta il tuo immobile</Link>
+              <Link href="/registrazione/proprietario" className="rounded-2xl border border-white/20 px-6 py-3.5 font-black text-white">Inizia il percorso</Link>
               <Link href="/guimmia?intent=sell" className="rounded-2xl border border-white/20 px-6 py-3.5 font-black text-white">Parla con Guimmia</Link>
             </div>
           </div>

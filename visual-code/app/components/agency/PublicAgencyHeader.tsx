@@ -10,6 +10,7 @@ const navigation = [
   { href: "/immobili", label: "Immobili" },
   { href: "/vendere", label: "Vendere" },
   { href: "/affittare", label: "Affittare" },
+  { href: "/valuta-immobile", label: "Valuta" },
   { href: "/immobili?mercato=holiday", label: "Vacanze" },
   { href: "/servizi", label: "Servizi" },
 ];
@@ -38,7 +39,7 @@ export default function PublicAgencyHeader() {
             Accedi
           </Link>
           <Link
-            href="/vendere"
+            href="/valuta-immobile"
             className="hidden rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-extrabold text-white shadow-sm transition hover:bg-blue-700 sm:inline-flex"
           >
             Valuta il tuo immobile
@@ -84,7 +85,7 @@ export default function PublicAgencyHeader() {
               Accedi
             </Link>
             <Link
-              href="/vendere"
+              href="/valuta-immobile"
               onClick={() => setMenuOpen(false)}
               className="inline-flex min-h-12 items-center justify-center rounded-xl bg-blue-600 px-5 text-sm font-extrabold text-white"
             >

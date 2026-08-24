@@ -1,0 +1,11 @@
+{
+    "schemaVersion":  1,
+    "package":  "GUIMMIA_V77_1_0_HOME_MESSAGGIO_AGENZIA",
+    "version":  "77.1.0",
+    "installedAt":  "2026-08-24T12:15:54.2962907Z",
+    "projectRoot":  "C:\\Users\\Lenovo\\Desktop\\CasaPilot\\visual-code\\app",
+    "backupPath":  "C:\\Users\\Lenovo\\Desktop\\CasaPilot\\visual-code\\_guimmia_backups\\V77_1_0_HOME_20260824_141504_964",
+    "target":  "components/home/Hero.tsx",
+    "payloadSha256":  "3bd2ff0389c87946fa78fd76f6bca1efbd42f30a9852aed3e22d7a5fabc8f7f9",
+    "applicationBuildPassed":  true
+}

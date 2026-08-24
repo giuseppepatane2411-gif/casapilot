@@ -41,16 +41,21 @@ export default function Hero() {
             </div>
 
             <h1 className="mx-auto mt-6 max-w-4xl text-center text-[38px] font-semibold leading-[0.98] tracking-[-0.055em] text-white sm:mt-8 sm:text-6xl lg:text-[76px]">
-              La tua guida
+              Guimmia, la tua guida
               <span className="block text-blue-100">
-                immobiliare intelligente.
+                immobiliare intelligente
               </span>
             </h1>
 
-            <p className="mx-auto mt-5 max-w-3xl text-center text-base leading-7 text-blue-100/90 sm:mt-7 sm:text-xl sm:leading-9">
-              Vendi o affitta il tuo immobile senza perderti tra documenti,
-              scadenze e burocrazia. Racconta a Guimmia cosa vuoi fare e lasciati
-              guidare passo dopo passo.
+            <p className="mx-auto mt-5 max-w-4xl text-center text-base leading-7 text-blue-100/90 sm:mt-7 sm:text-xl sm:leading-9">
+              Guimmia è un’agenzia immobiliare completamente digitale che
+              semplifica il modo di comprare, vendere e affittare casa. Il
+              cliente gestisce direttamente alcune attività, come gli
+              appuntamenti e le visite, mentre Guimmia lo assiste nella
+              pubblicazione dell’annuncio, nella gestione della documentazione,
+              nella negoziazione e nella contrattualistica, offrendo anche una
+              serie di servizi accessori e utilizzando l’intelligenza artificiale
+              per migliorare il servizio.
             </p>
 
             <SearchBar
@@ -81,4 +86,3 @@ export default function Hero() {
     </section>
   );
 }
-

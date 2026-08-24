@@ -47,11 +47,32 @@ export const OPERATION_OPTIONS: Array<{
     eyebrow: "Percorso vendita",
   },
   {
-    id: "rent",
-    title: "Affittare",
+    id: "rent_long_term",
+    title: "Affitto a lungo termine",
     description:
-      "Prepara immobile, documentazione e contratto per una locazione più sicura.",
-    eyebrow: "Percorso affitto",
+      "Prepara immobile, candidati, contratto e consegna per una locazione stabile.",
+    eyebrow: "Locazione residenziale",
+  },
+  {
+    id: "rent_transitory",
+    title: "Affitto transitorio",
+    description:
+      "Organizza durata, esigenza temporanea, documenti e contratto transitorio.",
+    eyebrow: "Esigenza temporanea",
+  },
+  {
+    id: "rent_student",
+    title: "Affitto a studenti",
+    description:
+      "Gestisci requisiti dello studente, garanzie, contratto e consegna.",
+    eyebrow: "Locazione universitaria",
+  },
+  {
+    id: "rent_tourist_short",
+    title: "Affitto turistico breve",
+    description:
+      "Verifica la conformità e organizza annuncio, prenotazioni, soggiorno e adempimenti.",
+    eyebrow: "Ospitalità turistica",
   },
 ];
 
@@ -121,6 +142,23 @@ const BUILDINGS: PropertyType[] = [
   "commercial",
 ];
 
+const ALL_RENTALS: OperationType[] = [
+  "rent",
+  "rent_long_term",
+  "rent_transitory",
+  "rent_student",
+  "rent_tourist_short",
+];
+
+const RESIDENTIAL_RENTALS: OperationType[] = [
+  "rent",
+  "rent_long_term",
+  "rent_transitory",
+  "rent_student",
+];
+
+const ALL_OPERATIONS: OperationType[] = ["sale", ...ALL_RENTALS];
+
 export const DOCUMENT_DEFINITIONS: DocumentDefinition[] = [
   {
     id: "ownership",
@@ -128,7 +166,7 @@ export const DOCUMENT_DEFINITIONS: DocumentDefinition[] = [
     shortTitle: "atto di provenienza",
     description: "Dimostra come e quando hai acquisito l’immobile.",
     weight: 11,
-    operations: ["sale", "rent"],
+    operations: ALL_OPERATIONS,
     propertyTypes: ALL_PROPERTIES,
   },
   {
@@ -137,7 +175,7 @@ export const DOCUMENT_DEFINITIONS: DocumentDefinition[] = [
     shortTitle: "planimetria catastale",
     description: "La rappresentazione grafica depositata al Catasto.",
     weight: 10,
-    operations: ["sale", "rent"],
+    operations: ALL_OPERATIONS,
     propertyTypes: ALL_PROPERTIES,
   },
   {
@@ -146,7 +184,7 @@ export const DOCUMENT_DEFINITIONS: DocumentDefinition[] = [
     shortTitle: "visura catastale",
     description: "Contiene intestazione, rendita e principali dati catastali.",
     weight: 9,
-    operations: ["sale", "rent"],
+    operations: ALL_OPERATIONS,
     propertyTypes: ALL_PROPERTIES,
   },
   {
@@ -155,7 +193,7 @@ export const DOCUMENT_DEFINITIONS: DocumentDefinition[] = [
     shortTitle: "attestato energetico",
     description: "L’APE indica la classe energetica dell’immobile.",
     weight: 9,
-    operations: ["sale", "rent"],
+    operations: ALL_OPERATIONS,
     propertyTypes: BUILDINGS,
   },
   {
@@ -164,7 +202,7 @@ export const DOCUMENT_DEFINITIONS: DocumentDefinition[] = [
     shortTitle: "certificato di agibilità",
     description: "Documenta l’idoneità dell’immobile al suo utilizzo.",
     weight: 7,
-    operations: ["sale", "rent"],
+    operations: ALL_OPERATIONS,
     propertyTypes: BUILDINGS,
   },
   {
@@ -173,7 +211,7 @@ export const DOCUMENT_DEFINITIONS: DocumentDefinition[] = [
     shortTitle: "documenti degli impianti",
     description: "Certificazioni o dichiarazioni di conformità disponibili.",
     weight: 6,
-    operations: ["sale", "rent"],
+    operations: ALL_OPERATIONS,
     propertyTypes: BUILDINGS,
   },
   {
@@ -182,7 +220,7 @@ export const DOCUMENT_DEFINITIONS: DocumentDefinition[] = [
     shortTitle: "documenti condominiali",
     description: "Regolamento, spese e informazioni dell’amministratore.",
     weight: 5,
-    operations: ["sale", "rent"],
+    operations: ALL_OPERATIONS,
     propertyTypes: ["apartment", "commercial", "garage"],
   },
   {
@@ -200,8 +238,78 @@ export const DOCUMENT_DEFINITIONS: DocumentDefinition[] = [
     shortTitle: "bozza del contratto",
     description: "Una base da adattare al tipo di locazione scelto.",
     weight: 8,
-    operations: ["rent"],
+    operations: RESIDENTIAL_RENTALS,
     propertyTypes: ALL_PROPERTIES,
+  },
+  {
+    id: "rentalAuthority",
+    title: "Titolo o autorizzazione alla locazione",
+    shortTitle: "titolo per la locazione",
+    description:
+      "Chiarisce chi può proporre l’immobile e con quale autorizzazione.",
+    weight: 9,
+    operations: ALL_RENTALS,
+    propertyTypes: ALL_PROPERTIES,
+  },
+  {
+    id: "transitoryReasonEvidence",
+    title: "Esigenza transitoria e documentazione",
+    shortTitle: "documentazione dell’esigenza transitoria",
+    description:
+      "Raccoglie motivo, durata ed elementi utili a verificare il percorso transitorio.",
+    weight: 10,
+    operations: ["rent_transitory"],
+    propertyTypes: BUILDINGS,
+  },
+  {
+    id: "studentEnrollment",
+    title: "Iscrizione o percorso di studi",
+    shortTitle: "documentazione dello studente",
+    description:
+      "Documenta iscrizione, sede e periodo del percorso di studi.",
+    weight: 9,
+    operations: ["rent_student"],
+    propertyTypes: BUILDINGS,
+  },
+  {
+    id: "guarantorEvidence",
+    title: "Garanzia o capacità economica",
+    shortTitle: "documentazione della garanzia",
+    description:
+      "Raccoglie gli elementi da far valutare prima della scelta del candidato.",
+    weight: 9,
+    operations: ["rent_student"],
+    propertyTypes: BUILDINGS,
+  },
+  {
+    id: "touristUnitCompliance",
+    title: "Requisiti dell’unità per l’ospitalità",
+    shortTitle: "verifica dell’unità turistica",
+    description:
+      "Raccoglie requisiti, eventuali registrazioni e verifiche dell’immobile.",
+    weight: 11,
+    operations: ["rent_tourist_short"],
+    propertyTypes: BUILDINGS,
+  },
+  {
+    id: "touristLocalRules",
+    title: "Regole locali applicabili",
+    shortTitle: "verifica delle regole locali",
+    description:
+      "Identifica gli adempimenti territoriali da confermare prima della pubblicazione.",
+    weight: 10,
+    operations: ["rent_tourist_short"],
+    propertyTypes: BUILDINGS,
+  },
+  {
+    id: "touristGuestReporting",
+    title: "Profilo comunicazioni ospiti",
+    shortTitle: "profilo comunicazioni ospiti",
+    description:
+      "Prepara il processo di identificazione e comunicazione da verificare con Guimmia.",
+    weight: 9,
+    operations: ["rent_tourist_short"],
+    propertyTypes: BUILDINGS,
   },
 ];
 
@@ -253,7 +361,20 @@ export function getRequiredDocuments(
 }
 
 export function getOperationLabel(operation: OperationType) {
-  return operation === "sale" ? "Vendita" : "Affitto";
+  const labels: Record<OperationType, string> = {
+    sale: "Vendita",
+    rent: "Affitto da specificare",
+    rent_long_term: "Affitto a lungo termine",
+    rent_transitory: "Affitto transitorio",
+    rent_student: "Affitto a studenti",
+    rent_tourist_short: "Affitto turistico breve",
+  };
+
+  return labels[operation];
+}
+
+export function isRentalOperation(operation: OperationType | "") {
+  return Boolean(operation && operation !== "sale");
 }
 
 export function getPropertyLabel(propertyType: PropertyType) {

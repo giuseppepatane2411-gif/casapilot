@@ -71,12 +71,15 @@ export default function PropertyWizard() {
         setDraftRestored(true);
       } else {
         const goal = searchParams.get("goal");
-        if (goal === "sale" || goal === "rent") {
+        if (goal === "sale") {
           setData({
             ...INITIAL_WIZARD_DATA,
             operation: goal,
           });
           setStep(2);
+        } else if (goal === "rent") {
+          setData(INITIAL_WIZARD_DATA);
+          setStep(1);
         }
       }
 
@@ -132,7 +135,7 @@ export default function PropertyWizard() {
 
   function validateStep(targetStep: number) {
     if (targetStep === 1 && !data.operation) {
-      return "Scegli se vuoi vendere o affittare l’immobile.";
+      return "Scegli il percorso immobiliare che vuoi avviare.";
     }
 
     if (targetStep === 2) {

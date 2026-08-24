@@ -1,7 +1,25 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+
+import { requestSiteOrchestration } from "@/lib/guimmia/site-orchestration/client";
+import {
+  OPERATION_LABELS,
+  detectCustomerRole,
+  detectGuimmiaOperationType,
+  hasGenericRentalIntent,
+  toSiteOperationType,
+} from "@/lib/guimmia/site-orchestration/operation";
+import type {
+  SiteCustomerRole,
+  SiteOrchestrationResponse,
+} from "@/lib/guimmia/site-orchestration/types";
+import type { GuimmiaOperationType } from "@/lib/guimmia/brain/case-orchestrator/types";
+import { INITIAL_WIZARD_DATA } from "@/lib/property-journey/constants";
+import { createJourney } from "@/lib/property-journey/storage";
+import type { PropertyType } from "@/lib/property-journey/types";
 
 type ChatMessage = {
   id: string;
@@ -14,6 +32,7 @@ type PropertyDraft = {
   id: string;
   objective: string;
   propertyType: string;
+  country: string;
   city: string;
   province: string;
   address: string;
@@ -22,6 +41,10 @@ type PropertyDraft = {
   condition: string;
   occupancy: string;
   notes: string;
+  operationType?: GuimmiaOperationType;
+  customerRole?: SiteCustomerRole;
+  journeyId?: string;
+  destinationHref?: string;
   status: "draft" | "confirmed";
   updatedAt: string;
 };
@@ -33,6 +56,7 @@ const emptyDraft = (): PropertyDraft => ({
   id: `property_${Date.now()}`,
   objective: "",
   propertyType: "",
+  country: "",
   city: "",
   province: "",
   address: "",
@@ -63,7 +87,7 @@ function CompassIcon({ className = "h-5 w-5" }: { className?: string }) {
 
 function detectObjective(text: string) {
   const value = text.toLowerCase();
-  if (/(vend|cess|acquirent)/.test(value)) return "Vendita";
+  if (/(vend|cess|acquirent|compr|compravend)/.test(value)) return "Vendita o acquisto";
   if (/(affitt|locaz|inquilin)/.test(value)) return "Affitto";
   if (/(valut|quanto vale|stima)/.test(value)) return "Valutazione";
   if (/(ristruttur|lavori|rinnov)/.test(value)) return "Ristrutturazione";
@@ -103,14 +127,37 @@ function detectCity(text: string) {
   return common.find((city) => text.toLowerCase().includes(city.toLowerCase())) ?? "";
 }
 
+function detectCountry(text: string, city: string) {
+  if (/(spagna|spain|tenerife|güímar|guimar)/i.test(`${text} ${city}`)) {
+    return "Spagna";
+  }
+  if (/(italia|italy)/i.test(text)) return "Italia";
+  if (city && !["Tenerife", "Güímar", "Guimar"].includes(city)) return "Italia";
+  return "";
+}
+
+function toPropertyType(value: string): PropertyType | null {
+  const normalized = value.toLocaleLowerCase("it-IT");
+  if (/(appartamento|attico|loft|monolocale)/.test(normalized)) return "apartment";
+  if (/(villa|casa|villetta)/.test(normalized)) return "house";
+  if (/(locale|ufficio|negozio|magazzino)/.test(normalized)) return "commercial";
+  if (/(terreno|appezzamento)/.test(normalized)) return "land";
+  if (/(garage|box|posto auto)/.test(normalized)) return "garage";
+  return null;
+}
+
 function fieldCount(draft: PropertyDraft) {
-  return [draft.objective, draft.propertyType, draft.city, draft.surface, draft.condition].filter(Boolean).length;
+  return [draft.objective, draft.propertyType, draft.country, draft.city, draft.surface, draft.condition].filter(Boolean).length;
 }
 
 function nextQuestion(draft: PropertyDraft) {
   if (!draft.objective) return "Qual è il tuo obiettivo principale: vendere, affittare, valutare oppure gestire l’immobile?";
+  if (draft.objective === "Affitto" && !draft.operationType) {
+    return "Che tipo di affitto vuoi gestire: lungo termine, transitorio, per studenti oppure turistico breve?";
+  }
   if (!draft.propertyType) return "Di che tipo di immobile si tratta? Per esempio appartamento, villa, casa indipendente, terreno o locale.";
   if (!draft.city) return "In quale comune si trova l’immobile?";
+  if (!draft.country) return "In quale Paese si trova l’immobile?";
   if (!draft.surface) return "Conosci indicativamente la superficie in metri quadrati? Puoi anche dirmi che non la sai ancora.";
   if (!draft.condition) return "Come descriveresti lo stato dell’immobile: da ristrutturare, buono, ristrutturato o nuovo?";
   return "Ho preparato una prima bozza. Controllala a destra: puoi correggere ogni dato prima di confermarla.";
@@ -118,8 +165,10 @@ function nextQuestion(draft: PropertyDraft) {
 
 function firstMissingField(draft: PropertyDraft): keyof PropertyDraft | null {
   if (!draft.objective) return "objective";
+  if (draft.objective === "Affitto" && !draft.operationType) return "operationType";
   if (!draft.propertyType) return "propertyType";
   if (!draft.city) return "city";
+  if (!draft.country) return "country";
   if (!draft.surface) return "surface";
   if (!draft.condition) return "condition";
   return null;
@@ -130,11 +179,50 @@ function normalizeDirectAnswer(field: keyof PropertyDraft, text: string) {
   return text.trim();
 }
 
+async function brainReply(
+  draft: PropertyDraft,
+): Promise<{ text: string; decision: SiteOrchestrationResponse | null }> {
+  const localQuestion = nextQuestion(draft);
+  if (firstMissingField(draft)) {
+    return { text: localQuestion, decision: null };
+  }
+
+  try {
+    const decision = await requestSiteOrchestration({
+      caseId: draft.id,
+      operationType: draft.operationType ?? null,
+      customerRole: draft.customerRole ?? "UNCONFIRMED",
+      property: {
+        id: draft.id,
+        type: draft.propertyType,
+        country: draft.country,
+        city: draft.city,
+        province: draft.province,
+        address: draft.address,
+      },
+      progress: { currentPhase: "INTAKE" },
+    });
+    const question = decision.customerQuestions[0];
+
+    return {
+      text:
+        question?.prompt ||
+        decision.customerExplanation ||
+        localQuestion,
+      decision,
+    };
+  } catch {
+    return { text: localQuestion, decision: null };
+  }
+}
+
 export default function PilotFirstChat() {
+  const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([initialMessage]);
   const [draft, setDraft] = useState<PropertyDraft>(emptyDraft);
   const [input, setInput] = useState("");
   const [savedNotice, setSavedNotice] = useState("");
+  const [brainDecision, setBrainDecision] = useState<SiteOrchestrationResponse | null>(null);
   const [loaded, setLoaded] = useState(false);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const initialQueryHandledRef = useRef(false);
@@ -178,7 +266,18 @@ export default function PilotFirstChat() {
       city: draft.city || detectCity(initialMessageFromHome),
       surface: draft.surface || detectSurface(initialMessageFromHome),
       rooms: draft.rooms || detectRooms(initialMessageFromHome),
+      operationType:
+        draft.operationType ||
+        detectGuimmiaOperationType(initialMessageFromHome) ||
+        undefined,
+      customerRole:
+        draft.customerRole && draft.customerRole !== "UNCONFIRMED"
+          ? draft.customerRole
+          : detectCustomerRole(initialMessageFromHome),
     };
+    detected.country =
+      draft.country ||
+      detectCountry(initialMessageFromHome, detected.city ?? draft.city);
 
     const updated: PropertyDraft = {
       ...draft,
@@ -187,7 +286,11 @@ export default function PilotFirstChat() {
       status: "draft",
     };
 
-    if (expectedField && !String(updated[expectedField] ?? "").trim()) {
+    if (
+      expectedField &&
+      expectedField !== "operationType" &&
+      !String(updated[expectedField] ?? "").trim()
+    ) {
       Object.assign(updated, {
         [expectedField]: normalizeDirectAnswer(
           expectedField,
@@ -209,21 +312,27 @@ export default function PilotFirstChat() {
     setDraft(updated);
 
     window.setTimeout(() => {
-      setMessages((current) => [
-        ...current,
-        {
-          id: `pilot_home_${Date.now()}`,
-          sender: "pilot",
-          text: nextQuestion(updated),
-          createdAt: new Date().toISOString(),
-        },
-      ]);
+      void brainReply(updated).then(({ text, decision }) => {
+        setBrainDecision(decision);
+        setMessages((current) => [
+          ...current,
+          {
+            id: `pilot_home_${Date.now()}`,
+            sender: "pilot",
+            text,
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+      });
     }, 250);
 
     window.history.replaceState({}, "", window.location.pathname);
   }, [loaded, draft]);
 
-  const completeness = useMemo(() => Math.min(100, fieldCount(draft) * 20), [draft]);
+  const completeness = useMemo(
+    () => Math.min(100, Math.round((fieldCount(draft) / 6) * 100)),
+    [draft],
+  );
 
   const addMessage = (sender: ChatMessage["sender"], text: string) => {
     setMessages((current) => [
@@ -240,7 +349,14 @@ export default function PilotFirstChat() {
       city: draft.city || detectCity(text),
       surface: draft.surface || detectSurface(text),
       rooms: draft.rooms || detectRooms(text),
+      operationType:
+        draft.operationType || detectGuimmiaOperationType(text) || undefined,
+      customerRole:
+        draft.customerRole && draft.customerRole !== "UNCONFIRMED"
+          ? draft.customerRole
+          : detectCustomerRole(text),
     };
+    detected.country = draft.country || detectCountry(text, detected.city ?? draft.city);
 
     const updated: PropertyDraft = {
       ...draft,
@@ -249,7 +365,11 @@ export default function PilotFirstChat() {
       status: "draft",
     };
 
-    if (expectedField && !String(updated[expectedField] ?? "").trim()) {
+    if (
+      expectedField &&
+      expectedField !== "operationType" &&
+      !String(updated[expectedField] ?? "").trim()
+    ) {
       const directAnswer = normalizeDirectAnswer(expectedField, text);
       Object.assign(updated, { [expectedField]: directAnswer });
     }
@@ -259,7 +379,12 @@ export default function PilotFirstChat() {
     }
 
     setDraft(updated);
-    window.setTimeout(() => addMessage("pilot", nextQuestion(updated)), 250);
+    window.setTimeout(() => {
+      void brainReply(updated).then(({ text: reply, decision }) => {
+        setBrainDecision(decision);
+        addMessage("pilot", reply);
+      });
+    }, 250);
   };
 
   const submit = (event: FormEvent) => {
@@ -278,19 +403,77 @@ export default function PilotFirstChat() {
   };
 
   const updateDraft = (field: keyof PropertyDraft, value: string) => {
-    setDraft((current) => ({ ...current, [field]: value, status: "draft", updatedAt: new Date().toISOString() }));
+    setDraft((current) => {
+      const next = { ...current, [field]: value, status: "draft" as const, updatedAt: new Date().toISOString() };
+      if (field === "objective") {
+        next.operationType = detectGuimmiaOperationType(value) || undefined;
+        if (hasGenericRentalIntent(value) && !next.operationType) {
+          next.objective = "Affitto";
+        }
+      }
+      return next;
+    });
     setSavedNotice("");
   };
 
   const saveDraft = () => {
-    const confirmed = { ...draft, status: "confirmed" as const, updatedAt: new Date().toISOString() };
+    if (draft.destinationHref) {
+      router.push(draft.destinationHref);
+      return;
+    }
+    if (draft.journeyId) {
+      router.push(`/dashboard?created=${draft.journeyId}`);
+      return;
+    }
+    if (!draft.operationType) {
+      setSavedNotice("Specifica prima il tipo di operazione immobiliare.");
+      return;
+    }
+    if (["BUYER", "TENANT", "GUEST"].includes(draft.customerRole ?? "")) {
+      const confirmed = {
+        ...draft,
+        destinationHref: "/immobili",
+        status: "confirmed" as const,
+        updatedAt: new Date().toISOString(),
+      };
+      setDraft(confirmed);
+      setSavedNotice("Richiesta preparata. Ora puoi consultare gli immobili disponibili.");
+      addMessage(
+        "pilot",
+        "Ho riconosciuto che stai cercando un immobile. Ti porto nella vetrina Guimmia: da ogni annuncio potrai chiedere informazioni o proporre una visita.",
+      );
+      return;
+    }
+    const propertyType = toPropertyType(draft.propertyType);
+    if (!propertyType) {
+      setSavedNotice("Controlla il tipo di immobile prima di creare il percorso.");
+      return;
+    }
+
+    const journey = createJourney({
+      ...INITIAL_WIZARD_DATA,
+      operation: toSiteOperationType(draft.operationType),
+      propertyType,
+      propertyName: `${draft.propertyType} a ${draft.city}`,
+      surface: draft.surface.replace(/[^0-9.,]/g, "").replace(",", "."),
+      country: draft.country,
+      city: draft.city,
+      province: draft.province,
+      address: draft.address,
+    });
+    const confirmed = {
+      ...draft,
+      journeyId: journey.id,
+      status: "confirmed" as const,
+      updatedAt: new Date().toISOString(),
+    };
     setDraft(confirmed);
     try {
       const current = JSON.parse(window.localStorage.getItem(PROPERTY_STORAGE_KEY) || "[]") as PropertyDraft[];
       const next = [...current.filter((item) => item.id !== confirmed.id), confirmed];
       window.localStorage.setItem(PROPERTY_STORAGE_KEY, JSON.stringify(next));
-      setSavedNotice("Scheda confermata e salvata localmente.");
-      addMessage("pilot", "Perfetto. Ho salvato la scheda confermata. Da qui possiamo costruire il percorso operativo e capire quali professionisti servono davvero.");
+      setSavedNotice("Pratica creata. Ora puoi aprire il percorso orchestrato da Guimmia.");
+      addMessage("pilot", "Perfetto. Ho creato la pratica e collegato il percorso al cervello di Guimmia. Nella dashboard vedrai il primo passo adatto a questa operazione.");
     } catch {
       setSavedNotice("Non è stato possibile salvare la scheda nel browser.");
     }
@@ -300,6 +483,7 @@ export default function PilotFirstChat() {
     const fresh = emptyDraft();
     setDraft(fresh);
     setMessages([{ ...initialMessage, id: `pilot_welcome_${Date.now()}` }]);
+    setBrainDecision(null);
     setSavedNotice("");
     window.localStorage.removeItem(STORAGE_KEY);
   };
@@ -312,8 +496,8 @@ export default function PilotFirstChat() {
             <div className="flex items-center gap-3">
               <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-sm"><CompassIcon className="h-6 w-6" /></span>
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight">ia</h1>
-                <p className="text-sm text-slate-500"><span className="mr-1 inline-block h-2 w-2 rounded-full bg-emerald-500" />Online · inizia dalla conversazione</p>
+                <h1 className="text-2xl font-semibold tracking-tight">Guimmia</h1>
+                <p className="text-sm text-slate-500"><span className="mr-1 inline-block h-2 w-2 rounded-full bg-emerald-500" />La tua guida immobiliare intelligente</p>
               </div>
             </div>
           </div>
@@ -374,10 +558,25 @@ export default function PilotFirstChat() {
               <div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-blue-600 transition-all" style={{ width: `${completeness}%` }} /></div>
             </div>
 
+            {(draft.operationType || brainDecision) && (
+              <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-blue-600">Percorso Guimmia</p>
+                <p className="mt-2 text-sm font-bold text-slate-900">
+                  {draft.operationType
+                    ? OPERATION_LABELS[draft.operationType]
+                    : brainDecision?.operationLabel}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-slate-600">
+                  Il cervello usa questo percorso per ordinare domande, documenti e passaggi successivi.
+                </p>
+              </div>
+            )}
+
             <div className="mt-6 grid gap-4">
               {[
                 ["objective", "Obiettivo", "Vendita, affitto, valutazione..."],
                 ["propertyType", "Tipo di immobile", "Appartamento, villa..."],
+                ["country", "Paese", "Italia, Spagna..."],
                 ["city", "Comune", "Comune"],
                 ["province", "Provincia", "Sigla o provincia"],
                 ["address", "Indirizzo", "Facoltativo in questa fase"],
@@ -397,7 +596,13 @@ export default function PilotFirstChat() {
               </label>
             </div>
 
-            <button type="button" onClick={saveDraft} className="mt-6 flex min-h-12 w-full items-center justify-center rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700">Conferma e salva la scheda</button>
+            <button type="button" onClick={saveDraft} className="mt-6 flex min-h-12 w-full items-center justify-center rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700">
+              {draft.destinationHref
+                ? "Vedi gli immobili Guimmia"
+                : draft.journeyId
+                  ? "Apri il percorso Guimmia"
+                  : "Conferma e crea il percorso"}
+            </button>
             {savedNotice ? <p className={`mt-3 text-center text-sm font-semibold ${savedNotice.startsWith("Scheda") ? "text-emerald-700" : "text-red-600"}`}>{savedNotice}</p> : null}
             <p className="mt-4 text-xs leading-5 text-slate-500">Guimmia può interpretare male un dettaglio. Per questo nessun dato diventa definitivo senza il tuo controllo.</p>
           </aside>
@@ -406,4 +611,3 @@ export default function PilotFirstChat() {
     </main>
   );
 }
-

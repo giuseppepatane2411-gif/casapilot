@@ -14,7 +14,10 @@ import {
 import DocumentGuideItem from "@/components/property-journey/DocumentGuideItem";
 import { useJourneys } from "@/hooks/useJourneys";
 import { useLocalVault } from "@/hooks/useLocalVault";
-import { getRequiredDocuments } from "@/lib/property-journey/constants";
+import {
+  getOperationLabel,
+  getRequiredDocuments,
+} from "@/lib/property-journey/constants";
 import { updateJourneyDocuments } from "@/lib/property-journey/storage";
 import type { DocumentKey } from "@/lib/property-journey/types";
 
@@ -103,6 +106,9 @@ export default function DocumentsOverview() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">{activeJourney.property.name}</p>
+            <p className="mt-2 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
+              {getOperationLabel(activeJourney.operation)}
+            </p>
             <p className="mt-2 text-sm font-semibold text-slate-700">
               {missing.length === 0
                 ? "Hai indicato tutti i documenti della checklist iniziale."
@@ -124,6 +130,23 @@ export default function DocumentsOverview() {
           <div className="h-full rounded-full bg-blue-600" style={{ width: `${progress}%` }} />
         </div>
       </section>
+
+      {activeJourney.operation === "rent" && (
+        <section className="rounded-[22px] border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm font-bold text-amber-950">
+            Prima specifichiamo il tipo di affitto.
+          </p>
+          <p className="mt-1 text-xs leading-5 text-amber-800">
+            Lungo termine, transitorio, studenti e turistico richiedono checklist differenti.
+          </p>
+          <Link
+            href={`/dashboard/properties/${activeJourney.id}#manage-property`}
+            className="mt-3 inline-flex text-xs font-bold text-amber-900 underline underline-offset-4"
+          >
+            Correggi il tipo di operazione
+          </Link>
+        </section>
+      )}
 
       {primaryMissing ? (
         <section className="rounded-[28px] border border-amber-200 bg-amber-50/50 p-4 shadow-sm sm:p-5">

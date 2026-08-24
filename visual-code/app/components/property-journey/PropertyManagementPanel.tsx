@@ -15,11 +15,18 @@ import GuidedAddressSearch, {
   type GuidedAddressValue,
 } from "@/components/property-wizard/GuidedAddressSearch";
 import PropertyLocationMap from "@/components/property-wizard/PropertyLocationMap";
-import { OCCUPANCY_OPTIONS } from "@/lib/property-journey/constants";
+import {
+  OCCUPANCY_OPTIONS,
+  OPERATION_OPTIONS,
+} from "@/lib/property-journey/constants";
 import { deleteJourneyCompletely } from "@/lib/property-journey/delete";
-import { updateJourneyProperty } from "@/lib/property-journey/storage";
+import {
+  updateJourneyOperation,
+  updateJourneyProperty,
+} from "@/lib/property-journey/storage";
 import type {
   OccupancyStatus,
+  OperationType,
   PropertyJourney,
 } from "@/lib/property-journey/types";
 
@@ -35,6 +42,7 @@ export default function PropertyManagementPanel({ journey }: PropertyManagementP
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [operation, setOperation] = useState<OperationType>(journey.operation);
   const [form, setForm] = useState<EditableProperty>({
     ...journey.property,
     cadastralSheet: journey.property.cadastralSheet ?? "",
@@ -70,6 +78,7 @@ export default function PropertyManagementPanel({ journey }: PropertyManagementP
   }
 
   function cancelEditing() {
+    setOperation(journey.operation);
     setForm({
       ...journey.property,
       cadastralSheet: journey.property.cadastralSheet ?? "",
@@ -86,6 +95,7 @@ export default function PropertyManagementPanel({ journey }: PropertyManagementP
   }
 
   function save() {
+    updateJourneyOperation(journey.id, operation);
     updateJourneyProperty(journey.id, {
       ...form,
       name: form.name.trim() || journey.property.name,
@@ -142,6 +152,28 @@ export default function PropertyManagementPanel({ journey }: PropertyManagementP
 
       {editing && (
         <div className="mt-6 space-y-6 rounded-[24px] border border-slate-200 bg-slate-50 p-4 sm:p-5">
+          <label className="block">
+            <span className="text-sm font-bold text-slate-900">Tipo di operazione</span>
+            <p className="mt-1 text-xs leading-5 text-slate-500">
+              Questa scelta permette a Guimmia di usare il percorso, i controlli e i documenti corretti.
+            </p>
+            <select
+              value={operation}
+              onChange={(event) => {
+                setSaved(false);
+                setOperation(event.target.value as OperationType);
+              }}
+              className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            >
+              {operation === "rent" && (
+                <option value="rent">Affitto da specificare</option>
+              )}
+              {OPERATION_OPTIONS.map((option) => (
+                <option key={option.id} value={option.id}>{option.title}</option>
+              ))}
+            </select>
+          </label>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <Field
               label="Nome dell’immobile"
@@ -323,4 +355,3 @@ function Field({
     </label>
   );
 }
-

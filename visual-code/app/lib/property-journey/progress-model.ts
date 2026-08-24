@@ -40,7 +40,7 @@ function clamp(value: number) {
 export function getGoalPhaseWeights(
   operation: OperationType | "",
 ): GoalPhaseWeights {
-  return operation === "rent" ? RENT_WEIGHTS : SALE_WEIGHTS;
+  return operation && operation !== "sale" ? RENT_WEIGHTS : SALE_WEIGHTS;
 }
 
 export function calculateSetupCompletion(

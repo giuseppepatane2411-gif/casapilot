@@ -10,6 +10,13 @@ export const DOCUMENT_PRIORITY: Record<DocumentKey, number> = {
   systems: 62,
   condominium: 58,
   leaseTemplate: 55,
+  rentalAuthority: 92,
+  transitoryReasonEvidence: 88,
+  studentEnrollment: 88,
+  guarantorEvidence: 84,
+  touristUnitCompliance: 96,
+  touristLocalRules: 94,
+  touristGuestReporting: 86,
 };
 
 export const DOCUMENT_TIME_MINUTES: Record<DocumentKey, number> = {
@@ -22,10 +29,24 @@ export const DOCUMENT_TIME_MINUTES: Record<DocumentKey, number> = {
   condominium: 7,
   urbanCompliance: 15,
   leaseTemplate: 20,
+  rentalAuthority: 10,
+  transitoryReasonEvidence: 15,
+  studentEnrollment: 10,
+  guarantorEvidence: 15,
+  touristUnitCompliance: 20,
+  touristLocalRules: 20,
+  touristGuestReporting: 15,
 };
 
 export function getOperationGoal(operation: OperationType) {
-  return operation === "sale"
-    ? "preparare l’immobile per una vendita ordinata e verificabile"
-    : "preparare l’immobile per una locazione sicura e ben documentata";
+  const goals: Record<OperationType, string> = {
+    sale: "preparare l’immobile per una vendita ordinata e verificabile",
+    rent: "definire il tipo di affitto e preparare una locazione ben documentata",
+    rent_long_term: "preparare una locazione residenziale stabile e ben documentata",
+    rent_transitory: "verificare l’esigenza temporanea e preparare la locazione transitoria",
+    rent_student: "preparare immobile, requisiti e garanzie per la locazione a studenti",
+    rent_tourist_short: "preparare conformità, annuncio e gestione del soggiorno turistico",
+  };
+
+  return goals[operation];
 }

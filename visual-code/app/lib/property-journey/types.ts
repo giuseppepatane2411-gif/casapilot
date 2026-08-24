@@ -1,4 +1,10 @@
-export type OperationType = "sale" | "rent";
+export type OperationType =
+  | "sale"
+  | "rent"
+  | "rent_long_term"
+  | "rent_transitory"
+  | "rent_student"
+  | "rent_tourist_short";
 
 export type PropertyType =
   | "apartment"
@@ -18,7 +24,14 @@ export type DocumentKey =
   | "systems"
   | "condominium"
   | "urbanCompliance"
-  | "leaseTemplate";
+  | "leaseTemplate"
+  | "rentalAuthority"
+  | "transitoryReasonEvidence"
+  | "studentEnrollment"
+  | "guarantorEvidence"
+  | "touristUnitCompliance"
+  | "touristLocalRules"
+  | "touristGuestReporting";
 
 export type WizardData = {
   operation: OperationType | "";

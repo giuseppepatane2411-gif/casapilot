@@ -116,6 +116,90 @@ export const DOCUMENT_GUIDES: Record<DocumentKey, DocumentGuide> = {
     commonMistake:
       "Scaricare un modello generico e usarlo senza verificare regime fiscale, durata e clausole applicabili.",
   },
+  rentalAuthority: {
+    whyItMatters:
+      "Permette a Guimmia di capire chi può affidare e gestire la locazione dell’immobile.",
+    howToGet: [
+      "Individua il proprietario o il soggetto che dispone dell’immobile.",
+      "Se agisci per un’altra persona, raccogli la delega o il titolo da far verificare a Guimmia.",
+    ],
+    whatToCheck:
+      "Identità del soggetto, collegamento con l’immobile, poteri attribuiti ed eventuali limiti.",
+    commonMistake:
+      "Iniziare la pubblicazione prima di aver chiarito chi può autorizzare annuncio e condizioni.",
+  },
+  transitoryReasonEvidence: {
+    whyItMatters:
+      "Il percorso transitorio dipende da una reale esigenza temporanea e dalla durata del rapporto.",
+    howToGet: [
+      "Descrivi in modo preciso l’esigenza temporanea e il periodo previsto.",
+      "Raccogli gli elementi disponibili e falli verificare prima di scegliere il contratto.",
+    ],
+    whatToCheck:
+      "Soggetto interessato, motivo, durata, coerenza dei documenti e territorio dell’immobile.",
+    commonMistake:
+      "Usare automaticamente un contratto transitorio soltanto perché la durata desiderata è breve.",
+  },
+  studentEnrollment: {
+    whyItMatters:
+      "Aiuta a collegare il percorso abitativo alla sede e alla durata effettiva degli studi.",
+    howToGet: [
+      "Raccogli un documento o una dichiarazione relativa all’iscrizione e alla sede del corso.",
+      "Annota il periodo di studi previsto e le esigenze abitative dello studente.",
+    ],
+    whatToCheck:
+      "Nome, istituto o università, sede, corso e periodo a cui la documentazione si riferisce.",
+    commonMistake:
+      "Considerare sufficiente una richiesta informale senza verificare il percorso dichiarato.",
+  },
+  guarantorEvidence: {
+    whyItMatters:
+      "Fornisce agli agenti gli elementi per valutare garanzie e sostenibilità senza decisioni automatiche.",
+    howToGet: [
+      "Chiedi quale garanzia o capacità economica verrà proposta.",
+      "Raccogli soltanto i documenti necessari e condividili attraverso l’area protetta.",
+    ],
+    whatToCheck:
+      "Identità, validità, pertinenza e completezza, evitando dati non necessari.",
+    commonMistake:
+      "Lasciare che un punteggio automatico sostituisca la valutazione dell’agente e le verifiche consentite.",
+  },
+  touristUnitCompliance: {
+    whyItMatters:
+      "Prima di proporre soggiorni brevi occorre chiarire se l’unità è pronta e quali verifiche servono.",
+    howToGet: [
+      "Raccogli i dati dell’immobile e le eventuali registrazioni o comunicazioni già disponibili.",
+      "Fai verificare a Guimmia o al professionista gli adempimenti applicabili al caso concreto.",
+    ],
+    whatToCheck:
+      "Identificazione dell’unità, destinazione, requisiti, registrazioni e corrispondenza dei dati.",
+    commonMistake:
+      "Copiare il percorso di un altro Comune o di un’altra Regione senza una verifica locale aggiornata.",
+  },
+  touristLocalRules: {
+    whyItMatters:
+      "Le regole operative possono cambiare in base al territorio e devono essere verificate prima della pubblicazione.",
+    howToGet: [
+      "Indica con precisione Comune, Provincia o Regione dell’immobile.",
+      "Raccogli i riferimenti ufficiali applicabili e richiedi conferma quando necessario.",
+    ],
+    whatToCheck:
+      "Fonte, territorio, data di aggiornamento, adempimento richiesto e soggetto responsabile.",
+    commonMistake:
+      "Trattare come regola nazionale un requisito valido soltanto in uno specifico territorio.",
+  },
+  touristGuestReporting: {
+    whyItMatters:
+      "Prepara in anticipo identificazione, comunicazioni e responsabilità legate agli ospiti.",
+    howToGet: [
+      "Definisci chi effettuerà check-in e raccolta dei dati necessari.",
+      "Verifica accessi, procedure e scadenze con Guimmia prima del primo soggiorno.",
+    ],
+    whatToCheck:
+      "Soggetto autorizzato, dati minimi, procedura, tempi e conservazione sicura delle informazioni.",
+    commonMistake:
+      "Raccogliere documenti degli ospiti senza aver definito prima finalità, accessi e procedura sicura.",
+  },
 };
 
 export function getDocumentGuide(documentId: DocumentKey) {

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { useJourneys } from "@/hooks/useJourneys";
+import GuimmiaOrchestrationCard from "@/components/guimmia/GuimmiaOrchestrationCard";
 import GoalProgressCard from "@/components/property-journey/GoalProgressCard";
 import { usePilotMemory } from "@/hooks/usePilotMemory";
 import { buildPilotContext } from "@/lib/pilot-os";
@@ -122,10 +123,15 @@ function ActiveDashboard({
 
       <GoalProgressCard progress={context.goalProgress} />
 
+      <GuimmiaOrchestrationCard
+        journey={journey}
+        currentPhase={context.goalProgress.currentPhaseId}
+      />
+
       <section className="overflow-hidden rounded-[30px] border border-blue-200 bg-white shadow-xl shadow-blue-600/[0.06]">
         <div className="flex items-center justify-between gap-4 bg-blue-600 px-5 py-4 text-white sm:px-7">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-blue-100">Il prossimo passo</p>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-blue-100">Attività operativa</p>
             <p className="mt-1 text-sm font-semibold text-white/90">Fase {currentPhaseIndex} di {context.goalProgress.phases.length}</p>
           </div>
           <span className="rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold">

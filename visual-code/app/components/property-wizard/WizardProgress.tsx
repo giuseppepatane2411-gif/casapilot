@@ -1,6 +1,9 @@
 import { Check } from "lucide-react";
 
-import { WIZARD_STEPS } from "@/lib/property-journey/constants";
+import {
+  WIZARD_STEPS,
+  getOperationLabel,
+} from "@/lib/property-journey/constants";
 import type { OperationType } from "@/lib/property-journey/types";
 
 type WizardProgressProps = {
@@ -13,12 +16,9 @@ export default function WizardProgress({
   operation,
 }: WizardProgressProps) {
   const current = WIZARD_STEPS[currentStep - 1];
-  const objective =
-    operation === "sale"
-      ? "vendita"
-      : operation === "rent"
-        ? "affitto"
-        : "obiettivo finale";
+  const objective = operation
+    ? getOperationLabel(operation).toLocaleLowerCase("it-IT")
+    : "obiettivo finale";
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm sm:px-5">

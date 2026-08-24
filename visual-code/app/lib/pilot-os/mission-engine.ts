@@ -269,12 +269,123 @@ function buildExecutionMissions(journey: PropertyJourney): PilotMission[] {
     ];
   }
 
+  if (journey.operation === "rent_tourist_short") {
+    return [
+      manualMission({
+        id: "strategy-review",
+        title: "Definisci soggiorni, disponibilità e condizioni",
+        description:
+          "Imposta durata, regole della casa, disponibilità, prezzo e condizioni essenziali del soggiorno.",
+        reason:
+          "L’affitto turistico richiede un’offerta chiara prima di aprire prenotazioni e canali.",
+        estimatedMinutes: 20,
+        scoreGain: 10,
+        priority: "medium",
+        category: "strategy",
+        href: "/dashboard/pilot#pilot-chat",
+        actionLabel: "Segna condizioni definite",
+      }),
+      manualMission({
+        id: "marketing-material",
+        title: "Prepara l’annuncio turistico",
+        description:
+          "Raccogli fotografie, servizi, regole, istruzioni e informazioni utili agli ospiti.",
+        reason:
+          "Un annuncio coerente riduce incomprensioni e prepara meglio il soggiorno.",
+        estimatedMinutes: 30,
+        scoreGain: 10,
+        priority: "medium",
+        category: "marketing",
+        href: `/dashboard/properties/${journey.id}`,
+        actionLabel: "Segna materiale pronto",
+      }),
+      manualMission({
+        id: "tourist-publish-listing",
+        title: "Approva e pubblica l’annuncio",
+        description:
+          "Controlla le informazioni e distribuisci l’annuncio solo sui canali autorizzati.",
+        reason:
+          "La pubblicazione deve seguire i controlli dell’unità e l’approvazione di Guimmia.",
+        estimatedMinutes: 20,
+        scoreGain: 8,
+        priority: "high",
+        category: "market",
+        href: "/dashboard/pilot#pilot-chat",
+        actionLabel: "Segna annuncio pubblicato",
+      }),
+      manualMission({
+        id: "tourist-open-booking",
+        title: "Gestisci disponibilità e prenotazioni",
+        description:
+          "Mantieni le date aggiornate e conferma ogni prenotazione con condizioni chiare.",
+        reason:
+          "Disponibilità coerenti evitano sovrapposizioni e promesse non verificabili.",
+        estimatedMinutes: 15,
+        scoreGain: 7,
+        priority: "high",
+        category: "market",
+        href: "/dashboard/pilot#pilot-chat",
+        actionLabel: "Segna prenotazioni organizzate",
+      }),
+      manualMission({
+        id: "tourist-checkin-reporting",
+        title: "Prepara check-in e adempimenti ospiti",
+        description:
+          "Organizza identificazione, istruzioni di accesso e comunicazioni previste per il soggiorno.",
+        reason:
+          "Accoglienza e adempimenti devono essere preparati prima dell’arrivo dell’ospite.",
+        estimatedMinutes: 25,
+        scoreGain: 10,
+        priority: "high",
+        category: "closing",
+        href: "/dashboard/pilot#pilot-chat",
+        actionLabel: "Segna check-in preparato",
+      }),
+      manualMission({
+        id: "tourist-turnover",
+        title: "Completa check-out e riassetto",
+        description:
+          "Registra lo stato dell’immobile e prepara pulizia, dotazioni e prossima disponibilità.",
+        reason:
+          "Ogni soggiorno si chiude soltanto quando l’unità è pronta per quello successivo.",
+        estimatedMinutes: 30,
+        scoreGain: 10,
+        priority: "high",
+        category: "closing",
+        href: "/dashboard/pilot#pilot-chat",
+        actionLabel: "Segna riassetto completato",
+      }),
+    ];
+  }
+
+  const isStudentRental = journey.operation === "rent_student";
+  const isTransitoryRental = journey.operation === "rent_transitory";
+  const strategyTitle = isStudentRental
+    ? "Definisci requisiti e condizioni per studenti"
+    : isTransitoryRental
+      ? "Definisci esigenza, durata e condizioni"
+      : "Definisci tipo di locazione e canone";
+  const strategyDescription = isStudentRental
+    ? "Definisci durata, canone, garanzie e requisiti coerenti con il percorso di studi."
+    : isTransitoryRental
+      ? "Chiarisci esigenza temporanea, durata, canone, deposito e condizioni principali."
+      : "Scegli durata, formula contrattuale, canone, deposito e condizioni principali.";
+  const candidateTitle = isStudentRental
+    ? "Verifica studente e garanzie"
+    : isTransitoryRental
+      ? "Verifica candidato ed esigenza transitoria"
+      : "Valuta richieste e candidati";
+  const selectionTitle = isStudentRental
+    ? "Conferma studente, garanzie e condizioni"
+    : isTransitoryRental
+      ? "Conferma candidato, motivo e durata"
+      : "Scegli l’inquilino e conferma le condizioni";
+
   return [
     manualMission({
       id: "strategy-review",
-      title: "Definisci tipo di locazione e canone",
-      description:
-        "Scegli durata, formula contrattuale, canone, deposito e condizioni principali.",
+      title: strategyTitle,
+      description: strategyDescription,
       reason:
         "La strategia di locazione determina annuncio, documenti e profilo dell’inquilino da cercare.",
       estimatedMinutes: 15,
@@ -314,7 +425,7 @@ function buildExecutionMissions(journey: PropertyJourney): PilotMission[] {
     }),
     manualMission({
       id: "rent-screen-applicants",
-      title: "Valuta richieste e candidati",
+      title: candidateTitle,
       description:
         "Organizza visite e raccogli le informazioni necessarie per una prima valutazione.",
       reason:
@@ -328,7 +439,7 @@ function buildExecutionMissions(journey: PropertyJourney): PilotMission[] {
     }),
     manualMission({
       id: "rent-select-tenant",
-      title: "Scegli l’inquilino e conferma le condizioni",
+      title: selectionTitle,
       description:
         "Confronta i candidati e definisci con quello scelto condizioni, date e garanzie.",
       reason:

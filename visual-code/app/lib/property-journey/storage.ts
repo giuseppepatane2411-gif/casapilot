@@ -34,6 +34,13 @@ const LEGACY_DOCUMENT_MAP: Record<string, DocumentKey | undefined> = {
   urbanCompliance: "urbanCompliance",
   tenantDocuments: "leaseTemplate",
   leaseTemplate: "leaseTemplate",
+  rentalAuthority: "rentalAuthority",
+  transitoryReasonEvidence: "transitoryReasonEvidence",
+  studentEnrollment: "studentEnrollment",
+  guarantorEvidence: "guarantorEvidence",
+  touristUnitCompliance: "touristUnitCompliance",
+  touristLocalRules: "touristLocalRules",
+  touristGuestReporting: "touristGuestReporting",
 };
 
 function isBrowser() {
@@ -49,7 +56,14 @@ function createId() {
 }
 
 function isOperation(value: unknown): value is OperationType {
-  return value === "sale" || value === "rent";
+  return [
+    "sale",
+    "rent",
+    "rent_long_term",
+    "rent_transitory",
+    "rent_student",
+    "rent_tourist_short",
+  ].includes(String(value));
 }
 
 function isPropertyType(value: unknown): value is PropertyType {
@@ -368,6 +382,33 @@ export function updateJourneyDocuments(
     updatedJourney = {
       ...journey,
       documents,
+      updatedAt: new Date().toISOString(),
+      ...metrics,
+    };
+
+    return updatedJourney;
+  });
+
+  writeJourneys(updatedJourneys);
+  return updatedJourney;
+}
+
+export function updateJourneyOperation(
+  journeyId: string,
+  operation: OperationType,
+) {
+  const journeys = readJourneys();
+  let updatedJourney: PropertyJourney | null = null;
+
+  const updatedJourneys = journeys.map((journey) => {
+    if (journey.id !== journeyId) return journey;
+
+    const data = journeyToWizardData({ ...journey, operation });
+    const metrics = calculateJourneyMetrics(data);
+
+    updatedJourney = {
+      ...journey,
+      operation,
       updatedAt: new Date().toISOString(),
       ...metrics,
     };

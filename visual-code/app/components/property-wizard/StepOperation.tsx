@@ -1,4 +1,11 @@
-import { BadgeEuro, Check, KeyRound } from "lucide-react";
+import {
+  BadgeEuro,
+  BedDouble,
+  Check,
+  Clock3,
+  GraduationCap,
+  KeyRound,
+} from "lucide-react";
 
 import { OPERATION_OPTIONS } from "@/lib/property-journey/constants";
 import type { OperationType } from "@/lib/property-journey/types";
@@ -11,6 +18,10 @@ type StepOperationProps = {
 const iconByOperation = {
   sale: BadgeEuro,
   rent: KeyRound,
+  rent_long_term: KeyRound,
+  rent_transitory: Clock3,
+  rent_student: GraduationCap,
+  rent_tourist_short: BedDouble,
 };
 
 export default function StepOperation({
@@ -18,7 +29,7 @@ export default function StepOperation({
   onChange,
 }: StepOperationProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {OPERATION_OPTIONS.map((option) => {
         const Icon = iconByOperation[option.id];
         const selected = value === option.id;

@@ -4,6 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
+import {
+  classifyGuimmiaBrainRequest,
+  formatGuimmiaBrainAnswer,
+  requestGuimmiaBrain,
+} from "@/lib/guimmia/openai/brain-client";
 import { requestSiteOrchestration } from "@/lib/guimmia/site-orchestration/client";
 import {
   OPERATION_LABELS,
@@ -14,6 +19,7 @@ import {
 } from "@/lib/guimmia/site-orchestration/operation";
 import type {
   SiteCustomerRole,
+  SiteOrchestrationRequest,
   SiteOrchestrationResponse,
 } from "@/lib/guimmia/site-orchestration/types";
 import type { GuimmiaOperationType } from "@/lib/guimmia/brain/case-orchestrator/types";
@@ -26,6 +32,7 @@ type ChatMessage = {
   sender: "pilot" | "user";
   text: string;
   createdAt: string;
+  engine?: "OPENAI" | "CACHE" | "DETERMINISTIC" | "LOCAL";
 };
 
 type PropertyDraft = {
@@ -181,27 +188,62 @@ function normalizeDirectAnswer(field: keyof PropertyDraft, text: string) {
 
 async function brainReply(
   draft: PropertyDraft,
-): Promise<{ text: string; decision: SiteOrchestrationResponse | null }> {
+  customerMessage: string,
+  history: ChatMessage[],
+): Promise<{
+  text: string;
+  decision: SiteOrchestrationResponse | null;
+  engine: "OPENAI" | "CACHE" | "DETERMINISTIC" | "LOCAL";
+}> {
   const localQuestion = nextQuestion(draft);
   if (firstMissingField(draft)) {
-    return { text: localQuestion, decision: null };
+    return { text: localQuestion, decision: null, engine: "LOCAL" };
+  }
+
+  const caseRequest: SiteOrchestrationRequest = {
+    caseId: draft.id,
+    operationType: draft.operationType ?? null,
+    customerRole: draft.customerRole ?? "UNCONFIRMED",
+    property: {
+      id: draft.id,
+      type: draft.propertyType,
+      country: draft.country,
+      city: draft.city,
+      province: draft.province,
+      address: draft.address,
+      locationVerified: false,
+      documents: [],
+    },
+    progress: { currentPhase: "INTAKE" },
+  };
+
+  if (draft.operationType) {
+    try {
+      const result = await requestGuimmiaBrain({
+        question:
+          customerMessage.trim() ||
+          draft.notes.trim() ||
+          "Qual è il prossimo passo sicuro per questa pratica?",
+        requestKind: classifyGuimmiaBrainRequest(customerMessage),
+        case: { ...caseRequest, operationType: draft.operationType },
+        conversation: history.slice(-4).map((message) => ({
+          role: message.sender === "user" ? "user" : "assistant",
+          text: message.text,
+        })),
+      });
+
+      return {
+        text: formatGuimmiaBrainAnswer(result),
+        decision: result.orchestration,
+        engine: result.cacheHit ? "CACHE" : "OPENAI",
+      };
+    } catch {
+      // OpenAI is an assistive layer: deterministic Guimmia remains available.
+    }
   }
 
   try {
-    const decision = await requestSiteOrchestration({
-      caseId: draft.id,
-      operationType: draft.operationType ?? null,
-      customerRole: draft.customerRole ?? "UNCONFIRMED",
-      property: {
-        id: draft.id,
-        type: draft.propertyType,
-        country: draft.country,
-        city: draft.city,
-        province: draft.province,
-        address: draft.address,
-      },
-      progress: { currentPhase: "INTAKE" },
-    });
+    const decision = await requestSiteOrchestration(caseRequest);
     const question = decision.customerQuestions[0];
 
     return {
@@ -210,9 +252,10 @@ async function brainReply(
         decision.customerExplanation ||
         localQuestion,
       decision,
+      engine: "DETERMINISTIC",
     };
   } catch {
-    return { text: localQuestion, decision: null };
+    return { text: localQuestion, decision: null, engine: "LOCAL" };
   }
 }
 
@@ -223,23 +266,28 @@ export default function PilotFirstChat() {
   const [input, setInput] = useState("");
   const [savedNotice, setSavedNotice] = useState("");
   const [brainDecision, setBrainDecision] = useState<SiteOrchestrationResponse | null>(null);
+  const [thinking, setThinking] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const initialQueryHandledRef = useRef(false);
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored) as { messages?: ChatMessage[]; draft?: PropertyDraft };
-        if (parsed.messages?.length) setMessages(parsed.messages);
-        if (parsed.draft) setDraft(parsed.draft);
+    const timer = window.setTimeout(() => {
+      try {
+        const stored = window.localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored) as { messages?: ChatMessage[]; draft?: PropertyDraft };
+          if (parsed.messages?.length) setMessages(parsed.messages);
+          if (parsed.draft) setDraft(parsed.draft);
+        }
+      } catch {
+        // A damaged local demo session must not block Guimmia.
+      } finally {
+        setLoaded(true);
       }
-    } catch {
-      // A damaged local demo session must not block Guimmia.
-    } finally {
-      setLoaded(true);
-    }
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -299,35 +347,40 @@ export default function PilotFirstChat() {
       });
     }
 
-    setMessages((current) => [
-      ...current,
-      {
-        id: `user_home_${Date.now()}`,
-        sender: "user",
-        text: initialMessageFromHome,
-        createdAt: new Date().toISOString(),
-      },
-    ]);
+    const timer = window.setTimeout(() => {
+      setMessages((current) => [
+        ...current,
+        {
+          id: `user_home_${Date.now()}`,
+          sender: "user",
+          text: initialMessageFromHome,
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+      setDraft(updated);
+      setThinking(true);
 
-    setDraft(updated);
+      void brainReply(updated, initialMessageFromHome, messages)
+        .then(({ text, decision, engine }) => {
+          setBrainDecision(decision);
+          setMessages((current) => [
+            ...current,
+            {
+              id: `pilot_home_${Date.now()}`,
+              sender: "pilot",
+              text,
+              createdAt: new Date().toISOString(),
+              engine,
+            },
+          ]);
+        })
+        .finally(() => setThinking(false));
 
-    window.setTimeout(() => {
-      void brainReply(updated).then(({ text, decision }) => {
-        setBrainDecision(decision);
-        setMessages((current) => [
-          ...current,
-          {
-            id: `pilot_home_${Date.now()}`,
-            sender: "pilot",
-            text,
-            createdAt: new Date().toISOString(),
-          },
-        ]);
-      });
-    }, 250);
+      window.history.replaceState({}, "", window.location.pathname);
+    }, 0);
 
-    window.history.replaceState({}, "", window.location.pathname);
-  }, [loaded, draft]);
+    return () => window.clearTimeout(timer);
+  }, [loaded, draft, messages]);
 
   const completeness = useMemo(
     () => Math.min(100, Math.round((fieldCount(draft) / 6) * 100)),
@@ -379,25 +432,38 @@ export default function PilotFirstChat() {
     }
 
     setDraft(updated);
+    setThinking(true);
     window.setTimeout(() => {
-      void brainReply(updated).then(({ text: reply, decision }) => {
-        setBrainDecision(decision);
-        addMessage("pilot", reply);
-      });
+      void brainReply(updated, text, messages)
+        .then(({ text: reply, decision, engine }) => {
+          setBrainDecision(decision);
+          setMessages((current) => [
+            ...current,
+            {
+              id: `pilot_${Date.now()}_${Math.random()}`,
+              sender: "pilot",
+              text: reply,
+              createdAt: new Date().toISOString(),
+              engine,
+            },
+          ]);
+        })
+        .finally(() => setThinking(false));
     }, 250);
   };
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
     const value = input.trim();
-    if (!value) return;
+    if (!value || thinking) return;
     addMessage("user", value);
     setInput("");
     setSavedNotice("");
     processMessage(value);
   };
 
-  const usePrompt = (prompt: string) => {
+  const handlePrompt = (prompt: string) => {
+    if (thinking) return;
     addMessage("user", prompt);
     processMessage(prompt);
   };
@@ -484,6 +550,7 @@ export default function PilotFirstChat() {
     setDraft(fresh);
     setMessages([{ ...initialMessage, id: `pilot_welcome_${Date.now()}` }]);
     setBrainDecision(null);
+    setThinking(false);
     setSavedNotice("");
     window.localStorage.removeItem(STORAGE_KEY);
   };
@@ -519,24 +586,42 @@ export default function PilotFirstChat() {
                 <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`max-w-[86%] rounded-2xl px-4 py-3 text-sm leading-6 sm:max-w-[72%] ${message.sender === "user" ? "rounded-br-md bg-blue-600 text-white" : "rounded-bl-md bg-slate-100 text-slate-800"}`}>
                     {message.text}
+                    {message.sender === "pilot" && message.engine ? (
+                      <span className="mt-2 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
+                        {message.engine === "OPENAI"
+                          ? "Cervello Guimmia + OpenAI"
+                          : message.engine === "CACHE"
+                            ? "Risposta riutilizzata · nessun nuovo costo"
+                            : message.engine === "DETERMINISTIC"
+                              ? "Percorso sicuro Guimmia · OpenAI non utilizzato"
+                              : "Raccolta dati locale · nessun costo IA"}
+                      </span>
+                    ) : null}
                   </div>
                 </div>
               ))}
+              {thinking ? (
+                <div className="flex justify-start" aria-live="polite">
+                  <div className="rounded-2xl rounded-bl-md bg-slate-100 px-4 py-3 text-sm text-slate-600">
+                    Guimmia sta consultando il percorso e le regole della pratica…
+                  </div>
+                </div>
+              ) : null}
               <div ref={chatEndRef} />
             </div>
 
             {messages.length <= 2 ? (
               <div className="flex flex-wrap gap-2 border-t border-slate-100 px-4 py-3 sm:px-6">
                 {["Voglio vendere una casa ad Acireale", "Vorrei affittare il mio appartamento", "Ho bisogno di capire quanto vale il mio immobile"].map((prompt) => (
-                  <button key={prompt} type="button" onClick={() => usePrompt(prompt)} className="rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100">{prompt}</button>
+                  <button key={prompt} type="button" disabled={thinking} onClick={() => handlePrompt(prompt)} className="rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50">{prompt}</button>
                 ))}
               </div>
             ) : null}
 
             <form onSubmit={submit} className="border-t border-slate-100 p-4 sm:p-5">
               <div className="flex items-end gap-3 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-50">
-                <textarea value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} placeholder="Scrivi qui il tuo messaggio..." rows={2} className="min-h-12 flex-1 resize-none border-0 bg-transparent px-3 py-2 text-sm outline-none" />
-                <button type="submit" disabled={!input.trim()} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white disabled:cursor-not-allowed disabled:bg-slate-300" aria-label="Invia messaggio">
+                <textarea value={input} disabled={thinking} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} placeholder="Scrivi qui il tuo messaggio..." rows={2} className="min-h-12 flex-1 resize-none border-0 bg-transparent px-3 py-2 text-sm outline-none disabled:cursor-wait" />
+                <button type="submit" disabled={!input.trim() || thinking} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white disabled:cursor-not-allowed disabled:bg-slate-300" aria-label="Invia messaggio">
                   <svg viewBox="0 0 20 20" fill="none" className="h-5 w-5" aria-hidden="true"><path d="m3 3 14 7-14 7 2.8-7L3 3Z" fill="currentColor" /><path d="M6 10h7" stroke="white" strokeWidth="1.4" strokeLinecap="round" /></svg>
                 </button>
               </div>

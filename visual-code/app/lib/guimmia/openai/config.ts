@@ -12,6 +12,13 @@ export const GUIMMIA_AI_MONTHLY_BUDGET_USD = 5;
 export const GUIMMIA_AI_MAX_REQUEST_COST_USD = 0.05;
 export const GUIMMIA_AI_RATE_LIMIT_REQUESTS = 3;
 export const GUIMMIA_AI_RATE_LIMIT_WINDOW_MINUTES = 30;
+export const GUIMMIA_BRAIN_MAX_REQUEST_COST_USD = 0.02;
+export const GUIMMIA_BRAIN_RATE_LIMIT_REQUESTS = 12;
+export const GUIMMIA_BRAIN_RATE_LIMIT_WINDOW_MINUTES = 30;
+export const GUIMMIA_BRAIN_REUSE_WINDOW_MINUTES = 15;
+export const GUIMMIA_BRAIN_MAX_RULES = 10;
+export const GUIMMIA_BRAIN_MAX_KNOWLEDGE_CARDS = 6;
+export const GUIMMIA_BRAIN_MAX_OUTPUT_TOKENS = 900;
 
 export function getOpenAIConfiguration() {
   const apiKey = process.env.OPENAI_API_KEY?.trim() ?? "";

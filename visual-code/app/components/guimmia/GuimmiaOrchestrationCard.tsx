@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import {
   ArrowRight,
   BrainCircuit,
@@ -10,6 +11,15 @@ import {
 } from "lucide-react";
 
 import { useGuimmiaOrchestration } from "@/hooks/useGuimmiaOrchestration";
+import {
+  classifyGuimmiaBrainRequest,
+  formatGuimmiaBrainAnswer,
+  requestGuimmiaBrain,
+} from "@/lib/guimmia/openai/brain-client";
+import {
+  phaseToPlaybookStage,
+  toGuimmiaOperationType,
+} from "@/lib/guimmia/site-orchestration/operation";
 import type { GoalProgressPhaseId } from "@/lib/pilot-os/goal-progress";
 import type { PropertyJourney } from "@/lib/property-journey/types";
 
@@ -34,6 +44,60 @@ export default function GuimmiaOrchestrationCard({
     journey,
     currentPhase,
   );
+  const [question, setQuestion] = useState("");
+  const [brainAnswer, setBrainAnswer] = useState("");
+  const [brainError, setBrainError] = useState("");
+  const [brainMeta, setBrainMeta] = useState("");
+  const [brainLoading, setBrainLoading] = useState(false);
+
+  const askGuimmia = async () => {
+    const operationType = toGuimmiaOperationType(journey.operation);
+    if (!operationType || brainLoading) return;
+
+    const customerQuestion =
+      question.trim() || "Qual è il prossimo passo sicuro per questa pratica?";
+    setBrainLoading(true);
+    setBrainError("");
+    setBrainMeta("");
+
+    try {
+      const result = await requestGuimmiaBrain({
+        question: customerQuestion,
+        requestKind: classifyGuimmiaBrainRequest(customerQuestion),
+        case: {
+          caseId: journey.id,
+          caseVersion: 1,
+          operationType,
+          customerRole: operationType === "SALE" ? "OWNER" : "LANDLORD",
+          property: {
+            id: journey.id,
+            type: journey.property.type,
+            country: journey.property.country,
+            city: journey.property.city,
+            province: journey.property.province,
+            address: journey.property.address,
+            locationVerified: journey.property.locationVerified,
+            documents: journey.documents,
+          },
+          progress: {
+            currentPhase: phaseToPlaybookStage(currentPhase, operationType),
+          },
+        },
+      });
+      setBrainAnswer(formatGuimmiaBrainAnswer(result));
+      setBrainMeta(
+        result.cacheHit
+          ? "Risposta riutilizzata per 15 minuti: nessun nuovo costo OpenAI."
+          : `Analisi eseguita con cervello Guimmia + OpenAI. Costo stimato: $${result.usage.estimatedCostUsd.toFixed(4)}.`,
+      );
+    } catch {
+      setBrainError(
+        "La consulenza intelligente non è disponibile in questo momento. Il percorso sicuro mostrato sopra resta valido.",
+      );
+    } finally {
+      setBrainLoading(false);
+    }
+  };
 
   if (loading && !decision) {
     return (
@@ -141,6 +205,58 @@ export default function GuimmiaOrchestrationCard({
             </div>
           </div>
         )}
+
+        <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50/70 p-4 sm:p-5">
+          <div className="flex items-start gap-3">
+            <BrainCircuit className="mt-0.5 shrink-0 text-blue-700" size={19} />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-slate-950">
+                Chiedi a Guimmia sulla pratica
+              </p>
+              <p className="mt-1 text-xs leading-5 text-slate-600">
+                Guimmia consulta la fase attuale, i documenti e le regole pertinenti. Nessuna azione viene eseguita.
+              </p>
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                <input
+                  value={question}
+                  disabled={brainLoading}
+                  onChange={(event) => setQuestion(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      void askGuimmia();
+                    }
+                  }}
+                  placeholder="Es. Quali documenti mancano?"
+                  className="min-h-11 flex-1 rounded-xl border border-blue-200 bg-white px-3 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-wait"
+                />
+                <button
+                  type="button"
+                  disabled={brainLoading || !toGuimmiaOperationType(journey.operation)}
+                  onClick={() => void askGuimmia()}
+                  className="inline-flex min-h-11 items-center justify-center rounded-xl bg-blue-700 px-4 text-sm font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                >
+                  {brainLoading ? "Consulto…" : "Chiedi a Guimmia"}
+                </button>
+              </div>
+              {brainAnswer ? (
+                <p className="mt-4 whitespace-pre-line rounded-xl bg-white p-4 text-sm leading-6 text-slate-700">
+                  {brainAnswer}
+                </p>
+              ) : null}
+              {brainMeta ? (
+                <p className="mt-2 text-[11px] font-semibold leading-5 text-blue-800">
+                  {brainMeta} Nessuna azione è stata eseguita.
+                </p>
+              ) : null}
+              {brainError ? (
+                <p className="mt-3 text-xs font-semibold leading-5 text-amber-800">
+                  {brainError}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

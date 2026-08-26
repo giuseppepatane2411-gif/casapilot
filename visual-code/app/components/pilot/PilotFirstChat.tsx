@@ -4,17 +4,45 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
+import GuimmiaAgendaWorkspace from "@/components/guimmia/GuimmiaAgendaWorkspace";
+import GuimmiaDocumentWorkspace from "@/components/guimmia/GuimmiaDocumentWorkspace";
+import GuimmiaLivingCaseRoom from "@/components/guimmia/GuimmiaLivingCaseRoom";
+import GuidedAddressSearch, {
+  type GuidedAddressValue,
+} from "@/components/property-wizard/GuidedAddressSearch";
+import {
+  GUIMMIA_CONDITION_OPTIONS,
+  GUIMMIA_COUNTRY_OPTIONS,
+  GUIMMIA_OBJECTIVE_OPTIONS,
+  GUIMMIA_OCCUPANCY_OPTIONS,
+  GUIMMIA_PROPERTY_TYPE_OPTIONS,
+  GUIMMIA_RENTAL_OPTIONS,
+  isRentalObjective,
+  objectiveOption,
+} from "@/lib/guimmia/intake/options";
 import {
   classifyGuimmiaBrainRequest,
   formatGuimmiaBrainAnswer,
   requestGuimmiaBrain,
 } from "@/lib/guimmia/openai/brain-client";
+import { requestGuimmiaIntake } from "@/lib/guimmia/openai/intake-client";
+import type {
+  GuimmiaIntakeDraft,
+  GuimmiaIntakePatch,
+} from "@/lib/guimmia/openai/intake-types";
+import { analyzeGuimmiaDocument } from "@/lib/guimmia/operations/document-client";
+import type {
+  GuimmiaActionReceipt,
+  GuimmiaCaseRoomPanel,
+} from "@/lib/guimmia/operations/case-room-types";
+import {
+  interpretGuimmiaSchedule,
+  looksLikeGuimmiaSchedulingMessage,
+} from "@/lib/guimmia/operations/scheduling-client";
+import type { GuimmiaScheduleProposal } from "@/lib/guimmia/operations/scheduling-types";
 import { requestSiteOrchestration } from "@/lib/guimmia/site-orchestration/client";
 import {
   OPERATION_LABELS,
-  detectCustomerRole,
-  detectGuimmiaOperationType,
-  hasGenericRentalIntent,
   toSiteOperationType,
 } from "@/lib/guimmia/site-orchestration/operation";
 import type {
@@ -32,8 +60,11 @@ type ChatMessage = {
   sender: "pilot" | "user";
   text: string;
   createdAt: string;
-  engine?: "OPENAI" | "CACHE" | "DETERMINISTIC" | "LOCAL";
+  engine?: "OPENAI" | "CACHE" | "INTAKE" | "DETERMINISTIC" | "LOCAL";
+  receipt?: GuimmiaActionReceipt;
 };
+
+type WorkspacePanel = GuimmiaCaseRoomPanel;
 
 type PropertyDraft = {
   id: string;
@@ -43,6 +74,10 @@ type PropertyDraft = {
   city: string;
   province: string;
   address: string;
+  postalCode: string;
+  latitude: number | null;
+  longitude: number | null;
+  locationVerified: boolean;
   surface: string;
   rooms: string;
   condition: string;
@@ -67,6 +102,10 @@ const emptyDraft = (): PropertyDraft => ({
   city: "",
   province: "",
   address: "",
+  postalCode: "",
+  latitude: null,
+  longitude: null,
+  locationVerified: false,
   surface: "",
   rooms: "",
   condition: "",
@@ -79,7 +118,7 @@ const emptyDraft = (): PropertyDraft => ({
 const initialMessage: ChatMessage = {
   id: "pilot_welcome",
   sender: "pilot",
-  text: "Ciao! Sono Guimmia. Raccontami cosa vuoi fare con il tuo immobile: puoi scriverlo liberamente, organizzerò io le informazioni.",
+  text: "Ciao, sono Guimmia. Raccontami in una sola frase cosa vuoi fare con il tuo immobile. Io aprirò la pratica, organizzerò quello che mi dici e ti mostrerò la prima mossa utile.",
   createdAt: new Date().toISOString(),
 };
 
@@ -90,57 +129,6 @@ function CompassIcon({ className = "h-5 w-5" }: { className?: string }) {
       <path d="m14.9 8.2-1.7 5-5 1.7 1.7-5 5-1.7Z" fill="currentColor" />
     </svg>
   );
-}
-
-function detectObjective(text: string) {
-  const value = text.toLowerCase();
-  if (/(vend|cess|acquirent|compr|compravend)/.test(value)) return "Vendita o acquisto";
-  if (/(affitt|locaz|inquilin)/.test(value)) return "Affitto";
-  if (/(valut|quanto vale|stima)/.test(value)) return "Valutazione";
-  if (/(ristruttur|lavori|rinnov)/.test(value)) return "Ristrutturazione";
-  if (/(gest|manuten|amministr)/.test(value)) return "Gestione";
-  return "";
-}
-
-function detectPropertyType(text: string) {
-  const value = text.toLowerCase();
-  if (value.includes("villa")) return "Villa";
-  if (value.includes("appartamento")) return "Appartamento";
-  if (value.includes("casa indipendente")) return "Casa indipendente";
-  if (value.includes("casa")) return "Casa";
-  if (value.includes("terreno")) return "Terreno";
-  if (value.includes("locale")) return "Locale commerciale";
-  if (value.includes("ufficio")) return "Ufficio";
-  if (value.includes("garage") || value.includes("box")) return "Garage o box";
-  return "";
-}
-
-function detectSurface(text: string) {
-  const match = text.match(/(\d{2,4})\s*(?:mq|m2|m²|metri quadrati)/i);
-  return match?.[1] ? `${match[1]} m²` : "";
-}
-
-function detectRooms(text: string) {
-  const match = text.match(/(\d{1,2})\s*(?:stanze|vani|camere|locali)/i);
-  return match?.[1] ?? "";
-}
-
-function detectCity(text: string) {
-  const common = [
-    "Acireale", "Catania", "Palermo", "Messina", "Siracusa", "Ragusa",
-    "Milano", "Roma", "Torino", "Bologna", "Firenze", "Napoli", "Bari",
-    "Tenerife", "Güímar", "Guimar",
-  ];
-  return common.find((city) => text.toLowerCase().includes(city.toLowerCase())) ?? "";
-}
-
-function detectCountry(text: string, city: string) {
-  if (/(spagna|spain|tenerife|güímar|guimar)/i.test(`${text} ${city}`)) {
-    return "Spagna";
-  }
-  if (/(italia|italy)/i.test(text)) return "Italia";
-  if (city && !["Tenerife", "Güímar", "Guimar"].includes(city)) return "Italia";
-  return "";
 }
 
 function toPropertyType(value: string): PropertyType | null {
@@ -154,17 +142,27 @@ function toPropertyType(value: string): PropertyType | null {
 }
 
 function fieldCount(draft: PropertyDraft) {
-  return [draft.objective, draft.propertyType, draft.country, draft.city, draft.surface, draft.condition].filter(Boolean).length;
+  return [
+    draft.objective,
+    draft.operationType,
+    draft.propertyType,
+    draft.country,
+    draft.city,
+    draft.locationVerified ? "verified" : "",
+    draft.surface,
+    draft.condition,
+  ].filter(Boolean).length;
 }
 
 function nextQuestion(draft: PropertyDraft) {
   if (!draft.objective) return "Qual è il tuo obiettivo principale: vendere, affittare, valutare oppure gestire l’immobile?";
-  if (draft.objective === "Affitto" && !draft.operationType) {
+  if (isRentalObjective(draft.objective) && !draft.operationType) {
     return "Che tipo di affitto vuoi gestire: lungo termine, transitorio, per studenti oppure turistico breve?";
   }
   if (!draft.propertyType) return "Di che tipo di immobile si tratta? Per esempio appartamento, villa, casa indipendente, terreno o locale.";
   if (!draft.city) return "In quale comune si trova l’immobile?";
   if (!draft.country) return "In quale Paese si trova l’immobile?";
+  if (!draft.locationVerified) return "Controlla la località suggerita nella scheda e conferma la posizione dell’immobile.";
   if (!draft.surface) return "Conosci indicativamente la superficie in metri quadrati? Puoi anche dirmi che non la sai ancora.";
   if (!draft.condition) return "Come descriveresti lo stato dell’immobile: da ristrutturare, buono, ristrutturato o nuovo?";
   return "Ho preparato una prima bozza. Controllala a destra: puoi correggere ogni dato prima di confermarla.";
@@ -172,18 +170,110 @@ function nextQuestion(draft: PropertyDraft) {
 
 function firstMissingField(draft: PropertyDraft): keyof PropertyDraft | null {
   if (!draft.objective) return "objective";
-  if (draft.objective === "Affitto" && !draft.operationType) return "operationType";
+  if (isRentalObjective(draft.objective) && !draft.operationType) return "operationType";
   if (!draft.propertyType) return "propertyType";
   if (!draft.city) return "city";
   if (!draft.country) return "country";
+  if (!draft.locationVerified) return "locationVerified";
   if (!draft.surface) return "surface";
   if (!draft.condition) return "condition";
   return null;
 }
 
-function normalizeDirectAnswer(field: keyof PropertyDraft, text: string) {
-  if (field === "surface" && /non (lo )?so|non conosco/i.test(text)) return "Da verificare";
-  return text.trim();
+const INTAKE_FIELD_LABELS: Partial<Record<keyof GuimmiaIntakePatch, string>> = {
+  objective: "Obiettivo della pratica",
+  operationType: "Percorso immobiliare",
+  customerRole: "Ruolo del cliente",
+  propertyType: "Tipo di immobile",
+  country: "Paese",
+  city: "Comune",
+  province: "Provincia",
+  address: "Indirizzo",
+  postalCode: "CAP",
+  surfaceSqm: "Superficie",
+  rooms: "Vani o camere",
+  condition: "Stato dell’immobile",
+  occupancy: "Disponibilità dell’immobile",
+  notes: "Note della pratica",
+};
+
+function intakeReceipt(patch: GuimmiaIntakePatch): GuimmiaActionReceipt | undefined {
+  const items = Object.entries(patch)
+    .filter(([, value]) => value !== undefined && value !== null && value !== "")
+    .map(([field]) => INTAKE_FIELD_LABELS[field as keyof GuimmiaIntakePatch])
+    .filter((label): label is string => Boolean(label));
+  if (items.length === 0) return undefined;
+  return {
+    title: "Ho aggiornato la pratica",
+    items: Array.from(new Set(items)).slice(0, 6),
+    targetPanel: "CASE_ROOM",
+    requiresConfirmation: true,
+  };
+}
+
+function toIntakeDraft(draft: PropertyDraft): GuimmiaIntakeDraft {
+  const surfaceSqm = Number(
+    draft.surface.replace(/[^0-9.,]/g, "").replace(",", "."),
+  );
+  const rooms = Number(draft.rooms.replace(/\D/g, ""));
+  return {
+    id: draft.id,
+    objective: draft.objective,
+    operationType: draft.operationType ?? null,
+    customerRole: draft.customerRole ?? "UNCONFIRMED",
+    propertyType: draft.propertyType,
+    country: draft.country,
+    city: draft.city,
+    province: draft.province,
+    address: draft.address,
+    postalCode: draft.postalCode,
+    surfaceSqm: Number.isFinite(surfaceSqm) && surfaceSqm > 0 ? surfaceSqm : null,
+    rooms: Number.isInteger(rooms) && rooms > 0 ? rooms : null,
+    condition: draft.condition,
+    occupancy: draft.occupancy,
+    notes: draft.notes,
+    locationVerified: draft.locationVerified,
+  };
+}
+
+function applyIntakePatch(
+  draft: PropertyDraft,
+  patch: GuimmiaIntakePatch,
+): PropertyDraft {
+  const locationChanged = ["country", "city", "province", "address", "postalCode"].some(
+    (field) => {
+      const value = patch[field as keyof GuimmiaIntakePatch];
+      return value !== undefined && value !== draft[field as keyof PropertyDraft];
+    },
+  );
+  return {
+    ...draft,
+    ...(patch.objective !== undefined ? { objective: patch.objective } : {}),
+    ...(patch.operationType !== undefined
+      ? { operationType: patch.operationType ?? undefined }
+      : {}),
+    ...(patch.customerRole !== undefined
+      ? { customerRole: patch.customerRole }
+      : {}),
+    ...(patch.propertyType !== undefined ? { propertyType: patch.propertyType } : {}),
+    ...(patch.country !== undefined ? { country: patch.country } : {}),
+    ...(patch.city !== undefined ? { city: patch.city } : {}),
+    ...(patch.province !== undefined ? { province: patch.province } : {}),
+    ...(patch.address !== undefined ? { address: patch.address } : {}),
+    ...(patch.postalCode !== undefined ? { postalCode: patch.postalCode } : {}),
+    ...(patch.surfaceSqm !== undefined && patch.surfaceSqm !== null
+      ? { surface: String(patch.surfaceSqm) }
+      : {}),
+    ...(patch.rooms !== undefined && patch.rooms !== null
+      ? { rooms: String(patch.rooms) }
+      : {}),
+    ...(patch.condition !== undefined ? { condition: patch.condition } : {}),
+    ...(patch.occupancy !== undefined ? { occupancy: patch.occupancy } : {}),
+    ...(patch.notes !== undefined ? { notes: patch.notes } : {}),
+    locationVerified: locationChanged ? false : draft.locationVerified,
+    status: "draft",
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 async function brainReply(
@@ -194,6 +284,7 @@ async function brainReply(
   text: string;
   decision: SiteOrchestrationResponse | null;
   engine: "OPENAI" | "CACHE" | "DETERMINISTIC" | "LOCAL";
+  receipt?: GuimmiaActionReceipt;
 }> {
   const localQuestion = nextQuestion(draft);
   if (firstMissingField(draft)) {
@@ -211,7 +302,7 @@ async function brainReply(
       city: draft.city,
       province: draft.province,
       address: draft.address,
-      locationVerified: false,
+      locationVerified: draft.locationVerified,
       documents: [],
     },
     progress: { currentPhase: "INTAKE" },
@@ -266,9 +357,16 @@ export default function PilotFirstChat() {
   const [input, setInput] = useState("");
   const [savedNotice, setSavedNotice] = useState("");
   const [brainDecision, setBrainDecision] = useState<SiteOrchestrationResponse | null>(null);
+  const [quickReplies, setQuickReplies] = useState<string[]>([]);
   const [thinking, setThinking] = useState(false);
+  const [documentUploading, setDocumentUploading] = useState(false);
+  const [documentRefreshToken, setDocumentRefreshToken] = useState(0);
+  const [caseRoomRefreshToken, setCaseRoomRefreshToken] = useState(0);
+  const [workspacePanel, setWorkspacePanel] = useState<WorkspacePanel>("CASE_ROOM");
+  const [scheduleProposal, setScheduleProposal] = useState<GuimmiaScheduleProposal | null>(null);
   const [loaded, setLoaded] = useState(false);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const initialQueryHandledRef = useRef(false);
 
   useEffect(() => {
@@ -278,7 +376,20 @@ export default function PilotFirstChat() {
         if (stored) {
           const parsed = JSON.parse(stored) as { messages?: ChatMessage[]; draft?: PropertyDraft };
           if (parsed.messages?.length) setMessages(parsed.messages);
-          if (parsed.draft) setDraft(parsed.draft);
+          if (parsed.draft) {
+            setDraft({
+              ...emptyDraft(),
+              ...parsed.draft,
+              objective:
+                parsed.draft.objective === "Affitto"
+                  ? "Affittare"
+                  : parsed.draft.objective,
+              postalCode: parsed.draft.postalCode ?? "",
+              latitude: parsed.draft.latitude ?? null,
+              longitude: parsed.draft.longitude ?? null,
+              locationVerified: parsed.draft.locationVerified === true,
+            });
+          }
         }
       } catch {
         // A damaged local demo session must not block Guimmia.
@@ -306,47 +417,6 @@ export default function PilotFirstChat() {
 
     if (!initialMessageFromHome) return;
 
-    const expectedField = firstMissingField(draft);
-    const detected: Partial<PropertyDraft> = {
-      objective: draft.objective || detectObjective(initialMessageFromHome),
-      propertyType:
-        draft.propertyType || detectPropertyType(initialMessageFromHome),
-      city: draft.city || detectCity(initialMessageFromHome),
-      surface: draft.surface || detectSurface(initialMessageFromHome),
-      rooms: draft.rooms || detectRooms(initialMessageFromHome),
-      operationType:
-        draft.operationType ||
-        detectGuimmiaOperationType(initialMessageFromHome) ||
-        undefined,
-      customerRole:
-        draft.customerRole && draft.customerRole !== "UNCONFIRMED"
-          ? draft.customerRole
-          : detectCustomerRole(initialMessageFromHome),
-    };
-    detected.country =
-      draft.country ||
-      detectCountry(initialMessageFromHome, detected.city ?? draft.city);
-
-    const updated: PropertyDraft = {
-      ...draft,
-      ...detected,
-      updatedAt: new Date().toISOString(),
-      status: "draft",
-    };
-
-    if (
-      expectedField &&
-      expectedField !== "operationType" &&
-      !String(updated[expectedField] ?? "").trim()
-    ) {
-      Object.assign(updated, {
-        [expectedField]: normalizeDirectAnswer(
-          expectedField,
-          initialMessageFromHome,
-        ),
-      });
-    }
-
     const timer = window.setTimeout(() => {
       setMessages((current) => [
         ...current,
@@ -357,20 +427,37 @@ export default function PilotFirstChat() {
           createdAt: new Date().toISOString(),
         },
       ]);
-      setDraft(updated);
       setThinking(true);
-
-      void brainReply(updated, initialMessageFromHome, messages)
-        .then(({ text, decision, engine }) => {
-          setBrainDecision(decision);
+      void requestGuimmiaIntake({
+        message: initialMessageFromHome,
+        draft: toIntakeDraft(draft),
+        conversation: [],
+      })
+        .then((result) => {
+          setDraft((current) => applyIntakePatch(current, result.patch));
+          setCaseRoomRefreshToken((current) => current + 1);
+          setQuickReplies(result.quickReplies);
           setMessages((current) => [
             ...current,
             {
               id: `pilot_home_${Date.now()}`,
               sender: "pilot",
-              text,
+              text: result.assistantMessage,
               createdAt: new Date().toISOString(),
-              engine,
+              engine: result.cacheHit ? "CACHE" : "INTAKE",
+              receipt: intakeReceipt(result.patch),
+            },
+          ]);
+        })
+        .catch(() => {
+          setMessages((current) => [
+            ...current,
+            {
+              id: `pilot_home_fallback_${Date.now()}`,
+              sender: "pilot",
+              text: "Non sono riuscita a interpretare il messaggio. Riprova descrivendo obiettivo, immobile e località.",
+              createdAt: new Date().toISOString(),
+              engine: "LOCAL",
             },
           ]);
         })
@@ -383,7 +470,7 @@ export default function PilotFirstChat() {
   }, [loaded, draft, messages]);
 
   const completeness = useMemo(
-    () => Math.min(100, Math.round((fieldCount(draft) / 6) * 100)),
+    () => Math.min(100, Math.round((fieldCount(draft) / 8) * 100)),
     [draft],
   );
 
@@ -395,48 +482,68 @@ export default function PilotFirstChat() {
   };
 
   const processMessage = (text: string) => {
-    const expectedField = firstMissingField(draft);
-    const detected: Partial<PropertyDraft> = {
-      objective: draft.objective || detectObjective(text),
-      propertyType: draft.propertyType || detectPropertyType(text),
-      city: draft.city || detectCity(text),
-      surface: draft.surface || detectSurface(text),
-      rooms: draft.rooms || detectRooms(text),
-      operationType:
-        draft.operationType || detectGuimmiaOperationType(text) || undefined,
-      customerRole:
-        draft.customerRole && draft.customerRole !== "UNCONFIRMED"
-          ? draft.customerRole
-          : detectCustomerRole(text),
-    };
-    detected.country = draft.country || detectCountry(text, detected.city ?? draft.city);
-
-    const updated: PropertyDraft = {
-      ...draft,
-      ...detected,
-      updatedAt: new Date().toISOString(),
-      status: "draft",
-    };
-
-    if (
-      expectedField &&
-      expectedField !== "operationType" &&
-      !String(updated[expectedField] ?? "").trim()
-    ) {
-      const directAnswer = normalizeDirectAnswer(expectedField, text);
-      Object.assign(updated, { [expectedField]: directAnswer });
-    }
-
-    if (!expectedField) {
-      updated.notes = [draft.notes, text.trim()].filter(Boolean).join("\n");
-    }
-
-    setDraft(updated);
+    const needsIntake = draft.status !== "confirmed";
+    const schedulingMessage = looksLikeGuimmiaSchedulingMessage(text);
     setThinking(true);
+    setQuickReplies([]);
     window.setTimeout(() => {
-      void brainReply(updated, text, messages)
-        .then(({ text: reply, decision, engine }) => {
-          setBrainDecision(decision);
+      const task = schedulingMessage
+        ? interpretGuimmiaSchedule({
+            message: text,
+            draftId: draft.id,
+            timezone:
+              Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Rome",
+          }).then((result) => {
+            if (result.proposal.intent !== "NONE") {
+              setScheduleProposal(result.proposal);
+              setWorkspacePanel("AGENDA");
+            }
+            return {
+              text: result.proposal.assistantMessage,
+              decision: null,
+              engine: "OPENAI" as const,
+              receipt: result.proposal.intent !== "NONE"
+                ? {
+                    title: "Ho preparato una proposta in agenda",
+                    items: [
+                      result.proposal.intent === "DECLARE_AVAILABILITY"
+                        ? "Fascia di disponibilità letta"
+                        : "Richiesta di appuntamento letta",
+                      "Nessuna prenotazione eseguita",
+                    ],
+                    targetPanel: "AGENDA" as const,
+                    requiresConfirmation: true,
+                  }
+                : undefined,
+            };
+          })
+        : needsIntake
+        ? requestGuimmiaIntake({
+            message: text,
+            draft: toIntakeDraft(draft),
+            conversation: messages.slice(-6).map((message) => ({
+              role:
+                message.sender === "user"
+                  ? "user" as const
+                  : "assistant" as const,
+              text: message.text,
+            })),
+          }).then((result) => {
+            setDraft((current) => applyIntakePatch(current, result.patch));
+            setCaseRoomRefreshToken((current) => current + 1);
+            setQuickReplies(result.quickReplies);
+            return {
+              text: result.assistantMessage,
+              decision: null,
+              engine: result.cacheHit ? "CACHE" as const : "INTAKE" as const,
+              receipt: intakeReceipt(result.patch),
+            };
+          })
+        : brainReply(draft, text, messages);
+
+      void task
+        .then(({ text: reply, decision, engine, receipt }) => {
+          if (decision) setBrainDecision(decision);
           setMessages((current) => [
             ...current,
             {
@@ -445,6 +552,21 @@ export default function PilotFirstChat() {
               text: reply,
               createdAt: new Date().toISOString(),
               engine,
+              receipt,
+            },
+          ]);
+        })
+        .catch(() => {
+          setMessages((current) => [
+            ...current,
+            {
+              id: `pilot_fallback_${Date.now()}_${Math.random()}`,
+              sender: "pilot",
+              text: needsIntake
+                ? "Non sono riuscita a leggere il messaggio. Riprova con una frase semplice oppure usa le scelte nella scheda."
+                : "Il collegamento intelligente non ha risposto. Il percorso sicuro di Guimmia resta disponibile.",
+              createdAt: new Date().toISOString(),
+              engine: "LOCAL",
             },
           ]);
         })
@@ -468,18 +590,121 @@ export default function PilotFirstChat() {
     processMessage(prompt);
   };
 
+  const handleDocumentSelected = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || documentUploading) return;
+    addMessage("user", `Ho caricato il documento “${file.name}”. Organizzalo nella pratica.`);
+    setDocumentUploading(true);
+    setWorkspacePanel("DOCUMENTS");
+    setSavedNotice("");
+    try {
+      const result = await analyzeGuimmiaDocument(file, draft.id);
+      setDocumentRefreshToken((current) => current + 1);
+      setCaseRoomRefreshToken((current) => current + 1);
+      setMessages((current) => [
+        ...current,
+        {
+          id: `pilot_document_${Date.now()}_${Math.random()}`,
+          sender: "pilot",
+          text: `${result.assistantMessage}\n\nControlla cartella e destinatari nel pannello Documenti, poi conferma. Non ho inviato il file a nessuno.`,
+          createdAt: new Date().toISOString(),
+          engine: "OPENAI",
+          receipt: {
+            title: "Ho preparato il documento",
+            items: [
+              `Nome proposto: ${result.document.suggestedName}`,
+              "Cartella e destinatari suggeriti",
+              "Invio bloccato fino alla conferma",
+            ],
+            targetPanel: "DOCUMENTS",
+            requiresConfirmation: true,
+          },
+        },
+      ]);
+    } catch (cause) {
+      setMessages((current) => [
+        ...current,
+        {
+          id: `pilot_document_error_${Date.now()}_${Math.random()}`,
+          sender: "pilot",
+          text:
+            cause instanceof Error
+              ? cause.message
+              : "Non sono riuscita a leggere il documento. Il file non è stato archiviato.",
+          createdAt: new Date().toISOString(),
+          engine: "LOCAL",
+        },
+      ]);
+    } finally {
+      setDocumentUploading(false);
+    }
+  };
+
   const updateDraft = (field: keyof PropertyDraft, value: string) => {
     setDraft((current) => {
       const next = { ...current, [field]: value, status: "draft" as const, updatedAt: new Date().toISOString() };
       if (field === "objective") {
-        next.operationType = detectGuimmiaOperationType(value) || undefined;
-        if (hasGenericRentalIntent(value) && !next.operationType) {
-          next.objective = "Affitto";
-        }
+        const option = objectiveOption(value);
+        next.operationType = option?.operationType ?? undefined;
+        next.customerRole = option?.customerRole ?? "UNCONFIRMED";
       }
       return next;
     });
+    setQuickReplies([]);
     setSavedNotice("");
+  };
+
+  const updateOperationType = (value: string) => {
+    const operationType = GUIMMIA_RENTAL_OPTIONS.find(
+      (option) => option.value === value,
+    )?.value;
+    setDraft((current) => ({
+      ...current,
+      operationType,
+      status: "draft",
+      updatedAt: new Date().toISOString(),
+    }));
+    setQuickReplies([]);
+    setSavedNotice("");
+  };
+
+  const updateAddress = (
+    value: GuidedAddressValue,
+    source: "municipality" | "address" | "postcode" | "manual",
+  ) => {
+    void source;
+    setDraft((current) => ({
+      ...current,
+      country: value.country,
+      city: value.city,
+      province: value.province,
+      postalCode: value.postalCode,
+      address: value.address,
+      latitude: value.latitude,
+      longitude: value.longitude,
+      locationVerified: false,
+      status: "draft",
+      updatedAt: new Date().toISOString(),
+    }));
+    setSavedNotice("");
+  };
+
+  const confirmLocation = () => {
+    if (!draft.city) {
+      setSavedNotice("Seleziona prima il Comune dai suggerimenti.");
+      return;
+    }
+    setDraft((current) => ({
+      ...current,
+      locationVerified: true,
+      status: "draft",
+      updatedAt: new Date().toISOString(),
+    }));
+    setQuickReplies([]);
+    setSavedNotice("Posizione confermata. La scheda resta una bozza finché non la approvi.");
   };
 
   const saveDraft = () => {
@@ -489,6 +714,11 @@ export default function PilotFirstChat() {
     }
     if (draft.journeyId) {
       router.push(`/dashboard?created=${draft.journeyId}`);
+      return;
+    }
+    const missing = firstMissingField(draft);
+    if (missing) {
+      setSavedNotice(nextQuestion(draft));
       return;
     }
     if (!draft.operationType) {
@@ -550,7 +780,13 @@ export default function PilotFirstChat() {
     setDraft(fresh);
     setMessages([{ ...initialMessage, id: `pilot_welcome_${Date.now()}` }]);
     setBrainDecision(null);
+    setQuickReplies([]);
     setThinking(false);
+    setDocumentUploading(false);
+    setDocumentRefreshToken(0);
+    setCaseRoomRefreshToken(0);
+    setWorkspacePanel("CASE_ROOM");
+    setScheduleProposal(null);
     setSavedNotice("");
     window.localStorage.removeItem(STORAGE_KEY);
   };
@@ -574,24 +810,42 @@ export default function PilotFirstChat() {
           </div>
         </div>
 
-        <div className="grid min-h-[720px] gap-5 lg:grid-cols-[minmax(0,1fr)_390px]">
+        <div className="grid min-h-[720px] gap-5 lg:grid-cols-[minmax(0,1fr)_440px]">
           <section className="flex min-h-[680px] flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-100 px-5 py-4">
-              <p className="font-semibold">Raccontami liberamente cosa vuoi fare</p>
-              <p className="mt-1 text-sm text-slate-500">Guimmia raccoglie i dati nel dialogo e prepara la bozza senza obbligarti a compilare un modulo iniziale.</p>
+              <p className="font-semibold">La pratica nasce dalla conversazione</p>
+              <p className="mt-1 text-sm text-slate-500">Parla normalmente: Guimmia trasforma parole e documenti in una pratica ordinata, sempre sotto il tuo controllo.</p>
             </div>
 
             <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5 sm:px-6">
               {messages.map((message) => (
                 <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[86%] rounded-2xl px-4 py-3 text-sm leading-6 sm:max-w-[72%] ${message.sender === "user" ? "rounded-br-md bg-blue-600 text-white" : "rounded-bl-md bg-slate-100 text-slate-800"}`}>
+                  <div className={`max-w-[86%] whitespace-pre-line rounded-2xl px-4 py-3 text-sm leading-6 sm:max-w-[72%] ${message.sender === "user" ? "rounded-br-md bg-blue-600 text-white" : "rounded-bl-md bg-slate-100 text-slate-800"}`}>
                     {message.text}
+                    {message.sender === "pilot" && message.receipt ? (
+                      <button
+                        type="button"
+                        onClick={() => message.receipt?.targetPanel && setWorkspacePanel(message.receipt.targetPanel)}
+                        className="mt-3 block w-full rounded-xl border border-blue-200 bg-white p-3 text-left shadow-sm"
+                      >
+                        <span className="flex items-center justify-between gap-2 text-[11px] font-bold text-blue-700">
+                          <span>✓ {message.receipt.title}</span>
+                          {message.receipt.requiresConfirmation ? <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] text-amber-800">Da controllare</span> : null}
+                        </span>
+                        <span className="mt-2 block space-y-1 text-[11px] leading-4 text-slate-600">
+                          {message.receipt.items.map((item) => <span key={item} className="block">• {item}</span>)}
+                        </span>
+                        {message.receipt.targetPanel ? <span className="mt-2 block text-[10px] font-bold text-blue-600">Apri il risultato →</span> : null}
+                      </button>
+                    ) : null}
                     {message.sender === "pilot" && message.engine ? (
                       <span className="mt-2 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-500">
                         {message.engine === "OPENAI"
                           ? "Cervello Guimmia + OpenAI"
                           : message.engine === "CACHE"
                             ? "Risposta riutilizzata · nessun nuovo costo"
+                            : message.engine === "INTAKE"
+                              ? "Scheda aggiornata da Guimmia + OpenAI"
                             : message.engine === "DETERMINISTIC"
                               ? "Percorso sicuro Guimmia · OpenAI non utilizzato"
                               : "Raccolta dati locale · nessun costo IA"}
@@ -610,16 +864,55 @@ export default function PilotFirstChat() {
               <div ref={chatEndRef} />
             </div>
 
-            {messages.length <= 2 ? (
+            <div className="border-t border-slate-100 px-4 py-3 sm:px-6">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">Comandi rapidi della pratica</p>
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {[
+                  ["Cosa manca?", "Controlla l’intera pratica e dimmi cosa manca, in ordine di priorità."],
+                  ["Prossima mossa", "Qual è la prossima mossa più utile e sicura per questa pratica?"],
+                  ["Fascicolo notaio", "Controlla quali documenti sono già pronti per il notaio e quali mancano."],
+                  ["Organizza visita", "Aiutami a organizzare una visita usando soltanto le disponibilità del proprietario."],
+                ].map(([label, prompt]) => (
+                  <button key={label} type="button" disabled={thinking} onClick={() => handlePrompt(prompt)} className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50">{label}</button>
+                ))}
+                <button type="button" disabled={thinking || documentUploading} onClick={() => fileInputRef.current?.click()} className="shrink-0 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-600 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50">Carica documento</button>
+              </div>
+            </div>
+
+            {quickReplies.length > 0 || messages.length <= 2 ? (
               <div className="flex flex-wrap gap-2 border-t border-slate-100 px-4 py-3 sm:px-6">
-                {["Voglio vendere una casa ad Acireale", "Vorrei affittare il mio appartamento", "Ho bisogno di capire quanto vale il mio immobile"].map((prompt) => (
+                {(quickReplies.length > 0
+                  ? quickReplies
+                  : [
+                      "Voglio vendere un appartamento di 110 m² a Modena, in buono stato",
+                      "Vorrei affittare il mio appartamento",
+                      "Ho bisogno di capire quanto vale il mio immobile",
+                    ]
+                ).map((prompt) => (
                   <button key={prompt} type="button" disabled={thinking} onClick={() => handlePrompt(prompt)} className="rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50">{prompt}</button>
                 ))}
               </div>
             ) : null}
 
             <form onSubmit={submit} className="border-t border-slate-100 p-4 sm:p-5">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,.rtf,.txt,.jpg,.jpeg,.png,.webp"
+                className="sr-only"
+                onChange={(event) => void handleDocumentSelected(event)}
+              />
               <div className="flex items-end gap-3 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-50">
+                <button
+                  type="button"
+                  disabled={thinking || documentUploading}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:cursor-wait disabled:opacity-50"
+                  aria-label="Carica un documento nella chat"
+                  title="Carica documento"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden="true"><path d="M8.5 12.5 14 7a3 3 0 0 1 4.2 4.2l-7.1 7.1a5 5 0 0 1-7.1-7.1L11.2 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </button>
                 <textarea value={input} disabled={thinking} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} placeholder="Scrivi qui il tuo messaggio..." rows={2} className="min-h-12 flex-1 resize-none border-0 bg-transparent px-3 py-2 text-sm outline-none disabled:cursor-wait" />
                 <button type="submit" disabled={!input.trim() || thinking} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white disabled:cursor-not-allowed disabled:bg-slate-300" aria-label="Invia messaggio">
                   <svg viewBox="0 0 20 20" fill="none" className="h-5 w-5" aria-hidden="true"><path d="m3 3 14 7-14 7 2.8-7L3 3Z" fill="currentColor" /><path d="M6 10h7" stroke="white" strokeWidth="1.4" strokeLinecap="round" /></svg>
@@ -629,11 +922,39 @@ export default function PilotFirstChat() {
           </section>
 
           <aside className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="grid grid-cols-4 gap-1 rounded-2xl bg-slate-100 p-1">
+              {([
+                ["CASE_ROOM", "Pratica"],
+                ["PROPERTY", "Scheda"],
+                ["DOCUMENTS", "Documenti"],
+                ["AGENDA", "Agenda"],
+              ] as const).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setWorkspacePanel(value)}
+                  className={`rounded-xl px-2 py-2 text-xs font-bold transition ${workspacePanel === value ? "bg-white text-blue-700 shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {workspacePanel === "CASE_ROOM" ? (
+              <GuimmiaLivingCaseRoom
+                draft={draft}
+                refreshToken={caseRoomRefreshToken}
+                onOpenPanel={setWorkspacePanel}
+                onPrompt={handlePrompt}
+                onUploadDocument={() => fileInputRef.current?.click()}
+              />
+            ) : workspacePanel === "PROPERTY" ? (
+            <>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-600">Bozza preparata da Guimmia</p>
                 <h2 className="mt-2 text-xl font-semibold">Scheda immobile</h2>
-                <p className="mt-1 text-sm text-slate-500">Correggi liberamente i dati prima di confermare.</p>
+                <p className="mt-1 text-sm text-slate-500">Guimmia compila. Tu controlli e scegli soltanto valori coerenti.</p>
               </div>
               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${draft.status === "confirmed" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>{draft.status === "confirmed" ? "Confermata" : "Bozza"}</span>
             </div>
@@ -657,24 +978,170 @@ export default function PilotFirstChat() {
               </div>
             )}
 
+            <div className="mt-5 rounded-2xl border border-emerald-100 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
+              <span className="font-bold">Non devi compilare tutto a mano.</span>{" "}
+              Scrivi nella chat ciò che sai: Guimmia aggiorna questa bozza e ti domanda soltanto ciò che manca.
+            </div>
+
             <div className="mt-6 grid gap-4">
-              {[
-                ["objective", "Obiettivo", "Vendita, affitto, valutazione..."],
-                ["propertyType", "Tipo di immobile", "Appartamento, villa..."],
-                ["country", "Paese", "Italia, Spagna..."],
-                ["city", "Comune", "Comune"],
-                ["province", "Provincia", "Sigla o provincia"],
-                ["address", "Indirizzo", "Facoltativo in questa fase"],
-                ["surface", "Superficie", "Per esempio 120 m²"],
-                ["rooms", "Vani o camere", "Per esempio 4"],
-                ["condition", "Stato", "Buono, da ristrutturare..."],
-                ["occupancy", "Disponibilità", "Libero, occupato..."],
-              ].map(([field, label, placeholder]) => (
-                <label key={field} className="grid gap-1.5 text-sm font-semibold text-slate-700">
-                  {label}
-                  <input value={String(draft[field as keyof PropertyDraft] ?? "")} onChange={(event) => updateDraft(field as keyof PropertyDraft, event.target.value)} placeholder={placeholder} className="min-h-11 rounded-xl border border-slate-200 px-3 font-normal outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50" />
+              <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+                Obiettivo
+                <select
+                  value={draft.objective}
+                  onChange={(event) => updateDraft("objective", event.target.value)}
+                  className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 font-normal outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+                >
+                  <option value="">Scegli l’obiettivo</option>
+                  {GUIMMIA_OBJECTIVE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </label>
+
+              {isRentalObjective(draft.objective) ? (
+                <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+                  Tipo di affitto
+                  <select
+                    value={draft.operationType ?? ""}
+                    onChange={(event) => updateOperationType(event.target.value)}
+                    className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 font-normal outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+                  >
+                    <option value="">Scegli il tipo di affitto</option>
+                    {GUIMMIA_RENTAL_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
                 </label>
-              ))}
+              ) : null}
+
+              <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+                Tipo di immobile
+                <select
+                  value={draft.propertyType}
+                  onChange={(event) => updateDraft("propertyType", event.target.value)}
+                  className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 font-normal outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+                >
+                  <option value="">Scegli il tipo di immobile</option>
+                  {GUIMMIA_PROPERTY_TYPE_OPTIONS.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+                Paese
+                <select
+                  value={draft.country}
+                  onChange={(event) => updateAddress({
+                    country: event.target.value,
+                    city: draft.city,
+                    province: draft.province,
+                    postalCode: draft.postalCode,
+                    address: draft.address,
+                    latitude: draft.latitude,
+                    longitude: draft.longitude,
+                  }, "manual")}
+                  className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 font-normal outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+                >
+                  <option value="">Scegli il Paese</option>
+                  {GUIMMIA_COUNTRY_OPTIONS.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              </label>
+
+              <GuidedAddressSearch
+                value={{
+                  country: draft.country,
+                  city: draft.city,
+                  province: draft.province,
+                  postalCode: draft.postalCode,
+                  address: draft.address,
+                  latitude: draft.latitude,
+                  longitude: draft.longitude,
+                }}
+                onChange={updateAddress}
+                countryOptions={GUIMMIA_COUNTRY_OPTIONS}
+                locationConfirmed={draft.locationVerified}
+              />
+
+              {draft.city ? (
+                <div className={`rounded-2xl border p-4 ${draft.locationVerified ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
+                  <p className="text-sm font-bold text-slate-900">
+                    {draft.locationVerified ? "Posizione confermata" : "Conferma la posizione"}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-slate-600">
+                    {[draft.address, draft.postalCode, draft.city, draft.province, draft.country].filter(Boolean).join(", ")}
+                  </p>
+                  {!draft.locationVerified ? (
+                    <button
+                      type="button"
+                      onClick={confirmLocation}
+                      className="mt-3 min-h-10 w-full rounded-xl bg-slate-950 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800"
+                    >
+                      Sì, la posizione è corretta
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+                  Superficie (m²)
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min="1"
+                    max="100000"
+                    value={draft.surface}
+                    onChange={(event) => updateDraft("surface", event.target.value)}
+                    placeholder="Es. 120"
+                    className="min-h-11 min-w-0 rounded-xl border border-slate-200 px-3 font-normal outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+                  />
+                </label>
+                <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+                  Vani o camere
+                  <select
+                    value={draft.rooms}
+                    onChange={(event) => updateDraft("rooms", event.target.value)}
+                    className="min-h-11 min-w-0 rounded-xl border border-slate-200 bg-white px-3 font-normal outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+                  >
+                    <option value="">Scegli</option>
+                    {Array.from({ length: 20 }, (_, index) => String(index + 1)).map((room) => (
+                      <option key={room} value={room}>{room}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+                Stato dell’immobile
+                <select
+                  value={draft.condition}
+                  onChange={(event) => updateDraft("condition", event.target.value)}
+                  className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 font-normal outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+                >
+                  <option value="">Scegli lo stato</option>
+                  {GUIMMIA_CONDITION_OPTIONS.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
+                Disponibilità
+                <select
+                  value={draft.occupancy}
+                  onChange={(event) => updateDraft("occupancy", event.target.value)}
+                  className="min-h-11 rounded-xl border border-slate-200 bg-white px-3 font-normal outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+                >
+                  <option value="">Scegli la disponibilità</option>
+                  {GUIMMIA_OCCUPANCY_OPTIONS.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              </label>
+
               <label className="grid gap-1.5 text-sm font-semibold text-slate-700">
                 Note
                 <textarea value={draft.notes} onChange={(event) => updateDraft("notes", event.target.value)} rows={4} placeholder="Dettagli aggiuntivi raccolti nella conversazione" className="rounded-xl border border-slate-200 px-3 py-2 font-normal outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50" />
@@ -690,6 +1157,27 @@ export default function PilotFirstChat() {
             </button>
             {savedNotice ? <p className={`mt-3 text-center text-sm font-semibold ${savedNotice.startsWith("Scheda") ? "text-emerald-700" : "text-red-600"}`}>{savedNotice}</p> : null}
             <p className="mt-4 text-xs leading-5 text-slate-500">Guimmia può interpretare male un dettaglio. Per questo nessun dato diventa definitivo senza il tuo controllo.</p>
+            </>
+            ) : workspacePanel === "DOCUMENTS" ? (
+              <GuimmiaDocumentWorkspace
+                draftId={draft.id}
+                refreshToken={documentRefreshToken}
+                onStatus={(message) => {
+                  addMessage("pilot", message);
+                  setCaseRoomRefreshToken((current) => current + 1);
+                }}
+              />
+            ) : (
+              <GuimmiaAgendaWorkspace
+                draftId={draft.id}
+                proposal={scheduleProposal}
+                onProposalHandled={() => setScheduleProposal(null)}
+                onStatus={(message) => {
+                  addMessage("pilot", message);
+                  setCaseRoomRefreshToken((current) => current + 1);
+                }}
+              />
+            )}
           </aside>
         </div>
       </div>

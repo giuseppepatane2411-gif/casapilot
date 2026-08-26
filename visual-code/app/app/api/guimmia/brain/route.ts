@@ -13,6 +13,7 @@ import {
   type GuimmiaBrainError,
   type GuimmiaBrainRequestKind,
   type GuimmiaBrainSuccess,
+  type GuimmiaOperationalSnapshot,
 } from "@/lib/guimmia/openai/brain-types";
 import {
   getOpenAIConfiguration,
@@ -195,6 +196,94 @@ async function supabaseInsert(table: string, value: Record<string, unknown>) {
   return true;
 }
 
+async function operationalSnapshot(
+  userId: string,
+  draftId: string,
+): Promise<GuimmiaOperationalSnapshot> {
+  const access = supabaseAccess();
+  if (!access) return { documents: [], availability: [], appointments: [] };
+  const request = async <T>(table: string, query: URLSearchParams) => {
+    try {
+      const response = await fetch(
+        `${access.url}/rest/v1/${table}?${query.toString()}`,
+        {
+          headers: { apikey: access.key, Authorization: `Bearer ${access.key}` },
+          cache: "no-store",
+        },
+      );
+      return response.ok ? await response.json() as T : [] as T;
+    } catch {
+      return [] as T;
+    }
+  };
+  const ownerFilter = { user_id: `eq.${userId}`, draft_id: `eq.${draftId}` };
+  const [documents, availability, appointments] = await Promise.all([
+    request<Array<{
+      document_type: string;
+      folder_code: string;
+      status: string;
+      quality: string;
+      recipient_roles: string[];
+    }>>("guimmia_case_document_staging", new URLSearchParams({
+      select: "document_type,folder_code,status,quality,recipient_roles",
+      ...ownerFilter,
+      status: "neq.REJECTED",
+      order: "created_at.desc",
+      limit: "40",
+    })),
+    request<Array<{
+      starts_at: string;
+      ends_at: string;
+      timezone: string;
+      allowed_event_types: string[];
+    }>>("guimmia_availability_windows", new URLSearchParams({
+      select: "starts_at,ends_at,timezone,allowed_event_types",
+      ...ownerFilter,
+      status: "eq.ACTIVE",
+      order: "starts_at.asc",
+      limit: "20",
+    })),
+    request<Array<{
+      event_type: string;
+      starts_at: string;
+      ends_at: string;
+      timezone: string;
+      status: string;
+    }>>("guimmia_case_appointments", new URLSearchParams({
+      select: "event_type,starts_at,ends_at,timezone,status",
+      ...ownerFilter,
+      status: "neq.CANCELLED",
+      order: "starts_at.asc",
+      limit: "20",
+    })),
+  ]);
+  return {
+    documents: documents.map((item) => ({
+      documentType: item.document_type,
+      folderCode: item.folder_code,
+      status: item.status,
+      quality: item.quality,
+      recipientRoles: item.recipient_roles ?? [],
+      humanConfirmationRequired: true,
+      legalValidityCertified: false,
+    })),
+    availability: availability.map((item) => ({
+      startsAt: item.starts_at,
+      endsAt: item.ends_at,
+      timezone: item.timezone,
+      allowedEventTypes: item.allowed_event_types ?? [],
+    })),
+    appointments: appointments.map((item) => ({
+      eventType: item.event_type,
+      startsAt: item.starts_at,
+      endsAt: item.ends_at,
+      timezone: item.timezone,
+      status: item.status,
+      ownerConfirmationRequired: true,
+    })),
+  };
+}
+
 type ReusableBrainInteraction = {
   id: string;
   model: "gpt-5.6-luna";
@@ -365,6 +454,7 @@ export async function POST(request: Request) {
   const interactionId = crypto.randomUUID();
   const safeQuestion = redactCustomerText(question);
   const questionHash = createHash("sha256").update(safeQuestion).digest("hex");
+  const operations = await operationalSnapshot(data.user.id, caseInput.caseId);
   const requestFingerprint = createHash("sha256")
     .update(
       JSON.stringify({
@@ -377,6 +467,7 @@ export async function POST(request: Request) {
           text: redactCustomerText(item.text),
         })),
         case: caseInput,
+        operations,
       }),
     )
     .digest("hex");
@@ -443,6 +534,7 @@ export async function POST(request: Request) {
       orchestration,
       knowledge,
       property: caseInput.property ?? {},
+      operations,
     });
     const auditSaved = await supabaseInsert("guimmia_ai_brain_interactions", {
       id: interactionId,

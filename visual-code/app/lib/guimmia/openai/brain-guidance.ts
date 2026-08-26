@@ -5,6 +5,7 @@ import type {
   GuimmiaBrainAnswer,
   GuimmiaBrainConversationMessage,
   GuimmiaBrainKnowledgeReference,
+  GuimmiaOperationalSnapshot,
   GuimmiaBrainRequestKind,
   GuimmiaBrainRetrievalContext,
   GuimmiaBrainUsage,
@@ -255,6 +256,7 @@ export async function generateGuimmiaBrainGuidance(input: {
     locationVerified?: boolean;
     documents?: string[];
   };
+  operations: GuimmiaOperationalSnapshot;
 }) {
   const configuration = getOpenAIConfiguration();
   if (!configuration.configured) {
@@ -286,6 +288,8 @@ export async function generateGuimmiaBrainGuidance(input: {
           "Non approvare documenti, non certificare conformità, non scegliere candidati, non fissare prezzi finali, non accettare offerte e non eseguire azioni.",
           "Quando una regola richiede agente o professionista, imposta handoffRequired e spiegalo senza allarmismi.",
           "Per COMMUNICATION_DRAFT prepara soltanto una bozza da confermare e non affermare che sia stata inviata.",
+          "Lo snapshot operativo descrive documenti e agenda realmente registrati. Un documento ARCHIVED è classificato, non legalmente verificato.",
+          "Non dire mai che un documento è stato inviato. Non creare o confermare appuntamenti: usa solo disponibilità e stati presenti nello snapshot.",
           "Cita in knowledgeRefs soltanto codici presenti in availableKnowledgeRefs.",
           "Non chiedere né ricostruire email, telefono, codice fiscale, dati bancari o altri contatti personali.",
         ].join("\n"),
@@ -316,6 +320,7 @@ export async function generateGuimmiaBrainGuidance(input: {
             customerExplanation: input.orchestration.customerExplanation,
             handoff: input.orchestration.handoff,
           },
+          operationalSnapshot: input.operations,
           brainContext: {
             version: input.knowledge.brainVersion,
             workflow: input.knowledge.workflow,

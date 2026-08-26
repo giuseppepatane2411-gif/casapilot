@@ -35,6 +35,8 @@ type LocationSearchResponse = {
 type GuidedAddressSearchProps = {
   value: GuidedAddressValue;
   onChange: (value: GuidedAddressValue, source: "municipality" | "address" | "postcode" | "manual") => void;
+  countryOptions?: readonly string[];
+  locationConfirmed?: boolean;
 };
 
 type SearchMode = "municipality" | "address" | "postcode";
@@ -77,6 +79,8 @@ function mergeSelection(
 export default function GuidedAddressSearch({
   value,
   onChange,
+  countryOptions,
+  locationConfirmed = false,
 }: GuidedAddressSearchProps) {
   const [cityQuery, setCityQuery] = useState(value.city);
   const [addressQuery, setAddressQuery] = useState(value.address);
@@ -107,7 +111,11 @@ export default function GuidedAddressSearch({
   const normalizedAddress = useMemo(() => normalize(addressQuery), [addressQuery]);
 
   useEffect(() => {
-    if (!cityOpen || normalizedCity.length < 1 || normalizedCity === value.city) return;
+    if (
+      !cityOpen ||
+      normalizedCity.length < 1 ||
+      (normalizedCity === value.city && locationConfirmed)
+    ) return;
 
     const key = `municipality:${normalizedCity.toLowerCase()}`;
     const cached = cache.get(key);
@@ -150,14 +158,14 @@ export default function GuidedAddressSearch({
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [cityOpen, normalizedCity, value.city]);
+  }, [cityOpen, locationConfirmed, normalizedCity, value.city]);
 
   useEffect(() => {
     if (
       !addressOpen ||
       normalizedAddress.length < 2 ||
       value.city.trim().length < 2 ||
-      normalizedAddress === value.address
+      (normalizedAddress === value.address && locationConfirmed)
     ) {
       return;
     }
@@ -217,6 +225,7 @@ export default function GuidedAddressSearch({
     };
   }, [
     addressOpen,
+    locationConfirmed,
     normalizedAddress,
     value.address,
     value.city,
@@ -346,7 +355,7 @@ export default function GuidedAddressSearch({
             ) : null}
           </div>
 
-          {cityOpen && normalizedCity.length >= 1 && normalizedCity !== value.city && (
+          {cityOpen && normalizedCity.length >= 1 && (normalizedCity !== value.city || !locationConfirmed) && (
             <SuggestionPanel
               results={cityResults}
               loading={cityLoading}
@@ -402,7 +411,7 @@ export default function GuidedAddressSearch({
             ) : null}
           </div>
 
-          {addressOpen && value.city && normalizedAddress.length >= 2 && normalizedAddress !== value.address && (
+          {addressOpen && value.city && normalizedAddress.length >= 2 && (normalizedAddress !== value.address || !locationConfirmed) && (
             <SuggestionPanel
               results={addressResults}
               loading={addressLoading}
@@ -455,13 +464,26 @@ export default function GuidedAddressSearch({
           <div className="rounded-2xl bg-slate-50 p-4">
             <label className="block">
               <span className="text-sm font-bold text-slate-900">Paese</span>
-              <input
-                type="text"
-                value={value.country}
-                onChange={(event) => onChange({ ...value, country: event.target.value }, "manual")}
-                placeholder="Italia"
-                className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-              />
+              {countryOptions?.length ? (
+                <select
+                  value={value.country}
+                  onChange={(event) => onChange({ ...value, country: event.target.value }, "manual")}
+                  className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                >
+                  <option value="">Scegli il Paese</option>
+                  {countryOptions.map((country) => (
+                    <option key={country} value={country}>{country}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={value.country}
+                  onChange={(event) => onChange({ ...value, country: event.target.value }, "manual")}
+                  placeholder="Italia"
+                  className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                />
+              )}
             </label>
             <p className="mt-3 text-xs leading-5 text-slate-500">
               Se un suggerimento non compare, puoi comunque usare il Comune e l’indirizzo che hai scritto. La mappa ti permetterà di indicare il punto esatto.

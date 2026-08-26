@@ -117,6 +117,32 @@ export type GuimmiaBrainUsage = {
   estimatedCostUsd: number;
 };
 
+export type GuimmiaOperationalSnapshot = {
+  documents: Array<{
+    documentType: string;
+    folderCode: string;
+    status: string;
+    quality: string;
+    recipientRoles: string[];
+    humanConfirmationRequired: true;
+    legalValidityCertified: false;
+  }>;
+  availability: Array<{
+    startsAt: string;
+    endsAt: string;
+    timezone: string;
+    allowedEventTypes: string[];
+  }>;
+  appointments: Array<{
+    eventType: string;
+    startsAt: string;
+    endsAt: string;
+    timezone: string;
+    status: string;
+    ownerConfirmationRequired: true;
+  }>;
+};
+
 export type GuimmiaBrainSuccess = {
   ok: true;
   interactionId: string;

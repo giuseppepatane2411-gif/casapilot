@@ -28,6 +28,7 @@ export const GUIMMIA_PROPERTY_TYPE_OPTIONS = [
   "Villa",
   "Villetta",
   "Casa indipendente",
+  "Stanza",
   "Rustico o casale",
   "Terreno",
   "Locale commerciale",

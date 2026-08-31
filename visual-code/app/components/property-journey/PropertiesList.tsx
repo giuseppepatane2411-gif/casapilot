@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import {
   ArrowRight,
+  BedDouble,
   Building2,
   CheckCircle2,
   Home,
@@ -24,6 +25,7 @@ const propertyIcons: Record<PropertyType, LucideIcon> = {
   commercial: Store,
   land: LandPlot,
   garage: Warehouse,
+  room: BedDouble,
 };
 
 export default function PropertiesList() {

@@ -4,6 +4,7 @@ export type OperationType =
   | "rent_long_term"
   | "rent_transitory"
   | "rent_student"
+  | "rent_room"
   | "rent_tourist_short";
 
 export type PropertyType =
@@ -11,7 +12,32 @@ export type PropertyType =
   | "house"
   | "commercial"
   | "land"
-  | "garage";
+  | "garage"
+  | "room";
+
+export type RoomType = "single" | "double" | "shared";
+export type HouseholdComposition =
+  | "none"
+  | "men"
+  | "women"
+  | "mixed"
+  | "not_specified";
+export type OccupantProfile = "student" | "worker";
+export type RoomGenderPreference = "none" | "men" | "women";
+
+export type RoomRentalData = {
+  roomType: RoomType | "";
+  roomSurface: string;
+  privateBathroom: boolean;
+  roomFurnished: boolean;
+  currentRoommates: string;
+  householdComposition: HouseholdComposition;
+  acceptedOccupantProfiles: OccupantProfile[];
+  genderPreference: RoomGenderPreference;
+  availableFrom: string;
+  expensesIncluded: boolean;
+  compatibilityNotes: string;
+};
 
 export type OccupancyStatus = "free" | "owner" | "tenant" | "other";
 
@@ -52,6 +78,7 @@ export type WizardData = {
   locationVerified: boolean;
   locationVerifiedAt: string;
   locationLabel: string;
+  roomRental: RoomRentalData;
   documents: DocumentKey[];
 };
 
@@ -80,6 +107,7 @@ export type PropertyJourney = {
     locationVerified: boolean;
     locationVerifiedAt: string;
     locationLabel: string;
+    roomRental: RoomRentalData;
   };
   documents: DocumentKey[];
   healthScore: number;

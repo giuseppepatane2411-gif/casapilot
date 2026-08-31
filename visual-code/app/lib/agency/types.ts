@@ -1,10 +1,14 @@
 export type Operation = "sale" | "rent";
-export type ListingMarket = "buy" | "rent" | "holiday";
+export type ListingMarket = "buy" | "rent" | "room" | "holiday";
+export type ListingKind = "whole_property" | "room";
+export type RoomType = "single" | "double" | "shared";
+export type OccupantProfile = "student" | "worker";
 
 export type AgencyListing = {
   id: string;
   slug: string;
   operation: Operation;
+  listing_kind?: ListingKind;
   property_type: string;
   title: string;
   description: string;
@@ -17,6 +21,14 @@ export type AgencyListing = {
   bathrooms: number | null;
   rooms: number | null;
   surface_sqm: number | null;
+  room_type?: RoomType | null;
+  room_surface_sqm?: number | null;
+  private_bathroom?: boolean | null;
+  current_roommates_count?: number | null;
+  current_household_summary?: string | null;
+  accepted_occupant_profiles?: OccupantProfile[];
+  available_from?: string | null;
+  expenses_included?: boolean | null;
   floor: string | null;
   elevator: boolean | null;
   energy_class: string | null;

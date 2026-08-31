@@ -9,6 +9,7 @@ export default function ListingFilters({
         <option value="">Tutti gli immobili</option>
         <option value="buy">Comprare</option>
         <option value="rent">Affittare</option>
+        <option value="room">Stanze</option>
         <option value="holiday">Vacanze</option>
       </select>
       <input name="citta" defaultValue={values.citta ?? ""} placeholder="Città" className="h-12 rounded-2xl border border-slate-200 px-4 font-semibold outline-none focus:border-blue-600" />
@@ -19,6 +20,7 @@ export default function ListingFilters({
         <option>Villa</option>
         <option>Casa indipendente</option>
         <option>Casa vacanze</option>
+        <option>Stanza</option>
         <option>Terreno</option>
         <option>Locale commerciale</option>
       </select>

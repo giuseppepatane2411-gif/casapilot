@@ -45,6 +45,7 @@ export function getOperationGoal(operation: OperationType) {
     rent_long_term: "preparare una locazione residenziale stabile e ben documentata",
     rent_transitory: "verificare l’esigenza temporanea e preparare la locazione transitoria",
     rent_student: "preparare immobile, requisiti e garanzie per la locazione a studenti",
+    rent_room: "preparare stanza, convivenza, candidati e contratto per l’affitto di una camera",
     rent_tourist_short: "preparare conformità, annuncio e gestione del soggiorno turistico",
   };
 

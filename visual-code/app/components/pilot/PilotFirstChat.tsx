@@ -133,6 +133,7 @@ function CompassIcon({ className = "h-5 w-5" }: { className?: string }) {
 
 function toPropertyType(value: string): PropertyType | null {
   const normalized = value.toLocaleLowerCase("it-IT");
+  if (/(stanza|camera|posto letto)/.test(normalized)) return "room";
   if (/(appartamento|attico|loft|monolocale)/.test(normalized)) return "apartment";
   if (/(villa|casa|villetta)/.test(normalized)) return "house";
   if (/(locale|ufficio|negozio|magazzino)/.test(normalized)) return "commercial";
@@ -159,7 +160,7 @@ function nextQuestion(draft: PropertyDraft) {
   if (isRentalObjective(draft.objective) && !draft.operationType) {
     return "Che tipo di affitto vuoi gestire: lungo termine, transitorio, per studenti oppure turistico breve?";
   }
-  if (!draft.propertyType) return "Di che tipo di immobile si tratta? Per esempio appartamento, villa, casa indipendente, terreno o locale.";
+  if (!draft.propertyType) return "Di che tipo di immobile si tratta? Per esempio appartamento, villa, stanza, casa indipendente, terreno o locale.";
   if (!draft.city) return "In quale comune si trova l’immobile?";
   if (!draft.country) return "In quale Paese si trova l’immobile?";
   if (!draft.locationVerified) return "Controlla la località suggerita nella scheda e conferma la posizione dell’immobile.";

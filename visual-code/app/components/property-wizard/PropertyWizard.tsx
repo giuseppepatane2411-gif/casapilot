@@ -35,8 +35,6 @@ import {
 } from "@/lib/property-journey/storage";
 import type {
   DocumentKey,
-  OperationType,
-  PropertyType,
   WizardData,
 } from "@/lib/property-journey/types";
 
@@ -80,6 +78,13 @@ export default function PropertyWizard() {
         } else if (goal === "rent") {
           setData(INITIAL_WIZARD_DATA);
           setStep(1);
+        } else if (goal === "rent_room") {
+          setData({
+            ...INITIAL_WIZARD_DATA,
+            operation: "rent_room",
+            propertyType: "room",
+          });
+          setStep(2);
         }
       }
 
@@ -101,21 +106,29 @@ export default function PropertyWizard() {
     setValidationMessage("");
 
     setData((current) => {
-      const nextData = {
+      const nextData: WizardData = {
         ...current,
         [field]: value,
       };
 
+      if (field === "operation" && value === "rent_room") {
+        nextData.propertyType = "room";
+      } else if (
+        field === "operation" &&
+        current.operation === "rent_room" &&
+        current.propertyType === "room"
+      ) {
+        nextData.propertyType = "";
+      }
+
+      if (field === "propertyType" && value === "room") {
+        nextData.operation = "rent_room";
+      }
+
       if (field === "operation" || field === "propertyType") {
         nextData.documents = filterDocumentsForJourney(current.documents, {
-          operation:
-            field === "operation"
-              ? (value as OperationType)
-              : current.operation,
-          propertyType:
-            field === "propertyType"
-              ? (value as PropertyType)
-              : current.propertyType,
+          operation: nextData.operation,
+          propertyType: nextData.propertyType,
         });
       }
 
@@ -144,6 +157,21 @@ export default function PropertyWizard() {
         return "Inserisci una superficie indicativa valida.";
       }
       if (!data.occupancy) return "Indica la situazione attuale dell’immobile.";
+      if (data.operation === "rent_room" || data.propertyType === "room") {
+        if (!data.roomRental.roomType) return "Seleziona il tipo di stanza.";
+        if (
+          !data.roomRental.roomSurface.trim() ||
+          Number(data.roomRental.roomSurface) < 4
+        ) {
+          return "Inserisci una superficie valida per la stanza.";
+        }
+        if (!data.roomRental.acceptedOccupantProfiles.length) {
+          return "Indica almeno un profilo compatibile: studente o lavoratore.";
+        }
+        if (!data.roomRental.availableFrom) {
+          return "Indica da quando sarà disponibile la stanza.";
+        }
+      }
     }
 
     if (targetStep === 3) {

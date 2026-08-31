@@ -15,7 +15,7 @@ const valuationSchema = {
   additionalProperties: false,
   properties: {
     currency: { type: "string", enum: ["EUR"] },
-    period: { type: "string", enum: ["TOTAL", "MONTH"] },
+    period: { type: "string", enum: ["TOTAL", "MONTH", "NIGHT"] },
     range: {
       type: "object",
       additionalProperties: false,
@@ -76,7 +76,12 @@ const valuationSchema = {
         evidenceSummary: { type: "string" },
         observedUnit: {
           type: "string",
-          enum: ["EUR_SQM_SALE", "EUR_SQM_MONTH"],
+          enum: [
+            "EUR_SQM_SALE",
+            "EUR_SQM_MONTH",
+            "EUR_ROOM_MONTH",
+            "EUR_NIGHT",
+          ],
         },
         observedLow: { type: "number", minimum: 0 },
         observedMedian: { type: "number", minimum: 0 },
@@ -120,6 +125,33 @@ const valuationSchema = {
         "comparableSignals",
       ],
     },
+    rentalProjection: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        applicable: { type: "boolean" },
+        basis: {
+          type: "string",
+          enum: ["NONE", "ANNUAL_RENT", "ANNUAL_GROSS_REVENUE"],
+        },
+        occupancyLowPercent: { type: "number", minimum: 0, maximum: 100 },
+        occupancyHighPercent: { type: "number", minimum: 0, maximum: 100 },
+        annualLow: { type: "number", minimum: 0 },
+        annualSuggested: { type: "number", minimum: 0 },
+        annualHigh: { type: "number", minimum: 0 },
+        note: { type: "string" },
+      },
+      required: [
+        "applicable",
+        "basis",
+        "occupancyLowPercent",
+        "occupancyHighPercent",
+        "annualLow",
+        "annualSuggested",
+        "annualHigh",
+        "note",
+      ],
+    },
     confidence: { type: "string", enum: ["LOW", "MEDIUM", "HIGH"] },
     summary: { type: "string" },
     factors: { type: "array", items: { type: "string" }, maxItems: 6 },
@@ -136,6 +168,7 @@ const valuationSchema = {
     "officialBenchmark",
     "valuationMethod",
     "marketEvidence",
+    "rentalProjection",
     "confidence",
     "summary",
     "factors",
@@ -390,6 +423,24 @@ function validateResult(value: unknown): PropertyValuationResult {
     .filter((item): item is ValuationComparableSignal => Boolean(item))
     .slice(0, 6);
 
+  const projection = result.rentalProjection;
+  if (
+    !projection ||
+    !Number.isFinite(projection.occupancyLowPercent) ||
+    !Number.isFinite(projection.occupancyHighPercent) ||
+    projection.occupancyLowPercent < 0 ||
+    projection.occupancyHighPercent > 100 ||
+    projection.occupancyLowPercent > projection.occupancyHighPercent ||
+    !Number.isFinite(projection.annualLow) ||
+    !Number.isFinite(projection.annualSuggested) ||
+    !Number.isFinite(projection.annualHigh) ||
+    projection.annualLow < 0 ||
+    projection.annualLow > projection.annualSuggested ||
+    projection.annualSuggested > projection.annualHigh
+  ) {
+    throw new Error("valuation_projection_invalid");
+  }
+
   return result;
 }
 
@@ -477,10 +528,14 @@ export async function generatePropertyValuation(
         instructions: [
           "Sei il motore di stima preliminare di Guimmia, agenzia immobiliare online italiana.",
           "Produci una fascia indicativa prudente, non una perizia e non una promessa di prezzo.",
-          "Per SALE restituisci importi totali; per RENT_LONG_TERM restituisci canoni mensili.",
+          "Per SALE restituisci importi totali e period TOTAL; per RENT_LONG_TERM restituisci canoni mensili e period MONTH.",
+          "Per RENT_ROOM restituisci il canone mensile della sola stanza, period MONTH e observedUnit EUR_ROOM_MONTH.",
+          "Per RENT_SHORT_TERM restituisci una tariffa media indicativa per notte, period NIGHT e observedUnit EUR_NIGHT.",
+          "Per ogni affitto compila rentalProjection: per lungo termine e stanza usa ANNUAL_RENT; per turistico usa ANNUAL_GROSS_REVENUE e una forchetta prudente di occupazione. Per SALE usa NONE, applicable false e tutti i valori numerici a zero.",
           "Applica una gerarchia esplicita: 1) quotazioni ufficiali OMI dell'Agenzia delle Entrate; 2) metodo sintetico-comparativo e coefficienti di merito; 3) annunci comparabili attuali.",
           "Per officialBenchmark usa esclusivamente una quotazione OMI verificabile su domini dell'Agenzia delle Entrate, coerente con zona, tipologia, stato e operazione. Indica periodo e zona esatti.",
           "Se non trovi una quotazione OMI puntuale e verificabile, imposta available false, low e high a 0 e spiega il limite: non stimare né inventare valori OMI.",
+          "OMI non fornisce una quotazione specifica per singola stanza o tariffa turistica giornaliera: per RENT_ROOM e RENT_SHORT_TERM imposta officialBenchmark available false e non convertire arbitrariamente i valori OMI.",
           "Consulta Borsino Immobiliare soltanto come riferimento metodologico per superficie commerciale e coefficienti di merito; non presentarlo come fonte ufficiale né come partner di Guimmia.",
           "In valuationMethod spiega la base di superficie e indica solo i correttivi effettivamente applicati: stato, piano, ascensore, pertinenze, efficienza energetica, occupazione e microzona quando disponibili.",
           "Cerca immobili realmente comparabili per microzona, tipologia, superficie, stato e dotazioni.",
@@ -493,6 +548,7 @@ export async function generatePropertyValuation(
           "Non stabilire il prezzo finale: la decisione resta al proprietario con il supporto dell'agenzia.",
           "Scrivi in italiano semplice, massimo sei elementi per lista, senza gergo tecnico inutile.",
           "Non chiedere né inferire dati personali del proprietario: non ti vengono trasmessi.",
+          "Per la stanza considera solo caratteristiche dell'alloggio, composizione attuale dichiarata e profilo studente/lavoratore. Non inferire dati personali e non produrre criteri di esclusione automatica.",
         ].join("\n"),
         input: JSON.stringify({
           useCase: "GUIMMIA_PRELIMINARY_PROPERTY_VALUATION",
@@ -520,6 +576,26 @@ export async function generatePropertyValuation(
     if (!text) throw new Error("openai_empty_output");
 
     const rawResult = validateResult(JSON.parse(text));
+    const expectedPeriod =
+      input.operation === "SALE"
+        ? "TOTAL"
+        : input.operation === "RENT_SHORT_TERM"
+          ? "NIGHT"
+          : "MONTH";
+    const expectedObservedUnit =
+      input.operation === "SALE"
+        ? "EUR_SQM_SALE"
+        : input.operation === "RENT_LONG_TERM"
+          ? "EUR_SQM_MONTH"
+          : input.operation === "RENT_ROOM"
+            ? "EUR_ROOM_MONTH"
+            : "EUR_NIGHT";
+    if (
+      rawResult.period !== expectedPeriod ||
+      rawResult.marketEvidence.observedUnit !== expectedObservedUnit
+    ) {
+      throw new Error("valuation_operation_unit_mismatch");
+    }
     const publicSources = sources(raw);
     const valuationQuality = quality(rawResult, publicSources, input);
     const result = applyEvidenceGuard(rawResult, publicSources, valuationQuality);

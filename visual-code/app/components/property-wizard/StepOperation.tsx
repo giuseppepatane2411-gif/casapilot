@@ -21,6 +21,7 @@ const iconByOperation = {
   rent_long_term: KeyRound,
   rent_transitory: Clock3,
   rent_student: GraduationCap,
+  rent_room: BedDouble,
   rent_tourist_short: BedDouble,
 };
 

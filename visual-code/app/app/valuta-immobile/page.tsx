@@ -7,7 +7,7 @@ import PropertyValuationExperience from "@/components/valuation/PropertyValuatio
 export const metadata: Metadata = {
   title: "Valuta il tuo immobile | Guimmia",
   description:
-    "Ottieni una fascia indicativa per vendere o affittare il tuo immobile con Guimmia, la tua guida immobiliare intelligente.",
+    "Ottieni una fascia indicativa per vendita, affitto, vacanze o singola stanza con Guimmia.",
 };
 
 export default function PropertyValuationPage() {

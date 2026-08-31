@@ -1,6 +1,7 @@
 import {
   ACTIVE_JOURNEY_STORAGE_KEY,
   INITIAL_WIZARD_DATA,
+  INITIAL_ROOM_RENTAL_DATA,
   JOURNEY_CHANGE_EVENT,
   JOURNEY_STORAGE_KEY,
   WIZARD_DRAFT_STORAGE_KEY,
@@ -62,12 +63,13 @@ function isOperation(value: unknown): value is OperationType {
     "rent_long_term",
     "rent_transitory",
     "rent_student",
+    "rent_room",
     "rent_tourist_short",
   ].includes(String(value));
 }
 
 function isPropertyType(value: unknown): value is PropertyType {
-  return ["apartment", "house", "commercial", "land", "garage"].includes(
+  return ["apartment", "house", "commercial", "land", "garage", "room"].includes(
     String(value),
   );
 }
@@ -114,6 +116,17 @@ function normalizeJourney(journey: PropertyJourney): PropertyJourney {
         typeof journey.property.locationLabel === "string"
           ? journey.property.locationLabel
           : "",
+      roomRental: {
+        ...INITIAL_ROOM_RENTAL_DATA,
+        ...(journey.property.roomRental ?? {}),
+        acceptedOccupantProfiles: Array.isArray(
+          journey.property.roomRental?.acceptedOccupantProfiles,
+        )
+          ? journey.property.roomRental.acceptedOccupantProfiles.filter(
+              (item) => item === "student" || item === "worker",
+            )
+          : [],
+      },
     },
   };
   const metrics = calculateJourneyMetrics(journeyToWizardData(normalized));
@@ -206,6 +219,7 @@ function migrateLegacyJourney(): PropertyJourney | null {
         locationVerified: data.locationVerified,
         locationVerifiedAt: data.locationVerifiedAt,
         locationLabel: data.locationLabel,
+        roomRental: data.roomRental,
       },
       documents: data.documents,
       ...metrics,
@@ -306,6 +320,7 @@ export function createJourney(data: WizardData) {
       locationVerified: data.locationVerified,
       locationVerifiedAt: data.locationVerifiedAt,
       locationLabel: data.locationLabel,
+      roomRental: data.roomRental,
     },
     documents: data.documents,
     ...metrics,
@@ -552,6 +567,7 @@ function migrateLegacyDraft(): WizardDraft | null {
             : "",
         locationLabel:
           typeof formData.locationLabel === "string" ? formData.locationLabel : "",
+        roomRental: INITIAL_ROOM_RENTAL_DATA,
         documents: mapLegacyDocuments(formData.documents),
       },
       updatedAt: new Date().toISOString(),
@@ -609,6 +625,17 @@ export function readWizardDraft(): WizardDraft | null {
           typeof parsed.data.locationLabel === "string"
             ? parsed.data.locationLabel
             : "",
+        roomRental: {
+          ...INITIAL_ROOM_RENTAL_DATA,
+          ...(parsed.data.roomRental ?? {}),
+          acceptedOccupantProfiles: Array.isArray(
+            parsed.data.roomRental?.acceptedOccupantProfiles,
+          )
+            ? parsed.data.roomRental.acceptedOccupantProfiles.filter(
+                (item) => item === "student" || item === "worker",
+              )
+            : [],
+        },
       },
       updatedAt:
         typeof parsed.updatedAt === "string"

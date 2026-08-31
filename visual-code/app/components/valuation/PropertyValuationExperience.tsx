@@ -1,10 +1,14 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
   Building2,
+  BedDouble,
+  CalendarDays,
   ChartNoAxesCombined,
   Check,
   CircleAlert,
@@ -29,6 +33,9 @@ import GuidedAddressSearch, {
   type GuidedAddressValue,
 } from "@/components/property-wizard/GuidedAddressSearch";
 import PropertyLocationMap from "@/components/property-wizard/PropertyLocationMap";
+import { createClient } from "@/lib/supabase/client";
+
+const VALUATION_DRAFT_KEY = "guimmia-valuation-draft-v776";
 
 const initialForm: PropertyValuationInput = {
   operation: "SALE",
@@ -58,6 +65,16 @@ const initialForm: PropertyValuationInput = {
     outdoorSpace: false,
     parking: false,
     furnished: false,
+    roomDetails: {
+      roomType: "SINGLE",
+      roomSurfaceSqm: 14,
+      privateBathroom: false,
+      currentRoommates: 0,
+      householdComposition: "UNKNOWN",
+      acceptedOccupantProfiles: ["STUDENT", "WORKER"],
+      availableFrom: "",
+      expensesIncluded: false,
+    },
     notes: "",
   },
   owner: {
@@ -84,21 +101,30 @@ const conditionLabels: Record<PropertyCondition, string> = {
   TO_RENOVATE: "Da ristrutturare",
 };
 
-function money(value: number, period: "TOTAL" | "MONTH") {
+function money(value: number, period: "TOTAL" | "MONTH" | "NIGHT") {
   const formatted = new Intl.NumberFormat("it-IT", {
     style: "currency",
     currency: "EUR",
     maximumFractionDigits: 0,
   }).format(value);
-  return period === "MONTH" ? `${formatted}/mese` : formatted;
+  if (period === "MONTH") return `${formatted}/mese`;
+  if (period === "NIGHT") return `${formatted}/notte`;
+  return formatted;
 }
 
 export default function PropertyValuationExperience() {
+  const router = useRouter();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<PropertyValuationInput>(initialForm);
   const [pending, setPending] = useState(false);
   const [response, setResponse] = useState<PropertyValuationSuccess | null>(null);
   const [failure, setFailure] = useState<PropertyValuationError | null>(null);
+  const [account, setAccount] = useState({
+    loading: true,
+    authenticated: false,
+    name: "",
+    email: "",
+  });
 
   const progress = useMemo(() => ((step + 1) / steps.length) * 100, [step]);
 
@@ -112,15 +138,90 @@ export default function PropertyValuationExperience() {
     }));
   };
 
-  const setOwner = <K extends keyof PropertyValuationInput["owner"]>(
-    key: K,
-    value: PropertyValuationInput["owner"][K],
-  ) => {
-    setForm((current) => ({
-      ...current,
-      owner: { ...current.owner, [key]: value },
-    }));
-  };
+  useEffect(() => {
+    let active = true;
+    const initialStateTimer = window.setTimeout(() => {
+      const params = new URLSearchParams(window.location.search);
+      const requestedOperation = {
+        vendita: "SALE",
+        affitto: "RENT_LONG_TERM",
+        vacanze: "RENT_SHORT_TERM",
+        stanza: "RENT_ROOM",
+      }[params.get("operazione") ?? ""] as ValuationOperation | undefined;
+      const savedDraft = window.localStorage.getItem(VALUATION_DRAFT_KEY);
+
+      if (params.get("resume") === "1" && savedDraft) {
+        try {
+          const stored = JSON.parse(savedDraft) as {
+            savedAt?: number;
+            form?: PropertyValuationInput;
+          };
+          const restored = stored.form;
+          if (
+            !restored ||
+            !stored.savedAt ||
+            Date.now() - stored.savedAt > 24 * 60 * 60 * 1000
+          ) {
+            throw new Error("valuation_draft_expired");
+          }
+          setForm({
+            ...initialForm,
+            ...restored,
+            property: { ...initialForm.property, ...restored.property },
+            owner: { ...initialForm.owner, ...restored.owner },
+          });
+          setStep(3);
+        } catch {
+          window.localStorage.removeItem(VALUATION_DRAFT_KEY);
+        }
+      } else if (requestedOperation) {
+        setForm((current) => ({
+          ...current,
+          operation: requestedOperation,
+          property: {
+            ...current.property,
+            propertyType:
+              requestedOperation === "RENT_ROOM"
+                ? "Stanza"
+                : current.property.propertyType,
+          },
+        }));
+      }
+    }, 0);
+
+    void (async () => {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase.auth.getUser();
+        if (!active) return;
+        const user = data.user;
+        if (!user?.email) {
+          setAccount({ loading: false, authenticated: false, name: "", email: "" });
+          return;
+        }
+        const name =
+          (typeof user.user_metadata?.full_name === "string"
+            ? user.user_metadata.full_name
+            : "") || user.email.split("@")[0];
+        const phone =
+          typeof user.user_metadata?.phone === "string" ? user.user_metadata.phone : "";
+        setAccount({ loading: false, authenticated: true, name, email: user.email });
+        setForm((current) => ({
+          ...current,
+          owner: { name, email: user.email ?? "", phone },
+        }));
+      } catch {
+        if (active) {
+          setAccount({ loading: false, authenticated: false, name: "", email: "" });
+        }
+      }
+    })();
+
+    return () => {
+      active = false;
+      window.clearTimeout(initialStateTimer);
+    };
+  }, []);
 
   const canContinue =
     step === 0
@@ -137,18 +238,32 @@ export default function PropertyValuationExperience() {
         ? form.property.surfaceSqm >= 10 &&
           form.property.rooms >= 1 &&
           form.property.bedrooms >= 0 &&
-          form.property.bathrooms >= 0
-        : Boolean(
-            form.owner.name.trim() &&
-              form.owner.email.includes("@") &&
-              form.owner.phone.trim() &&
-              form.privacyAccepted &&
-              form.automatedAnalysisAccepted,
-          );
+          form.property.bathrooms >= 0 &&
+          (form.operation !== "RENT_ROOM" ||
+            Boolean(
+              form.property.roomDetails &&
+                form.property.roomDetails.roomSurfaceSqm >= 4 &&
+                form.property.roomDetails.acceptedOccupantProfiles.length,
+            ))
+        : Boolean(form.privacyAccepted && form.automatedAnalysisAccepted);
+
+  const saveDraft = () => {
+    window.localStorage.setItem(
+      VALUATION_DRAFT_KEY,
+      JSON.stringify({ savedAt: Date.now(), form }),
+    );
+  };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!canContinue || pending) return;
+
+    if (!account.authenticated) {
+      saveDraft();
+      const next = "/valuta-immobile?resume=1";
+      router.push(`/register?type=private&next=${encodeURIComponent(next)}`);
+      return;
+    }
 
     setPending(true);
     setFailure(null);
@@ -164,11 +279,28 @@ export default function PropertyValuationExperience() {
         | PropertyValuationError;
 
       if (!request.ok || !payload.ok) {
+        if (
+          !payload.ok &&
+          (payload as PropertyValuationError).error === "registration_required"
+        ) {
+          saveDraft();
+          setAccount({
+            loading: false,
+            authenticated: false,
+            name: "",
+            email: "",
+          });
+          router.push(
+            `/login?next=${encodeURIComponent("/valuta-immobile?resume=1")}`,
+          );
+          return;
+        }
         setFailure(payload as PropertyValuationError);
         return;
       }
 
       setResponse(payload);
+      window.localStorage.removeItem(VALUATION_DRAFT_KEY);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
       setFailure({
@@ -190,6 +322,7 @@ export default function PropertyValuationExperience() {
           setFailure(null);
           setStep(0);
           setForm(initialForm);
+          window.localStorage.removeItem(VALUATION_DRAFT_KEY);
         }}
       />
     );
@@ -205,8 +338,8 @@ export default function PropertyValuationExperience() {
           Quanto può valere il tuo immobile?
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
-          Ricevi una fascia indicativa per vendere o affittare, costruita confrontando
-          zona, caratteristiche e dati pubblici di mercato.
+          Ricevi una fascia indicativa per vendita, affitto residenziale, vacanze o
+          singola stanza, costruita confrontando zona, caratteristiche e dati pubblici.
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-2 text-xs font-extrabold text-slate-700 sm:text-sm">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2">
@@ -261,8 +394,9 @@ export default function PropertyValuationExperience() {
             <ThirdStep
               form={form}
               setForm={setForm}
-              setOwner={setOwner}
               failure={failure}
+              account={account}
+              onSaveDraft={saveDraft}
             />
           ) : null}
         </div>
@@ -292,17 +426,25 @@ export default function PropertyValuationExperience() {
           ) : (
             <button
               type="submit"
-              disabled={!canContinue || pending}
+              disabled={!canContinue || pending || account.loading}
               className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
             >
-              {pending ? (
+              {account.loading ? (
+                <>
+                  <LoaderCircle className="animate-spin" size={18} aria-hidden="true" />
+                  Verifica account…
+                </>
+              ) : pending ? (
                 <>
                   <LoaderCircle className="animate-spin" size={18} aria-hidden="true" />
                   Guimmia confronta i dati…
                 </>
               ) : (
                 <>
-                  <Sparkles size={18} aria-hidden="true" /> Calcola la mia stima
+                  <Sparkles size={18} aria-hidden="true" />
+                  {account.authenticated
+                    ? "Calcola e invia la stima"
+                    : "Registrati e ricevi la stima"}
                 </>
               )}
             </button>
@@ -348,7 +490,8 @@ function FirstStep({
         Per cosa vuoi conoscere il valore?
       </h2>
       <p className="mt-2 text-sm leading-6 text-slate-600">
-        Guimmia preparerà una fascia di vendita oppure un canone mensile indicativo.
+        Guimmia preparerà una fascia di vendita, un canone di affitto oppure una
+        proiezione per l’ospitalità turistica.
       </p>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -356,6 +499,8 @@ function FirstStep({
           [
             ["SALE", House, "Vendere", "Fascia complessiva di posizionamento"],
             ["RENT_LONG_TERM", KeyRound, "Affittare", "Canone mensile indicativo"],
+            ["RENT_SHORT_TERM", CalendarDays, "Vacanze", "Tariffa per notte e ricavo annuo lordo"],
+            ["RENT_ROOM", BedDouble, "Affittare una stanza", "Canone mensile della singola camera"],
           ] as const
         ).map(([value, Icon, title, description]) => (
           <button
@@ -365,6 +510,15 @@ function FirstStep({
               setForm((current) => ({
                 ...current,
                 operation: value as ValuationOperation,
+                property: {
+                  ...current.property,
+                  propertyType:
+                    value === "RENT_ROOM"
+                      ? "Stanza"
+                      : current.property.propertyType === "Stanza"
+                        ? "Appartamento"
+                        : current.property.propertyType,
+                },
               }))
             }
             className={`rounded-2xl border p-5 text-left transition ${
@@ -389,16 +543,20 @@ function FirstStep({
           label="Che tipo di immobile è?"
           value={form.property.propertyType}
           onChange={(value) => setProperty("propertyType", value)}
-          options={[
-            "Appartamento",
-            "Attico",
-            "Villa",
-            "Casa indipendente",
-            "Villetta a schiera",
-            "Loft",
-            "Locale commerciale",
-            "Terreno",
-          ]}
+          options={
+            form.operation === "RENT_ROOM"
+              ? ["Stanza"]
+              : [
+                  "Appartamento",
+                  "Attico",
+                  "Villa",
+                  "Casa indipendente",
+                  "Villetta a schiera",
+                  "Loft",
+                  "Locale commerciale",
+                  "Terreno",
+                ]
+          }
         />
       </div>
 
@@ -526,6 +684,29 @@ function SecondStep({
     value: PropertyValuationInput["property"][K],
   ) => void;
 }) {
+  const roomDetails = form.property.roomDetails;
+  const setRoomDetail = <K extends keyof NonNullable<
+    PropertyValuationInput["property"]["roomDetails"]
+  >>(
+    key: K,
+    value: NonNullable<PropertyValuationInput["property"]["roomDetails"]>[K],
+  ) => {
+    setProperty("roomDetails", {
+      ...(roomDetails ?? initialForm.property.roomDetails!),
+      [key]: value,
+    });
+  };
+
+  const toggleRoomProfile = (profile: "STUDENT" | "WORKER") => {
+    const selected = roomDetails?.acceptedOccupantProfiles ?? [];
+    setRoomDetail(
+      "acceptedOccupantProfiles",
+      selected.includes(profile)
+        ? selected.filter((item) => item !== profile)
+        : [...selected, profile],
+    );
+  };
+
   return (
     <div>
       <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950">
@@ -536,7 +717,7 @@ function SecondStep({
       </p>
 
       <div className="mt-7 grid min-w-0 gap-5 sm:grid-cols-2 2xl:grid-cols-3">
-        <NumberField label="Superficie m²" value={form.property.surfaceSqm} min={10} onChange={(value) => setProperty("surfaceSqm", value === "" ? 0 : value)} />
+        <NumberField label="Superficie immobile m²" value={form.property.surfaceSqm} min={10} onChange={(value) => setProperty("surfaceSqm", value === "" ? 0 : value)} />
         <NumberField label="Locali" value={form.property.rooms} min={1} onChange={(value) => setProperty("rooms", value === "" ? 0 : value)} />
         <NumberField label="Camere" value={form.property.bedrooms} min={0} onChange={(value) => setProperty("bedrooms", value === "" ? -1 : value)} />
         <NumberField label="Bagni" value={form.property.bathrooms} min={0} onChange={(value) => setProperty("bathrooms", value === "" ? -1 : value)} />
@@ -621,6 +802,114 @@ function SecondStep({
         />
       </div>
 
+      {form.operation === "RENT_ROOM" && roomDetails ? (
+        <section className="mt-7 rounded-3xl border border-blue-200 bg-blue-50/70 p-5 sm:p-6">
+          <p className="text-xs font-black uppercase tracking-[0.12em] text-blue-700">
+            Stanza e convivenza
+          </p>
+          <h3 className="mt-2 text-xl font-black text-slate-950">
+            Dati necessari per stimare il canone della camera
+          </h3>
+          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <SelectField
+              label="Tipo di stanza"
+              value={roomDetails.roomType}
+              onChange={(value) =>
+                setRoomDetail(
+                  "roomType",
+                  value as NonNullable<
+                    PropertyValuationInput["property"]["roomDetails"]
+                  >["roomType"],
+                )
+              }
+              options={[
+                { value: "SINGLE", label: "Singola" },
+                { value: "DOUBLE_SINGLE_USE", label: "Doppia uso singolo" },
+                { value: "SHARED", label: "Posto letto in doppia" },
+              ]}
+            />
+            <NumberField
+              label="Superficie stanza m²"
+              value={roomDetails.roomSurfaceSqm}
+              min={4}
+              onChange={(value) =>
+                setRoomDetail("roomSurfaceSqm", value === "" ? 0 : value)
+              }
+            />
+            <NumberField
+              label="Coinquilini presenti"
+              value={roomDetails.currentRoommates}
+              min={0}
+              onChange={(value) =>
+                setRoomDetail("currentRoommates", value === "" ? 0 : value)
+              }
+            />
+            <SelectField
+              label="Composizione attuale"
+              value={roomDetails.householdComposition}
+              onChange={(value) =>
+                setRoomDetail(
+                  "householdComposition",
+                  value as NonNullable<
+                    PropertyValuationInput["property"]["roomDetails"]
+                  >["householdComposition"],
+                )
+              }
+              options={[
+                { value: "UNKNOWN", label: "Da indicare" },
+                { value: "NONE", label: "Nessun coinquilino" },
+                { value: "MEN", label: "Coinquilini uomini" },
+                { value: "WOMEN", label: "Coinquiline donne" },
+                { value: "MIXED", label: "Casa mista" },
+              ]}
+            />
+            <label className="grid gap-2 text-sm font-black text-slate-800">
+              Disponibile dal
+              <input
+                type="date"
+                value={roomDetails.availableFrom ?? ""}
+                onChange={(event) => setRoomDetail("availableFrom", event.target.value)}
+                className="h-13 rounded-xl border border-slate-200 bg-white px-4 font-normal text-slate-950 outline-none focus:border-blue-600 focus:ring-4 focus:ring-blue-50"
+              />
+            </label>
+          </div>
+
+          <fieldset className="mt-5">
+            <legend className="text-sm font-black text-slate-800">
+              Profilo previsto per la convivenza
+            </legend>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <CheckField
+                label="Studente o studentessa"
+                checked={roomDetails.acceptedOccupantProfiles.includes("STUDENT")}
+                onChange={() => toggleRoomProfile("STUDENT")}
+              />
+              <CheckField
+                label="Lavoratore o lavoratrice"
+                checked={roomDetails.acceptedOccupantProfiles.includes("WORKER")}
+                onChange={() => toggleRoomProfile("WORKER")}
+              />
+              <CheckField
+                label="Bagno privato"
+                checked={roomDetails.privateBathroom}
+                onChange={(value) => setRoomDetail("privateBathroom", value)}
+              />
+              <CheckField
+                label="Spese incluse"
+                checked={roomDetails.expensesIncluded}
+                onChange={(value) => setRoomDetail("expensesIncluded", value)}
+              />
+            </div>
+          </fieldset>
+
+          <p className="mt-5 text-xs leading-5 text-slate-500">
+            La valutazione usa soltanto dati dell’immobile e della convivenza già
+            presente. Non applica esclusioni automatiche basate su caratteristiche
+            personali.
+          </p>
+        </section>
+      ) : null}
+
       <fieldset className="mt-7">
         <legend className="text-sm font-black text-slate-800">Dotazioni</legend>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -649,32 +938,78 @@ function SecondStep({
 function ThirdStep({
   form,
   setForm,
-  setOwner,
   failure,
+  account,
+  onSaveDraft,
 }: {
   form: PropertyValuationInput;
   setForm: React.Dispatch<React.SetStateAction<PropertyValuationInput>>;
-  setOwner: <K extends keyof PropertyValuationInput["owner"]>(
-    key: K,
-    value: PropertyValuationInput["owner"][K],
-  ) => void;
   failure: PropertyValuationError | null;
+  account: {
+    loading: boolean;
+    authenticated: boolean;
+    name: string;
+    email: string;
+  };
+  onSaveDraft: () => void;
 }) {
+  const nextPath = "/valuta-immobile?resume=1";
+
   return (
     <div>
       <h2 className="text-2xl font-black tracking-[-0.03em] text-slate-950">
-        A chi colleghiamo questa richiesta?
+        Salva la richiesta e ricevi la stima
       </h2>
       <p className="mt-2 text-sm leading-6 text-slate-600">
-        La stima apparirà subito. I tuoi recapiti permettono a Guimmia di salvare la
-        richiesta e ricontattarti solo secondo il consenso espresso.
+        Prima del calcolo colleghiamo la valutazione al tuo account Guimmia. Così la
+        richiesta viene salvata in modo sicuro e il risultato arriva anche via email.
       </p>
 
-      <div className="mt-7 grid gap-5 sm:grid-cols-2">
-        <TextField label="Nome e cognome" value={form.owner.name} onChange={(value) => setOwner("name", value)} autoComplete="name" required />
-        <TextField label="Email" type="email" value={form.owner.email} onChange={(value) => setOwner("email", value)} autoComplete="email" required />
-        <TextField label="Telefono" type="tel" value={form.owner.phone} onChange={(value) => setOwner("phone", value)} autoComplete="tel" required wide />
-      </div>
+      {account.loading ? (
+        <div className="mt-7 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-5 text-sm font-bold text-slate-600">
+          <LoaderCircle className="animate-spin text-blue-600" size={19} />
+          Verifica dell’account in corso…
+        </div>
+      ) : account.authenticated ? (
+        <div className="mt-7 flex items-start gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white">
+            <Check size={20} />
+          </span>
+          <div>
+            <p className="font-black text-emerald-950">Account verificato</p>
+            <p className="mt-1 text-sm leading-6 text-emerald-800">
+              {account.name} · {account.email}
+            </p>
+            <p className="mt-1 text-xs leading-5 text-emerald-700">
+              La valutazione verrà salvata e inviata a questo indirizzo.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-7 rounded-3xl border border-blue-200 bg-blue-50 p-5 sm:p-6">
+          <p className="font-black text-slate-950">Manca soltanto il tuo account</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            La bozza resta per 24 ore su questo dispositivo durante la registrazione.
+            Dopo la conferma dell’email tornerai qui senza ricompilare i dati.
+          </p>
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+            <Link
+              href={`/register?type=private&next=${encodeURIComponent(nextPath)}`}
+              onClick={onSaveDraft}
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-black text-white hover:bg-blue-700"
+            >
+              Crea account gratuito <ArrowRight size={17} />
+            </Link>
+            <Link
+              href={`/login?next=${encodeURIComponent(nextPath)}`}
+              onClick={onSaveDraft}
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-300 bg-white px-5 text-sm font-black text-slate-800 hover:bg-slate-50"
+            >
+              Ho già un account
+            </Link>
+          </div>
+        </div>
+      )}
 
       <div className="sr-only" aria-hidden="true">
         <label>
@@ -736,6 +1071,12 @@ function ValuationResult({
     USEFUL: "Utile",
     STRONG: "Solida",
   }[response.quality.grade];
+  const continuationLabel = {
+    SALE: "Avvia la vendita con Guimmia",
+    RENT_LONG_TERM: "Avvia l’affitto con Guimmia",
+    RENT_SHORT_TERM: "Prepara l’immobile per le vacanze",
+    RENT_ROOM: "Prepara l’annuncio della stanza",
+  }[response.operation];
 
   return (
     <div className="overflow-hidden rounded-[36px] border border-slate-200 bg-white shadow-[0_30px_90px_rgba(15,23,42,0.1)]">
@@ -766,6 +1107,34 @@ function ValuationResult({
         <p className="mt-7 max-w-4xl text-base leading-8 text-slate-200">
           {response.result.summary}
         </p>
+
+        <div className="mt-7 flex items-start gap-3 rounded-2xl border border-blue-300/25 bg-blue-300/10 p-5 text-sm leading-6 text-blue-50 backdrop-blur">
+          <ShieldCheck className="mt-0.5 shrink-0 text-blue-200" size={20} aria-hidden="true" />
+          <div>
+            <p className="font-black">Questa non è ancora la cifra da pubblicare</p>
+            <p className="mt-1 text-blue-100">
+              È una fascia preliminare costruita sui dati disponibili. Prima di usarla
+              nell’annuncio, un agente Guimmia può controllare comparabili, documenti e
+              caratteristiche reali dell’immobile.
+            </p>
+          </div>
+        </div>
+
+        {response.result.rentalProjection.applicable ? (
+          <div className="mt-7 rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur">
+            <p className="text-xs font-black uppercase tracking-[0.12em] text-blue-200">
+              {response.result.rentalProjection.basis === "ANNUAL_GROSS_REVENUE"
+                ? "Ricavo annuo lordo indicativo"
+                : "Canone annuo indicativo"}
+            </p>
+            <p className="mt-2 text-2xl font-black">
+              {money(response.result.rentalProjection.annualLow, "TOTAL")} – {money(response.result.rentalProjection.annualHigh, "TOTAL")}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">
+              {response.result.rentalProjection.note}
+            </p>
+          </div>
+        ) : null}
       </div>
 
       <ValuationMethodEvidence response={response} />
@@ -785,6 +1154,17 @@ function ValuationResult({
           proseguire con dati reali finché il collegamento Supabase non è stato verificato.
         </div>
       ) : null}
+
+      {response.emailDelivery !== "SENT" ? (
+        <div className="mx-6 mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900 sm:mx-9 lg:mx-12">
+          La stima è salvata nel tuo account, ma l’invio email non è stato completato.
+          Puoi consultarla qui e Guimmia potrà reinviarla dopo la configurazione del mittente.
+        </div>
+      ) : (
+        <div className="mx-6 mb-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold leading-6 text-emerald-900 sm:mx-9 lg:mx-12">
+          La valutazione è stata inviata anche all’email del tuo account Guimmia.
+        </div>
+      )}
 
       <div className="border-t border-slate-200 bg-slate-50 p-6 sm:p-9 lg:px-12">
         <div>
@@ -826,7 +1206,7 @@ function ValuationResult({
             href={response.continuationUrl}
             className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-black text-white transition hover:bg-blue-700"
           >
-            Continua il percorso con Guimmia <ArrowRight size={17} aria-hidden="true" />
+            {continuationLabel} <ArrowRight size={17} aria-hidden="true" />
           </a>
         </div>
       </div>
@@ -843,8 +1223,12 @@ function ValuationMethodEvidence({
   const evidence = response.result.marketEvidence;
   const unit =
     benchmark.unit === "EUR_SQM_MONTH" ? "€/m² al mese" : "€/m²";
-  const observedUnit =
-    evidence.observedUnit === "EUR_SQM_MONTH" ? "€/m² al mese" : "€/m²";
+  const observedUnit = {
+    EUR_SQM_SALE: "€/m²",
+    EUR_SQM_MONTH: "€/m² al mese",
+    EUR_ROOM_MONTH: "€/stanza al mese",
+    EUR_NIGHT: "€/notte",
+  }[evidence.observedUnit];
 
   return (
     <section className="border-b border-slate-200 bg-white p-6 sm:p-9 lg:p-12">
@@ -938,7 +1322,15 @@ function ValuationMethodEvidence({
 
 function MarketEvidence({ response }: { response: PropertyValuationSuccess }) {
   const evidence = response.result.marketEvidence;
-  const unit = evidence.observedUnit === "EUR_SQM_MONTH" ? "€/m² al mese" : "€/m²";
+  const unit = {
+    EUR_SQM_SALE: "€/m²",
+    EUR_SQM_MONTH: "€/m² al mese",
+    EUR_ROOM_MONTH: "€/stanza al mese",
+    EUR_NIGHT: "€/notte",
+  }[evidence.observedUnit];
+  const directUnit =
+    evidence.observedUnit === "EUR_ROOM_MONTH" ||
+    evidence.observedUnit === "EUR_NIGHT";
   const similarityLabel = { HIGH: "Alta", MEDIUM: "Media", LOW: "Bassa" } as const;
 
   return (
@@ -986,7 +1378,9 @@ function MarketEvidence({ response }: { response: PropertyValuationSuccess }) {
               <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm text-slate-700">
                 <strong>{money(item.askingPrice, response.result.period)}</strong>
                 <span>{item.surfaceSqm.toLocaleString("it-IT")} m²</span>
-                <span>{item.pricePerSqm.toLocaleString("it-IT")} {unit}</span>
+                {!directUnit ? (
+                  <span>{item.pricePerSqm.toLocaleString("it-IT")} {unit}</span>
+                ) : null}
               </div>
               <p className="mt-3 text-xs leading-5 text-slate-500">{item.note}</p>
             </article>
@@ -1042,41 +1436,6 @@ function ResultList({ title, items, tone }: { title: string; items: string[]; to
         <p className="mt-3 text-sm text-slate-500">Nessun elemento segnalato.</p>
       )}
     </section>
-  );
-}
-
-function TextField({
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-  autoComplete,
-  required = false,
-  wide = false,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  type?: string;
-  autoComplete?: string;
-  required?: boolean;
-  wide?: boolean;
-}) {
-  return (
-    <label className={`grid min-w-0 gap-2 text-sm font-black text-slate-800 ${wide ? "sm:col-span-2" : ""}`}>
-      {label}{required ? " *" : ""}
-      <input
-        type={type}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        required={required}
-        className="min-h-12 w-full min-w-0 rounded-xl border border-slate-200 px-4 font-normal text-slate-950 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-50"
-      />
-    </label>
   );
 }
 

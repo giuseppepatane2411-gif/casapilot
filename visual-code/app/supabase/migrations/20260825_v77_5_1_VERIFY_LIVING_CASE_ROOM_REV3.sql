@@ -77,7 +77,7 @@ with checks as (
     (select count(*)::int from public.guimmia_ai_intake_profiles
       where controlled_vocabulary_required is true
         and jsonb_array_length(controlled_objectives) = 6
-        and jsonb_array_length(controlled_property_types) = 11),
+        and jsonb_array_length(controlled_property_types) = 12),
     1
   union all
   select 'LOCATION_CONFIRMATION',

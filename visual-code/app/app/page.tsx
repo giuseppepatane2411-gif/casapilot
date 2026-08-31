@@ -7,7 +7,6 @@ import {
   Handshake,
   House,
   KeyRound,
-  ShieldCheck,
   Sparkles,
   UserRoundCheck,
 } from "lucide-react";
@@ -16,7 +15,6 @@ import PublicAgencyFooter from "@/components/agency/PublicAgencyFooter";
 import PublicAgencyHeader from "@/components/agency/PublicAgencyHeader";
 import GuimmiaFloatingGuide from "@/components/home/GuimmiaFloatingGuide";
 import Hero from "@/components/home/Hero";
-import HomeListingShowcase from "@/components/home/HomeListingShowcase";
 import { getAgencyListings, getDemoListings } from "@/lib/agency/listings";
 
 export const metadata: Metadata = {
@@ -49,27 +47,10 @@ const serviceSteps = [
   },
 ];
 
-const trustItems = [
-  {
-    icon: ShieldCheck,
-    title: "Agenzia immobiliare",
-    description: "Persone e responsabilità reali",
-  },
-  {
-    icon: FileCheck2,
-    title: "Percorso organizzato",
-    description: "Documenti e passaggi sotto controllo",
-  },
-  {
-    icon: Sparkles,
-    title: "Digitale quando serve",
-    description: "Più semplicità, senza perdere il contatto umano",
-  },
-];
-
 export default async function HomePage() {
   const result = await getAgencyListings({ limit: 4 });
-  const hasPublishedListings = result.source === "supabase" && result.items.length > 0;
+  const hasPublishedListings =
+    result.source === "supabase" && result.items.length > 0;
   const listings = hasPublishedListings
     ? result.items
     : getDemoListings({ limit: 4 });
@@ -80,24 +61,6 @@ export default async function HomePage() {
       <PublicAgencyHeader />
       <main className="min-h-screen bg-white text-slate-950">
         <Hero featuredListing={listings[0]} preview={preview} />
-
-        <section className="border-b border-slate-100 bg-white">
-          <div className="mx-auto grid max-w-7xl gap-5 px-5 py-7 sm:grid-cols-3 sm:px-8 lg:px-10">
-            {trustItems.map(({ icon: Icon, title, description }) => (
-              <div key={title} className="flex items-center gap-3 sm:justify-center">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                  <Icon size={19} aria-hidden="true" />
-                </span>
-                <div>
-                  <p className="text-sm font-black text-slate-950">{title}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">{description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <HomeListingShowcase listings={listings} preview={preview} />
 
         <section className="bg-slate-50 py-16 sm:py-20 lg:py-24">
           <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
@@ -148,7 +111,7 @@ export default async function HomePage() {
                   href="/affittare"
                   className="relative mt-8 inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-black text-white transition group-hover:bg-blue-700"
                 >
-                  Affida il tuo immobile <ArrowRight size={17} aria-hidden="true" />
+                  Affitta il tuo immobile <ArrowRight size={17} aria-hidden="true" />
                 </Link>
               </article>
             </div>

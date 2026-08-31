@@ -3,6 +3,7 @@ import type {
   OccupancyStatus,
   OperationType,
   PropertyType,
+  RoomRentalData,
   WizardData,
 } from "@/lib/property-journey/types";
 
@@ -10,6 +11,20 @@ export const JOURNEY_STORAGE_KEY = "casapilot-property-journeys-v1";
 export const ACTIVE_JOURNEY_STORAGE_KEY = "casapilot-active-journey-id-v1";
 export const WIZARD_DRAFT_STORAGE_KEY = "casapilot-property-wizard-draft-v1";
 export const JOURNEY_CHANGE_EVENT = "casapilot:journeys-changed";
+
+export const INITIAL_ROOM_RENTAL_DATA: RoomRentalData = {
+  roomType: "",
+  roomSurface: "",
+  privateBathroom: false,
+  roomFurnished: false,
+  currentRoommates: "0",
+  householdComposition: "not_specified",
+  acceptedOccupantProfiles: [],
+  genderPreference: "none",
+  availableFrom: "",
+  expensesIncluded: false,
+  compatibilityNotes: "",
+};
 
 export const INITIAL_WIZARD_DATA: WizardData = {
   operation: "",
@@ -30,6 +45,7 @@ export const INITIAL_WIZARD_DATA: WizardData = {
   locationVerified: false,
   locationVerifiedAt: "",
   locationLabel: "",
+  roomRental: INITIAL_ROOM_RENTAL_DATA,
   documents: [],
 };
 
@@ -68,6 +84,13 @@ export const OPERATION_OPTIONS: Array<{
     eyebrow: "Locazione universitaria",
   },
   {
+    id: "rent_room",
+    title: "Affitto di una stanza",
+    description:
+      "Prepara stanza, convivenza, profilo compatibile, contratto e disponibilità.",
+    eyebrow: "Locazione stanza",
+  },
+  {
     id: "rent_tourist_short",
     title: "Affitto turistico breve",
     description:
@@ -102,6 +125,11 @@ export const PROPERTY_OPTIONS: Array<{
     description: "Terreno edificabile, agricolo o altro appezzamento.",
   },
   {
+    id: "room",
+    title: "Stanza",
+    description: "Stanza singola, doppia o condivisa in un immobile abitato.",
+  },
+  {
     id: "garage",
     title: "Garage",
     description: "Box auto, posto auto o autorimessa.",
@@ -134,12 +162,14 @@ const ALL_PROPERTIES: PropertyType[] = [
   "commercial",
   "land",
   "garage",
+  "room",
 ];
 
 const BUILDINGS: PropertyType[] = [
   "apartment",
   "house",
   "commercial",
+  "room",
 ];
 
 const ALL_RENTALS: OperationType[] = [
@@ -147,6 +177,7 @@ const ALL_RENTALS: OperationType[] = [
   "rent_long_term",
   "rent_transitory",
   "rent_student",
+  "rent_room",
   "rent_tourist_short",
 ];
 
@@ -155,6 +186,7 @@ const RESIDENTIAL_RENTALS: OperationType[] = [
   "rent_long_term",
   "rent_transitory",
   "rent_student",
+  "rent_room",
 ];
 
 const ALL_OPERATIONS: OperationType[] = ["sale", ...ALL_RENTALS];
@@ -367,6 +399,7 @@ export function getOperationLabel(operation: OperationType) {
     rent_long_term: "Affitto a lungo termine",
     rent_transitory: "Affitto transitorio",
     rent_student: "Affitto a studenti",
+    rent_room: "Affitto di una stanza",
     rent_tourist_short: "Affitto turistico breve",
   };
 

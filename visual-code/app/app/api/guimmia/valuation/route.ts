@@ -19,6 +19,8 @@ import type {
   PropertyValuationSuccess,
   ValuationOperation,
 } from "@/lib/guimmia/openai/types";
+import { createClient } from "@/lib/supabase/server";
+import { sendValuationEmail } from "@/lib/guimmia/valuation-email";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -31,7 +33,12 @@ const rateLimits =
   globalRateLimits.__guimmiaValuationRateLimits ?? new Map<string, RateLimitEntry>();
 globalRateLimits.__guimmiaValuationRateLimits = rateLimits;
 
-const operations = new Set<ValuationOperation>(["SALE", "RENT_LONG_TERM"]);
+const operations = new Set<ValuationOperation>([
+  "SALE",
+  "RENT_LONG_TERM",
+  "RENT_SHORT_TERM",
+  "RENT_ROOM",
+]);
 const conditions = new Set<PropertyCondition>([
   "NEW",
   "RENOVATED",
@@ -52,10 +59,6 @@ function cleanNumber(value: unknown, min: number, max: number) {
 
 function cleanBoolean(value: unknown) {
   return value === true;
-}
-
-function isEmail(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
 function error(
@@ -98,15 +101,20 @@ function consumeRateLimit(identity: string) {
   return { allowed: true, retryAfterSeconds: 0 };
 }
 
-function parseInput(body: Record<string, unknown>): PropertyValuationInput | null {
+function parseInput(
+  body: Record<string, unknown>,
+  owner: PropertyValuationInput["owner"],
+): PropertyValuationInput | null {
   const operation = cleanText(body.operation, 30) as ValuationOperation;
   const rawProperty =
     body.property && typeof body.property === "object" && !Array.isArray(body.property)
       ? (body.property as Record<string, unknown>)
       : {};
-  const rawOwner =
-    body.owner && typeof body.owner === "object" && !Array.isArray(body.owner)
-      ? (body.owner as Record<string, unknown>)
+  const rawRoomDetails =
+    rawProperty.roomDetails &&
+    typeof rawProperty.roomDetails === "object" &&
+    !Array.isArray(rawProperty.roomDetails)
+      ? (rawProperty.roomDetails as Record<string, unknown>)
       : {};
   const condition = cleanText(rawProperty.condition, 30) as PropertyCondition;
   const latitude =
@@ -135,10 +143,40 @@ function parseInput(body: Record<string, unknown>): PropertyValuationInput | nul
     rawProperty.monthlyCondominiumFees === null
       ? null
       : cleanNumber(rawProperty.monthlyCondominiumFees, 0, 10000);
-  const email = cleanText(rawOwner.email, 160).toLowerCase();
-  const phone = cleanText(rawOwner.phone, 40);
   const heating = cleanText(rawProperty.heating, 30) as PropertyValuationInput["property"]["heating"];
   const occupancy = cleanText(rawProperty.occupancy, 30) as PropertyValuationInput["property"]["occupancy"];
+  const roomType = cleanText(rawRoomDetails.roomType, 30) as NonNullable<
+    PropertyValuationInput["property"]["roomDetails"]
+  >["roomType"];
+  const roomSurfaceSqm = cleanNumber(rawRoomDetails.roomSurfaceSqm, 4, 200);
+  const currentRoommates = cleanNumber(rawRoomDetails.currentRoommates, 0, 30);
+  const householdComposition = cleanText(
+    rawRoomDetails.householdComposition,
+    30,
+  ) as NonNullable<
+    PropertyValuationInput["property"]["roomDetails"]
+  >["householdComposition"];
+  const acceptedOccupantProfiles = Array.isArray(
+    rawRoomDetails.acceptedOccupantProfiles,
+  )
+    ? Array.from(
+        new Set(
+          rawRoomDetails.acceptedOccupantProfiles.filter(
+            (item): item is "STUDENT" | "WORKER" =>
+              item === "STUDENT" || item === "WORKER",
+          ),
+        ),
+      )
+    : [];
+  const roomDetailsValid =
+    operation !== "RENT_ROOM" ||
+    (["SINGLE", "DOUBLE_SINGLE_USE", "SHARED"].includes(roomType) &&
+      roomSurfaceSqm !== null &&
+      currentRoommates !== null &&
+      ["NONE", "MEN", "WOMEN", "MIXED", "UNKNOWN"].includes(
+        householdComposition,
+      ) &&
+      acceptedOccupantProfiles.length > 0);
 
   if (
     !operations.has(operation) ||
@@ -160,9 +198,7 @@ function parseInput(body: Record<string, unknown>): PropertyValuationInput | nul
       monthlyCondominiumFees === null) ||
     !["AUTONOMOUS", "CENTRAL", "HEAT_PUMP", "NONE", "UNKNOWN"].includes(heating) ||
     !["VACANT", "OWNER_OCCUPIED", "TENANTED"].includes(occupancy) ||
-    !cleanText(rawOwner.name, 120) ||
-    !isEmail(email) ||
-    !phone ||
+    !roomDetailsValid ||
     body.privacyAccepted !== true ||
     body.automatedAnalysisAccepted !== true
   ) {
@@ -197,13 +233,23 @@ function parseInput(body: Record<string, unknown>): PropertyValuationInput | nul
       outdoorSpace: cleanBoolean(rawProperty.outdoorSpace),
       parking: cleanBoolean(rawProperty.parking),
       furnished: cleanBoolean(rawProperty.furnished),
+      roomDetails:
+        operation === "RENT_ROOM"
+          ? {
+              roomType,
+              roomSurfaceSqm: roomSurfaceSqm!,
+              privateBathroom: cleanBoolean(rawRoomDetails.privateBathroom),
+              currentRoommates: currentRoommates!,
+              householdComposition,
+              acceptedOccupantProfiles,
+              availableFrom:
+                cleanText(rawRoomDetails.availableFrom, 20) || undefined,
+              expensesIncluded: cleanBoolean(rawRoomDetails.expensesIncluded),
+            }
+          : undefined,
       notes: cleanText(rawProperty.notes, 1000) || undefined,
     },
-    owner: {
-      name: cleanText(rawOwner.name, 120),
-      email,
-      phone,
-    },
+    owner,
     privacyAccepted: true,
     automatedAnalysisAccepted: true,
     website: cleanText(body.website, 100) || undefined,
@@ -237,6 +283,37 @@ async function supabaseInsert(table: string, value: Record<string, unknown>) {
 
   if (!response.ok) {
     console.error(`Guimmia ${table} insert failed`, response.status, await response.text());
+    return false;
+  }
+
+  return true;
+}
+
+async function supabaseUpdate(
+  table: string,
+  id: string,
+  value: Record<string, unknown>,
+) {
+  const access = supabaseAccess();
+  if (!access) return false;
+
+  const response = await fetch(
+    `${access.url}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`,
+    {
+      method: "PATCH",
+      headers: {
+        apikey: access.key,
+        Authorization: `Bearer ${access.key}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(value),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    console.error(`Guimmia ${table} update failed`, response.status, await response.text());
     return false;
   }
 
@@ -282,28 +359,33 @@ async function budgetStatus() {
   }
 }
 
-async function persistLead(
+type LeadAIState = {
+  status: "PENDING" | "COMPLETED" | "FAILED" | "NOT_CONFIGURED" | "BLOCKED";
+  requestId?: string;
+  model?: string;
+  result?: unknown;
+  sources?: unknown;
+  quality?: unknown;
+  usage?: {
+    inputTokens: number;
+    cachedInputTokens: number;
+    outputTokens: number;
+    webSearchCalls: number;
+    estimatedCostUsd: number;
+  };
+  errorCode?: string;
+};
+
+function leadPayload(
   leadId: string,
+  userId: string,
   input: PropertyValuationInput,
-  ai: {
-    status: "COMPLETED" | "FAILED" | "NOT_CONFIGURED" | "BLOCKED";
-    requestId?: string;
-    model?: string;
-    result?: unknown;
-    sources?: unknown;
-    quality?: unknown;
-    usage?: {
-      inputTokens: number;
-      cachedInputTokens: number;
-      outputTokens: number;
-      webSearchCalls: number;
-      estimatedCostUsd: number;
-    };
-    errorCode?: string;
-  },
+  ai: LeadAIState,
 ) {
-  return supabaseInsert("guimmia_property_valuation_leads", {
+  return {
     id: leadId,
+    user_id: userId,
+    registration_verified_at: new Date().toISOString(),
     operation_type: input.operation,
     owner_name: input.owner.name,
     owner_email: input.owner.email,
@@ -312,7 +394,12 @@ async function persistLead(
     privacy_accepted_at: new Date().toISOString(),
     automated_analysis_accepted_at: new Date().toISOString(),
     source: "PUBLIC_VALUATION",
-    status: ai.status === "COMPLETED" ? "VALUATION_READY" : "NEEDS_REVIEW",
+    status:
+      ai.status === "PENDING"
+        ? "VALUATION_REQUESTED"
+        : ai.status === "COMPLETED"
+          ? "VALUATION_READY"
+          : "NEEDS_REVIEW",
     ai_execution_mode: "DRY_RUN",
     ai_status: ai.status,
     ai_request_id: ai.requestId ?? null,
@@ -326,7 +413,33 @@ async function persistLead(
     web_search_calls: ai.usage?.webSearchCalls ?? 0,
     estimated_cost_usd: ai.usage?.estimatedCostUsd ?? 0,
     error_code: ai.errorCode ?? null,
-  });
+    email_delivery_status: ai.status === "COMPLETED" ? "PENDING" : "NOT_SENT",
+  };
+}
+
+async function createLead(
+  leadId: string,
+  userId: string,
+  input: PropertyValuationInput,
+  ai: LeadAIState,
+) {
+  return supabaseInsert(
+    "guimmia_property_valuation_leads",
+    leadPayload(leadId, userId, input, ai),
+  );
+}
+
+async function updateLead(
+  leadId: string,
+  userId: string,
+  input: PropertyValuationInput,
+  ai: LeadAIState,
+) {
+  return supabaseUpdate(
+    "guimmia_property_valuation_leads",
+    leadId,
+    leadPayload(leadId, userId, input, ai),
+  );
 }
 
 export async function POST(request: Request) {
@@ -350,7 +463,51 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true }, { status: 202 });
   }
 
-  const input = parseInput(body);
+  if (!supabaseAccess()) {
+    return error(
+      503,
+      "database_not_configured",
+      "La stima non parte perché il collegamento sicuro al database non è ancora configurato.",
+    );
+  }
+
+  let authenticatedUser: {
+    id: string;
+    email: string;
+    user_metadata: Record<string, unknown>;
+  } | null = null;
+  try {
+    const supabase = await createClient();
+    const { data } = await supabase.auth.getUser();
+    if (data.user?.id && data.user.email) {
+      authenticatedUser = {
+        id: data.user.id,
+        email: data.user.email,
+        user_metadata: data.user.user_metadata ?? {},
+      };
+    }
+  } catch (caught) {
+    console.error("Guimmia valuation auth check failed", caught);
+  }
+
+  if (!authenticatedUser) {
+    return error(
+      401,
+      "registration_required",
+      "Crea il tuo account o accedi per collegare la richiesta e ricevere la valutazione via email.",
+    );
+  }
+
+  const metadata = authenticatedUser.user_metadata;
+  const ownerName =
+    cleanText(metadata.full_name, 120) ||
+    cleanText(metadata.name, 120) ||
+    authenticatedUser.email.split("@")[0];
+  const input = parseInput(body, {
+    name: ownerName,
+    email: authenticatedUser.email.toLowerCase(),
+    phone: cleanText(metadata.phone, 40),
+  });
   if (!input) {
     return error(
       400,
@@ -360,20 +517,29 @@ export async function POST(request: Request) {
   }
 
   const leadId = crypto.randomUUID();
-  if (!supabaseAccess()) {
+  const leadCaptured = await createLead(leadId, authenticatedUser.id, input, {
+    status: "PENDING",
+  });
+  if (!leadCaptured) {
     return error(
       503,
-      "database_not_configured",
-      "La stima non parte perché il collegamento sicuro al database non è ancora configurato.",
+      "lead_capture_failed",
+      "Non siamo riusciti a salvare la richiesta. La valutazione non è stata avviata e non ha consumato credito.",
+      { leadId, leadSaved: false },
     );
   }
+
   const rateLimit = consumeRateLimit(requestIdentity(request, input.owner.email));
   if (!rateLimit.allowed) {
+    await updateLead(leadId, authenticatedUser.id, input, {
+      status: "BLOCKED",
+      errorCode: "REQUEST_LIMIT_REACHED",
+    });
     return error(
       429,
       "request_limit_reached",
       `Hai già richiesto ${GUIMMIA_AI_RATE_LIMIT_REQUESTS} stime. Riprova più tardi per proteggere il budget della sperimentazione.`,
-      {},
+      { leadId, leadSaved: true },
       { "retry-after": String(rateLimit.retryAfterSeconds) },
     );
   }
@@ -381,7 +547,7 @@ export async function POST(request: Request) {
   const openAIConfiguration = getOpenAIConfiguration();
   const currentBudget = await budgetStatus();
   if (openAIConfiguration.configured && !currentBudget.available) {
-    const leadSaved = await persistLead(leadId, input, {
+    await updateLead(leadId, authenticatedUser.id, input, {
       status: "BLOCKED",
       errorCode: "MONTHLY_BUDGET_REACHED",
     });
@@ -389,7 +555,7 @@ export async function POST(request: Request) {
       429,
       "budget_limit_reached",
       `Il budget mensile di prova di $${GUIMMIA_AI_MONTHLY_BUDGET_USD.toFixed(2)} è stato raggiunto. La richiesta resta disponibile per Guimmia.`,
-      { leadId, leadSaved },
+      { leadId, leadSaved: true },
     );
   }
 
@@ -398,7 +564,7 @@ export async function POST(request: Request) {
       operation: input.operation,
       property: input.property,
     });
-    const leadSaved = await persistLead(leadId, input, {
+    const valuationSaved = await updateLead(leadId, authenticatedUser.id, input, {
       status: "COMPLETED",
       requestId: ai.requestId,
       model: ai.model,
@@ -407,6 +573,15 @@ export async function POST(request: Request) {
       quality: ai.quality,
       usage: ai.usage,
     });
+
+    if (!valuationSaved) {
+      return error(
+        503,
+        "valuation_persistence_failed",
+        "La richiesta è stata acquisita, ma il risultato non è stato salvato correttamente. Guimmia non mostra una stima non registrata.",
+        { leadId, leadSaved: true },
+      );
+    }
 
     await supabaseInsert("guimmia_ai_usage_events", {
       valuation_lead_id: leadId,
@@ -422,11 +597,31 @@ export async function POST(request: Request) {
       estimated_cost_usd: ai.usage.estimatedCostUsd,
     });
 
+    const continuationGoal =
+      input.operation === "SALE"
+        ? "sale"
+        : input.operation === "RENT_ROOM"
+          ? "rent_room"
+          : "rent";
+    const continuationUrl = `/dashboard/properties/new?goal=${continuationGoal}&valuationLeadId=${leadId}`;
+
+    const emailDelivery = await sendValuationEmail({
+      to: input.owner.email,
+      name: input.owner.name,
+      operation: input.operation,
+      result: ai.result,
+      continuationUrl: new URL(continuationUrl, request.url).toString(),
+    });
+    await supabaseUpdate("guimmia_property_valuation_leads", leadId, {
+      email_delivery_status: emailDelivery,
+      email_sent_at: emailDelivery === "SENT" ? new Date().toISOString() : null,
+    });
+
     return NextResponse.json<PropertyValuationSuccess>(
       {
         ok: true,
         leadId,
-        leadSaved,
+        leadSaved: true,
         mode: "DRY_RUN",
         model: ai.model,
         operation: input.operation,
@@ -434,14 +629,15 @@ export async function POST(request: Request) {
         sources: ai.sources,
         usage: ai.usage,
         quality: ai.quality,
-        continuationUrl: `/registrazione/proprietario?source=valutazione&leadId=${leadId}&operation=${input.operation}`,
+        continuationUrl,
+        emailDelivery,
         humanReviewRequired: true,
       },
       { status: 201, headers: { "cache-control": "no-store" } },
     );
   } catch (caught) {
     const notConfigured = caught instanceof OpenAINotConfiguredError;
-    const leadSaved = await persistLead(leadId, input, {
+    await updateLead(leadId, authenticatedUser.id, input, {
       status: notConfigured ? "NOT_CONFIGURED" : "FAILED",
       errorCode: notConfigured ? "OPENAI_NOT_CONFIGURED" : "OPENAI_REQUEST_FAILED",
     });
@@ -453,7 +649,7 @@ export async function POST(request: Request) {
       notConfigured
         ? "La richiesta è stata acquisita, ma Luna non è ancora collegata al server."
         : "L’analisi non è riuscita. La richiesta resta disponibile per il controllo Guimmia.",
-      { leadId, leadSaved },
+      { leadId, leadSaved: true },
     );
   }
 }

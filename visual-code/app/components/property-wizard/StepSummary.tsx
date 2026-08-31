@@ -45,6 +45,21 @@ export default function StepSummary({ data, onEditStep }: StepSummaryProps) {
           detail={`${data.surface} m² · ${getOccupancyLabel(data.occupancy || null)}`}
           onEdit={() => onEditStep(2)}
         />
+        {data.operation === "rent_room" && (
+          <SummaryCard
+            icon={Building2}
+            label="Stanza e convivenza"
+            value={
+              data.roomRental.roomType === "single"
+                ? "Stanza singola"
+                : data.roomRental.roomType === "double"
+                  ? "Doppia uso singolo"
+                  : "Posto letto in doppia"
+            }
+            detail={`${data.roomRental.roomSurface} m² · ${data.roomRental.currentRoommates || "0"} coinquilini · ${data.roomRental.acceptedOccupantProfiles.includes("student") ? "studenti" : ""}${data.roomRental.acceptedOccupantProfiles.length === 2 ? " e " : ""}${data.roomRental.acceptedOccupantProfiles.includes("worker") ? "lavoratori" : ""}`}
+            onEdit={() => onEditStep(2)}
+          />
+        )}
         <SummaryCard
           icon={MapPin}
           label="Dove si trova"

@@ -29,6 +29,9 @@ export function listingPrice(x: AgencyListing) {
 
 function listingOperationLabel(listing: AgencyListing) {
   if (listing.operation === "sale") return "In vendita";
+  if (listing.listing_kind === "room" || listing.property_type === "Stanza") {
+    return "Stanza in affitto";
+  }
   if (listing.rent_period === "day" || listing.rent_period === "week") {
     return "Affitto turistico";
   }
@@ -45,12 +48,16 @@ export default function ListingCard({
   const [favorite, setFavorite] = useState(false);
 
   useEffect(() => {
-    try {
-      const stored = JSON.parse(localStorage.getItem(FAVORITES_KEY) ?? "[]") as unknown;
-      setFavorite(Array.isArray(stored) && stored.includes(listing.id));
-    } catch {
-      setFavorite(false);
-    }
+    const timer = window.setTimeout(() => {
+      try {
+        const stored = JSON.parse(localStorage.getItem(FAVORITES_KEY) ?? "[]") as unknown;
+        setFavorite(Array.isArray(stored) && stored.includes(listing.id));
+      } catch {
+        setFavorite(false);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, [listing.id]);
 
   function toggleFavorite() {
@@ -127,9 +134,9 @@ export default function ListingCard({
           <p className="mt-3 text-2xl font-black text-slate-950">{listingPrice(listing)}</p>
 
           <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-y border-slate-100 py-3 text-xs font-bold text-slate-600">
-            {listing.surface_sqm ? (
+            {(listing.room_surface_sqm || listing.surface_sqm) ? (
               <span className="inline-flex items-center gap-1.5">
-                <Maximize2 size={15} aria-hidden="true" /> {listing.surface_sqm} m²
+                <Maximize2 size={15} aria-hidden="true" /> {listing.room_surface_sqm || listing.surface_sqm} m²
               </span>
             ) : null}
             {listing.bedrooms ? (
@@ -145,6 +152,21 @@ export default function ListingCard({
               </span>
             ) : null}
           </div>
+
+          {listing.listing_kind === "room" ? (
+            <div className="mt-3 space-y-1 text-xs leading-5 text-slate-600">
+              {listing.current_household_summary ? (
+                <p>{listing.current_household_summary}</p>
+              ) : null}
+              {listing.accepted_occupant_profiles?.length ? (
+                <p className="font-bold text-slate-700">
+                  Adatta a {listing.accepted_occupant_profiles
+                    .map((profile) => profile === "student" ? "studenti" : "lavoratori")
+                    .join(" e ")}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
 
           <div className="mt-4 flex items-center justify-between gap-3">
             <span className="text-xs font-bold text-slate-500">

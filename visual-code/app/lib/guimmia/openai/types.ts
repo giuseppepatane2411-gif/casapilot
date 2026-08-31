@@ -1,4 +1,8 @@
-export type ValuationOperation = "SALE" | "RENT_LONG_TERM";
+export type ValuationOperation =
+  | "SALE"
+  | "RENT_LONG_TERM"
+  | "RENT_SHORT_TERM"
+  | "RENT_ROOM";
 
 export type PropertyCondition =
   | "NEW"
@@ -43,6 +47,16 @@ export type PropertyValuationInput = {
     outdoorSpace: boolean;
     parking: boolean;
     furnished: boolean;
+    roomDetails?: {
+      roomType: "SINGLE" | "DOUBLE_SINGLE_USE" | "SHARED";
+      roomSurfaceSqm: number;
+      privateBathroom: boolean;
+      currentRoommates: number;
+      householdComposition: "NONE" | "MEN" | "WOMEN" | "MIXED" | "UNKNOWN";
+      acceptedOccupantProfiles: Array<"STUDENT" | "WORKER">;
+      availableFrom?: string;
+      expensesIncluded: boolean;
+    };
     notes?: string;
   };
   owner: {
@@ -72,7 +86,7 @@ export type ValuationComparableSignal = {
 
 export type PropertyValuationResult = {
   currency: "EUR";
-  period: "TOTAL" | "MONTH";
+  period: "TOTAL" | "MONTH" | "NIGHT";
   range: {
     low: number;
     suggested: number;
@@ -96,11 +110,25 @@ export type PropertyValuationResult = {
   };
   marketEvidence: {
     evidenceSummary: string;
-    observedUnit: "EUR_SQM_SALE" | "EUR_SQM_MONTH";
+    observedUnit:
+      | "EUR_SQM_SALE"
+      | "EUR_SQM_MONTH"
+      | "EUR_ROOM_MONTH"
+      | "EUR_NIGHT";
     observedLow: number;
     observedMedian: number;
     observedHigh: number;
     comparableSignals: ValuationComparableSignal[];
+  };
+  rentalProjection: {
+    applicable: boolean;
+    basis: "NONE" | "ANNUAL_RENT" | "ANNUAL_GROSS_REVENUE";
+    occupancyLowPercent: number;
+    occupancyHighPercent: number;
+    annualLow: number;
+    annualSuggested: number;
+    annualHigh: number;
+    note: string;
   };
   confidence: "LOW" | "MEDIUM" | "HIGH";
   summary: string;
@@ -141,6 +169,7 @@ export type PropertyValuationSuccess = {
   usage: ValuationUsage;
   quality: ValuationQuality;
   continuationUrl: string;
+  emailDelivery: "SENT" | "NOT_CONFIGURED" | "FAILED";
   humanReviewRequired: true;
 };
 
@@ -148,8 +177,11 @@ export type PropertyValuationError = {
   ok: false;
   error:
     | "invalid_request"
+    | "registration_required"
     | "openai_not_configured"
     | "database_not_configured"
+    | "lead_capture_failed"
+    | "valuation_persistence_failed"
     | "valuation_failed"
     | "request_limit_reached"
     | "budget_limit_reached";

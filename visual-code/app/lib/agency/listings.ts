@@ -118,10 +118,48 @@ const DEMO: AgencyListing[] = [
     featured: true,
     published_at: new Date().toISOString(),
   },
+  {
+    id: "55555555-5555-4555-8555-555555555555",
+    slug: "stanza-singola-bologna-centro",
+    operation: "rent",
+    listing_kind: "room",
+    property_type: "Stanza",
+    title: "Stanza singola arredata in appartamento condiviso",
+    description:
+      "Stanza dimostrativa con informazioni chiare sulla casa e sulla convivenza.",
+    price_cents: 52000,
+    rent_period: "month",
+    city: "Bologna",
+    province: "BO",
+    zone: "Centro",
+    bedrooms: 1,
+    bathrooms: 1,
+    rooms: 4,
+    surface_sqm: 96,
+    room_type: "single",
+    room_surface_sqm: 16,
+    private_bathroom: false,
+    current_roommates_count: 2,
+    current_household_summary: "Casa condivisa con una studentessa e un lavoratore",
+    accepted_occupant_profiles: ["student", "worker"],
+    available_from: "2026-09-01",
+    expenses_included: false,
+    floor: "3",
+    elevator: true,
+    energy_class: "D",
+    features: ["Arredata", "Wi-Fi", "Spazi comuni"],
+    cover_image_url: "/images/guimmia/listing-bilocale-milano.webp",
+    visibility_tier: "standard",
+    featured: false,
+    published_at: new Date().toISOString(),
+  },
 ];
 
 export function getListingMarket(listing: AgencyListing): ListingMarket {
   if (listing.operation === "sale") return "buy";
+  if (listing.listing_kind === "room" || listing.property_type === "Stanza") {
+    return "room";
+  }
   return listing.rent_period === "day" || listing.rent_period === "week"
     ? "holiday"
     : "rent";
@@ -158,7 +196,7 @@ export async function getAgencyListings(filters: Filters = {}) {
   if (!url || !key) return { items: demoFiltered(filters), source: "demo" as const };
 
   const q = new URLSearchParams();
-  q.set("select", "id,slug,operation,property_type,title,description,price_cents,rent_period,city,province,zone,bedrooms,bathrooms,rooms,surface_sqm,floor,elevator,energy_class,features,cover_image_url,visibility_tier,featured,published_at");
+  q.set("select", "id,slug,operation,listing_kind,property_type,title,description,price_cents,rent_period,city,province,zone,bedrooms,bathrooms,rooms,surface_sqm,room_type,room_surface_sqm,private_bathroom,current_roommates_count,current_household_summary,accepted_occupant_profiles,available_from,expenses_included,floor,elevator,energy_class,features,cover_image_url,visibility_tier,featured,published_at");
   q.set("status", "eq.published");
   q.set("order", "featured.desc,visibility_tier.desc,published_at.desc");
   q.set("limit", String(filters.limit ?? 24));
@@ -170,6 +208,9 @@ export async function getAgencyListings(filters: Filters = {}) {
   } else if (filters.market === "holiday") {
     q.set("operation", "eq.rent");
     q.set("rent_period", "in.(day,week)");
+  } else if (filters.market === "room") {
+    q.set("operation", "eq.rent");
+    q.set("listing_kind", "eq.room");
   } else if (filters.operation) {
     q.set("operation", `eq.${filters.operation}`);
   }
@@ -190,6 +231,9 @@ export async function getAgencyListings(filters: Filters = {}) {
       items: items.map((x) => ({
         ...x,
         features: Array.isArray(x.features) ? x.features : [],
+        accepted_occupant_profiles: Array.isArray(x.accepted_occupant_profiles)
+          ? x.accepted_occupant_profiles
+          : [],
       })),
       source: "supabase" as const,
     };

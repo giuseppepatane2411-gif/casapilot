@@ -105,6 +105,7 @@ export function journeyToWizardData(journey: PropertyJourney): WizardData {
     locationVerified: journey.property.locationVerified ?? false,
     locationVerifiedAt: journey.property.locationVerifiedAt ?? "",
     locationLabel: journey.property.locationLabel ?? "",
+    roomRental: journey.property.roomRental,
     documents: journey.documents,
   };
 }

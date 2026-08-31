@@ -23,6 +23,29 @@ const markets = [
   { id: "holiday", label: "Vacanze", icon: MapPin },
 ] as const;
 
+type Market = (typeof markets)[number]["id"];
+
+const ownerActions: Record<
+  Market,
+  { valuationLabel: string; actionLabel: string; href: string }
+> = {
+  buy: {
+    valuationLabel: "Valuta per la vendita",
+    actionLabel: "Vendi con Guimmia",
+    href: "/valuta-immobile?operazione=vendita",
+  },
+  rent: {
+    valuationLabel: "Valuta il canone di affitto",
+    actionLabel: "Affitta con Guimmia",
+    href: "/valuta-immobile?operazione=affitto",
+  },
+  holiday: {
+    valuationLabel: "Stima il rendimento turistico",
+    actionLabel: "Affitta per le vacanze con Guimmia",
+    href: "/valuta-immobile?operazione=vacanze",
+  },
+};
+
 function featuredPrice(listing: AgencyListing) {
   const value = new Intl.NumberFormat("it-IT", {
     style: "currency",
@@ -165,6 +188,9 @@ export default function Hero({
   featuredListing: AgencyListing;
   preview: boolean;
 }) {
+  const [market, setMarket] = useState<Market>("buy");
+  const ownerAction = ownerActions[market];
+
   return (
     <section className="px-3 pt-3 sm:px-5 sm:pt-5">
       <div className="relative mx-auto overflow-hidden rounded-[28px] bg-slate-950 sm:rounded-[38px]">
@@ -190,8 +216,8 @@ export default function Hero({
               <span className="block text-blue-200">Oppure affidaci la tua.</span>
             </h1>
 
-            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-200 sm:text-lg sm:leading-8">
-              Immobili in vendita, in affitto e per le vacanze. Guimmia ti accompagna dalla ricerca alla negoziazione e alla contrattualistica.
+            <p className="mt-5 max-w-3xl text-sm leading-6 text-slate-200 sm:text-base sm:leading-7 lg:text-[17px] lg:leading-8">
+              Guimmia è un’agenzia immobiliare completamente digitale che semplifica il modo di comprare, vendere e affittare casa. Il cliente gestisce direttamente alcune attività, come gli appuntamenti e le visite, mentre Guimmia lo assiste nella pubblicazione dell’annuncio, nella gestione della documentazione, nella negoziazione e nella contrattualistica, offrendo anche una serie di servizi accessori e utilizzando l’intelligenza artificiale per migliorare il servizio.
             </p>
 
             <form
@@ -201,15 +227,16 @@ export default function Hero({
               <fieldset>
                 <legend className="sr-only">Cosa stai cercando?</legend>
                 <div className="grid grid-cols-3 gap-1 rounded-2xl bg-slate-100 p-1.5 sm:inline-grid sm:min-w-[430px]">
-                  {markets.map(({ id, label, icon: Icon }, index) => (
+                  {markets.map(({ id, label, icon: Icon }) => (
                     <div key={id} className="relative">
                       <input
                         id={`home-market-${id}`}
-                        type="radio"
-                        name="mercato"
-                        value={id}
-                        defaultChecked={index === 0}
-                        className="peer sr-only"
+                      type="radio"
+                      name="mercato"
+                      value={id}
+                      checked={market === id}
+                      onChange={() => setMarket(id)}
+                      className="peer sr-only"
                       />
                       <label
                         htmlFor={`home-market-${id}`}
@@ -240,6 +267,7 @@ export default function Hero({
                   <option>Attico</option>
                   <option>Villa</option>
                   <option>Casa indipendente</option>
+                  <option>Stanza</option>
                   <option>Terreno</option>
                   <option>Locale commerciale</option>
                 </select>
@@ -266,16 +294,16 @@ export default function Hero({
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
               <span className="text-sm font-semibold text-white/70">Sei proprietario?</span>
               <Link
-                href="/valuta-immobile"
+                href={ownerAction.href}
                 className="inline-flex items-center gap-2 text-sm font-extrabold text-white transition hover:text-blue-200"
               >
-                Valuta il tuo immobile <ArrowRight size={16} aria-hidden="true" />
+                {ownerAction.valuationLabel} <ArrowRight size={16} aria-hidden="true" />
               </Link>
               <Link
-                href="/vendere"
+                href={ownerAction.href}
                 className="inline-flex items-center gap-2 text-sm font-extrabold text-white transition hover:text-blue-200 sm:ml-3"
               >
-                Vendi con Guimmia <ArrowRight size={16} aria-hidden="true" />
+                {ownerAction.actionLabel} <ArrowRight size={16} aria-hidden="true" />
               </Link>
             </div>
           </div>
@@ -309,7 +337,8 @@ export default function Hero({
             <div className="p-4 pb-5">
               <p className="flex items-center gap-1.5 text-xs font-extrabold text-blue-600">
                 <MapPin size={14} aria-hidden="true" />
-                {featuredListing.city}{featuredListing.zone ? ` · ${featuredListing.zone}` : ""}
+                {featuredListing.city}
+                {featuredListing.zone ? ` · ${featuredListing.zone}` : ""}
               </p>
               <h2 className="mt-2 text-xl font-black leading-tight tracking-[-0.025em] text-slate-950">
                 {featuredListing.title}
@@ -319,13 +348,19 @@ export default function Hero({
               </p>
               <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-slate-100 pt-4 text-xs font-bold text-slate-600">
                 {featuredListing.surface_sqm ? (
-                  <span className="inline-flex items-center gap-1.5"><Maximize2 size={15} /> {featuredListing.surface_sqm} m²</span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Maximize2 size={15} /> {featuredListing.surface_sqm} m²
+                  </span>
                 ) : null}
                 {featuredListing.bedrooms ? (
-                  <span className="inline-flex items-center gap-1.5"><BedDouble size={15} /> {featuredListing.bedrooms}</span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <BedDouble size={15} /> {featuredListing.bedrooms}
+                  </span>
                 ) : null}
                 {featuredListing.bathrooms ? (
-                  <span className="inline-flex items-center gap-1.5"><Bath size={15} /> {featuredListing.bathrooms}</span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Bath size={15} /> {featuredListing.bathrooms}
+                  </span>
                 ) : null}
               </div>
             </div>

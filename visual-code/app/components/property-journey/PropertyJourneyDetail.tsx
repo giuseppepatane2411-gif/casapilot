@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
+  BedDouble,
   Building2,
   FileText,
   Home,
@@ -33,6 +34,7 @@ const propertyIcons: Record<PropertyType, LucideIcon> = {
   commercial: Store,
   land: LandPlot,
   garage: Warehouse,
+  room: BedDouble,
 };
 
 type PropertyJourneyDetailProps = {

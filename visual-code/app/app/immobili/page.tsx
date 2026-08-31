@@ -20,7 +20,7 @@ export default async function ImmobiliPage({ searchParams }: { searchParams: Par
   const marketRaw = one(sp.mercato);
   const legacyOperation = one(sp.operazione);
   const market: "" | ListingMarket =
-    marketRaw === "buy" || marketRaw === "rent" || marketRaw === "holiday"
+    marketRaw === "buy" || marketRaw === "rent" || marketRaw === "room" || marketRaw === "holiday"
       ? marketRaw
       : legacyOperation === "sale"
         ? "buy"
@@ -52,6 +52,10 @@ export default async function ImmobiliPage({ searchParams }: { searchParams: Par
     rent: {
       title: "Case in affitto",
       description: "Esplora le proposte in affitto e organizza la tua visita con Guimmia.",
+    },
+    room: {
+      title: "Stanze in affitto",
+      description: "Confronta stanze, caratteristiche della casa e informazioni utili sulla convivenza.",
     },
     holiday: {
       title: "Case per le vacanze",

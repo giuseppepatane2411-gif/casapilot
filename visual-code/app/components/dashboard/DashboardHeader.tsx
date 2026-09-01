@@ -17,7 +17,7 @@ function getSection(pathname: string) {
     return { title: "Guimmia", subtitle: "Chiedi quello che non è chiaro" };
   }
   if (pathname.startsWith("/dashboard/professionals")) {
-    return { title: "Professionisti", subtitle: "Supporto per la pratica" };
+    return { title: "Servizi", subtitle: "Supporto per il tuo immobile" };
   }
   if (pathname.startsWith("/dashboard/account")) {
     return { title: "Account", subtitle: "Profilo e accesso" };
@@ -61,4 +61,3 @@ export default function DashboardHeader({ onOpenMobileMenu }: DashboardHeaderPro
     </header>
   );
 }
-

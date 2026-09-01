@@ -22,6 +22,10 @@ function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
+function isRoute(pathname: string, route: string) {
+  return pathname === route || pathname.startsWith(`${route}/`);
+}
+
 export async function updateSession(request: NextRequest) {
   if (!isSupabaseConfigured()) return NextResponse.next({ request });
 
@@ -42,10 +46,24 @@ export async function updateSession(request: NextRequest) {
   const userId = data?.claims?.sub;
   const isAuthenticated = Boolean(userId);
   const pathname = request.nextUrl.pathname;
-  const requiresOwner = pathname.startsWith("/dashboard") && !isPublicPath(pathname);
+  const requiresDashboardAdmin = isRoute(pathname, "/dashboard/admin");
+  const requiresDashboardProfessional =
+    isRoute(pathname, "/dashboard/professional") ||
+    isRoute(pathname, "/dashboard/professional-profile") ||
+    isRoute(pathname, "/dashboard/professionals/jobs");
+  const requiresOwner =
+    pathname.startsWith("/dashboard") &&
+    !requiresDashboardAdmin &&
+    !requiresDashboardProfessional &&
+    !isPublicPath(pathname);
   const requiresProfessional = pathname.startsWith("/professionista") && !isPublicPath(pathname);
+  const requiresAuthenticatedRole =
+    requiresOwner ||
+    requiresProfessional ||
+    requiresDashboardProfessional ||
+    requiresDashboardAdmin;
 
-  if (!isAuthenticated && (requiresOwner || requiresProfessional)) {
+  if (!isAuthenticated && requiresAuthenticatedRole) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
@@ -53,7 +71,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   let roles: string[] = [];
-  if (isAuthenticated && userId && (requiresOwner || requiresProfessional || pathname === "/login" || pathname === "/register")) {
+  if (isAuthenticated && userId && (requiresAuthenticatedRole || pathname === "/login" || pathname === "/register")) {
     const { data: roleRows } = await supabase.from("app_roles").select("role").eq("user_id", userId);
     roles = (roleRows ?? []).map((row) => row.role);
   }
@@ -61,6 +79,20 @@ export async function updateSession(request: NextRequest) {
   const isAdmin = roles.includes("admin");
   const isOwner = roles.includes("owner");
   const isProfessional = roles.includes("professional");
+
+  if (requiresDashboardAdmin && !isAdmin) {
+    const target = request.nextUrl.clone();
+    target.pathname = "/dashboard";
+    target.search = "";
+    return NextResponse.redirect(target);
+  }
+
+  if (requiresDashboardProfessional && !isProfessional && !isAdmin) {
+    const target = request.nextUrl.clone();
+    target.pathname = "/dashboard";
+    target.search = "";
+    return NextResponse.redirect(target);
+  }
 
   if (requiresProfessional && !isProfessional && !isAdmin) {
     const target = request.nextUrl.clone();

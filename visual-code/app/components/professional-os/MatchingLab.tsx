@@ -132,7 +132,7 @@ export default function MatchingLab() {
           "candidate_other_zone",
           `${state.identity.displayName} Fuori zona`,
           {
-            generalAreas: ["Milano"],
+            generalAreas: ["Bologna"],
           },
         ),
         offering: cloneOffering(

@@ -370,7 +370,7 @@ export default function ProfessionalOnboardingCloud() {
           {step === 4 && (
             <div className="space-y-5">
               <div><h2 className="text-2xl font-bold text-slate-950">Zone operative</h2><p className="mt-2 text-sm leading-6 text-slate-500">Aggiungi Comuni e zone reali. Guimmia userà queste informazioni nel matching geografico.</p></div>
-              <ItalianAddressAutocomplete label="Aggiungi un Comune" value={areaQuery} onChange={setAreaQuery} onSelect={addArea} mode="municipality" placeholder="Es. Catania" />
+              <ItalianAddressAutocomplete label="Aggiungi un Comune" value={areaQuery} onChange={setAreaQuery} onSelect={addArea} mode="municipality" placeholder="Es. Bologna" />
               <div className="flex flex-wrap gap-2">{serviceAreas.map((area) => <button key={area} type="button" onClick={() => setServiceAreas((current) => current.filter((value) => value !== area))} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:border-rose-200 hover:text-rose-700">{area} ×</button>)}</div>
             </div>
           )}
@@ -397,4 +397,3 @@ export default function ProfessionalOnboardingCloud() {
 function Field({ label, value, onChange, wide = false }: { label: string; value: string; onChange: (value: string) => void; wide?: boolean }) { return <label className={`block ${wide ? "sm:col-span-2" : ""}`}><span className="text-sm font-bold text-slate-700">{label}</span><input value={value} onChange={(e) => onChange(e.target.value)} className="mt-2 min-h-12 w-full rounded-2xl border border-slate-200 px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" /></label>; }
 function ReadOnlyCard({ label, value }: { label: string; value: string }) { return <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4"><p className="text-xs font-bold uppercase tracking-wide text-slate-400">{label}</p><p className="mt-1 text-sm font-bold text-slate-800">{value || "—"}</p></div>; }
 function Summary({ label, value, wide = false }: { label: string; value: string; wide?: boolean }) { return <div className={`rounded-2xl border border-slate-200 p-4 ${wide ? "sm:col-span-2" : ""}`}><p className="text-xs font-bold uppercase tracking-wide text-slate-400">{label}</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{value || "—"}</p></div>; }
-

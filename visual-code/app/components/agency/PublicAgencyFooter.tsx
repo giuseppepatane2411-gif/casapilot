@@ -15,7 +15,7 @@ export default function PublicAgencyFooter() {
         <div>
           <p className="text-sm font-black text-slate-900">Immobiliare</p>
           <div className="mt-3 space-y-2 text-sm text-slate-600">
-            <Link className="block hover:text-blue-600" href="/immobili">Immobili</Link>
+            <Link className="block hover:text-blue-600" href="/immobili">Vetrina immobili</Link>
             <Link className="block hover:text-blue-600" href="/immobili?mercato=holiday">Vacanze</Link>
             <Link className="block hover:text-blue-600" href="/vendere">Vendere</Link>
             <Link className="block hover:text-blue-600" href="/affittare">Affittare</Link>

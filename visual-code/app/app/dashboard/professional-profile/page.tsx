@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 
 import ProfessionalProfilePanel from "@/components/account/ProfessionalProfilePanel";
+import { requireProfessionalAccess } from "@/lib/auth/role-access";
 
 export const metadata: Metadata = {
   title: "Profilo professionale",
   description: "Gestisci attività, territorio e verifica del tuo profilo professionale Guimmia.",
 };
 
-export default function ProfessionalProfilePage() {
+export default async function ProfessionalProfilePage() {
+  await requireProfessionalAccess();
   return (
     <div className="mx-auto max-w-5xl space-y-7">
       <header>

@@ -4,10 +4,7 @@ export default function ProfessionalNav() {
   const items = [
     ["Servizi", "/dashboard/professionals"],
     ["Le mie richieste", "/dashboard/professionals/requests"],
-    ["Lingua e presenza", "/dashboard/settings/communication"],
-    ["Incarichi", "/dashboard/professionals/jobs"],
-    ["Area professionista", "/professionista"],
-    ["Analytics", "/dashboard/admin/professionals"],
+    ["Preferenze", "/dashboard/settings/communication"],
   ];
 
   return (

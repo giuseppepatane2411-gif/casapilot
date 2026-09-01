@@ -30,9 +30,9 @@ export default function Hub() {
     <Page>
       <ProfessionalNav />
       <Heading
-        eyebrow="Rete Guimmia"
-        title="Che cosa devi risolvere?"
-        description="Scegli il risultato che vuoi ottenere. Guimmia trasforma il bisogno in una richiesta chiara, la invia a un massimo di tre professionisti e protegge il primo contatto."
+        eyebrow="Servizi per il tuo immobile"
+        title="Di che cosa hai bisogno?"
+        description="Descrivi il risultato che vuoi ottenere. Guimmia prepara una richiesta chiara e ti mette in contatto soltanto con professionisti pertinenti."
       />
 
       <div className="mb-7 grid gap-5 lg:grid-cols-2">
@@ -47,7 +47,7 @@ export default function Hub() {
         </div>
         <div className="rounded-3xl border border-violet-200 bg-violet-50 p-6">
           <p className="font-semibold text-violet-950">
-            Gestisci l'immobile anche se sei lontano o parli poco italiano.
+            Gestisci l’immobile anche se sei lontano o parli poco italiano.
           </p>
           <p className="mt-2 text-sm leading-6 text-violet-800">
             Guimmia può tradurre la comunicazione, segnalare i servizi
@@ -112,7 +112,7 @@ export default function Hub() {
         </h2>
         <p className="mt-2 text-sm text-blue-800">
           Descrivi il problema con parole tue, anche nella lingua che preferisci.
-          Guimmia suggerirà il servizio e potrai correggerlo prima dell'invio.
+          Guimmia suggerirà il servizio e potrai correggerlo prima dell’invio.
         </p>
         <Link
           href="/dashboard/professionals/request"
@@ -124,4 +124,3 @@ export default function Hub() {
     </Page>
   );
 }
-

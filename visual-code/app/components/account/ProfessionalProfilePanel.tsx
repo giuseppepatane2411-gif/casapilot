@@ -464,7 +464,7 @@ export default function ProfessionalProfilePanel() {
                     name="serviceAreas"
                     value={serviceAreasText}
                     onChange={setServiceAreasText}
-                    placeholder="Catania, Acireale, Provincia di Catania"
+                    placeholder="Bologna, Imola, Provincia di Bologna"
                     hint="Separa le zone con una virgola."
                     icon={MapPin}
                   />

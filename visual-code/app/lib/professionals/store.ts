@@ -105,7 +105,7 @@ export function seed() {
         categoryId: "documenti-conformita",
         serviceId: "verifica-catastale-urbanistica",
         propertyLabel: "Appartamento in Via Roma 24",
-        location: "Catania, centro",
+        location: "Bologna, centro",
         answers: {
           problem: "plan",
           documents: ["floorplan", "cadastral"],

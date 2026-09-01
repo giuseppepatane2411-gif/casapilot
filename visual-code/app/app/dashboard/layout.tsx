@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import DashboardShell from "@/components/dashboard/DashboardShell";
+import { getCurrentRoleAccess } from "@/lib/auth/role-access";
 
 export const metadata: Metadata = {
   title: "Dashboard | Guimmia",
@@ -11,8 +12,16 @@ type DashboardLayoutProps = {
   children: React.ReactNode;
 };
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: DashboardLayoutProps) {
-  return <DashboardShell>{children}</DashboardShell>;
+  const access = await getCurrentRoleAccess();
+
+  return (
+    <DashboardShell
+      canAccessProfessional={access.isProfessional || access.isAdmin}
+    >
+      {children}
+    </DashboardShell>
+  );
 }

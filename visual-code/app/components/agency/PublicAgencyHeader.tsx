@@ -7,7 +7,7 @@ import { Menu, X } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 
 const navigation = [
-  { href: "/immobili", label: "Immobili" },
+  { href: "/immobili", label: "Vetrina immobili" },
   { href: "/vendere", label: "Vendere" },
   { href: "/affittare", label: "Affittare" },
   { href: "/immobili?mercato=holiday", label: "Vacanze" },

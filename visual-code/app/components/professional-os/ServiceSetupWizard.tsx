@@ -432,7 +432,7 @@ export default function ServiceSetupWizard({
                               .filter(Boolean),
                           )
                         }
-                        placeholder="Catania, Acireale..."
+                        placeholder="Bologna, Imola..."
                         className="min-h-12 w-full rounded-xl border border-slate-200 px-4"
                       />
                     </label>
@@ -1055,4 +1055,3 @@ export default function ServiceSetupWizard({
     </Page>
   );
 }
-

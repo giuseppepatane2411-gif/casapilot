@@ -332,7 +332,7 @@ export default function GuidedAddressSearch({
                 setCityError(false);
               }}
               onFocus={() => setCityOpen(true)}
-              placeholder="Es. Catania"
+              placeholder="Es. Bologna"
               autoComplete="off"
               className="h-13 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-11 text-sm outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             />
@@ -431,7 +431,7 @@ export default function GuidedAddressSearch({
               type="text"
               value={value.province}
               onChange={(event) => onChange({ ...value, province: event.target.value }, "manual")}
-              placeholder="CT o Catania"
+              placeholder="BO o Bologna"
               className="mt-2 h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             />
           </label>

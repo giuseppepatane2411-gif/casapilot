@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import PublicAgencyHeader from "@/components/agency/PublicAgencyHeader";
 import PublicAgencyFooter from "@/components/agency/PublicAgencyFooter";
 import ListingCard from "@/components/agency/ListingCard";
-import ListingFilters from "@/components/agency/ListingFilters";
-import { getAgencyListings } from "@/lib/agency/listings";
+import Hero from "@/components/home/Hero";
+import { getAgencyListings, getDemoListings } from "@/lib/agency/listings";
 import type { ListingMarket } from "@/lib/agency/types";
 
 export const metadata: Metadata = {
@@ -66,25 +66,27 @@ export default async function ImmobiliPage({ searchParams }: { searchParams: Par
       description: "Immobili in vendita, in affitto e per le vacanze, in un’unica vetrina.",
     },
   }[market || "all"];
+  const featuredListing = result.items[0] ?? getDemoListings({ limit: 1 })[0];
+  const featuredPreview = result.source === "demo" || result.items.length === 0;
 
   return (
     <>
       <PublicAgencyHeader />
       <main className="min-h-screen bg-slate-50">
-        <section className="border-b border-slate-200 bg-white">
-          <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-            <p className="text-sm font-black uppercase tracking-[.16em] text-blue-600">Vetrina immobiliare</p>
-            <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-[-.05em] text-slate-950 sm:text-6xl">
-              {pageCopy.title}
-            </h1>
-            <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
-              {pageCopy.description}
-            </p>
-            <div className="mt-8"><ListingFilters values={values} /></div>
-          </div>
-        </section>
+        <Hero featuredListing={featuredListing} preview={featuredPreview} />
 
         <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <p className="text-sm font-black uppercase tracking-[.16em] text-blue-600">
+              Vetrina immobili
+            </p>
+            <h2 className="mt-3 max-w-4xl text-3xl font-black tracking-[-.04em] text-slate-950 sm:text-5xl">
+              {pageCopy.title}
+            </h2>
+            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">
+              {pageCopy.description}
+            </p>
+          </div>
           {result.source === "demo" ? (
             <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-900">
               Anteprima dimostrativa: questi annunci mostrano come funzionerà la vetrina. Gli immobili reali appariranno dopo la loro pubblicazione.

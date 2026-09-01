@@ -295,7 +295,7 @@ export default function AccountPanel() {
         </form>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2">
+      <section className={`grid gap-4 ${professional ? "lg:grid-cols-2" : "lg:grid-cols-1"}`}>
         <Link
           href="/forgot-password"
           className="group rounded-[24px] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200"
@@ -307,22 +307,22 @@ export default function AccountPanel() {
           <p className="mt-1 text-sm leading-6 text-slate-500">Richiedi un collegamento sicuro per impostare una nuova password.</p>
         </Link>
 
-        <Link
-          href="/dashboard/professional-profile"
-          className="group rounded-[24px] border border-blue-200 bg-blue-50 p-5 shadow-sm transition hover:-translate-y-0.5"
-        >
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white">
-            {professional ? <BadgeCheck size={20} /> : <Briefcase size={20} />}
-          </span>
-          <h3 className="mt-4 font-bold text-slate-950">
-            {professional ? "Gestisci il profilo professionale" : "Attiva un profilo professionale"}
-          </h3>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
-            {professional
-              ? "Completa attività, zone servite e stato della verifica."
-              : "Aggiungi in seguito la tua attività senza creare un secondo account."}
-          </p>
-        </Link>
+        {professional ? (
+          <Link
+            href="/professionista/profilo"
+            className="group rounded-[24px] border border-blue-200 bg-blue-50 p-5 shadow-sm transition hover:-translate-y-0.5"
+          >
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-white">
+              <BadgeCheck size={20} />
+            </span>
+            <h3 className="mt-4 font-bold text-slate-950">
+              Gestisci il profilo professionale
+            </h3>
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              Completa attività, zone servite e stato della verifica.
+            </p>
+          </Link>
+        ) : null}
       </section>
 
       <section className="rounded-[24px] border border-emerald-200 bg-emerald-50 p-5">

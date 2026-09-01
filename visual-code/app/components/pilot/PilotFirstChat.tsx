@@ -885,7 +885,7 @@ export default function PilotFirstChat() {
                 {(quickReplies.length > 0
                   ? quickReplies
                   : [
-                      "Voglio vendere un appartamento di 110 m² a Modena, in buono stato",
+                      "Voglio vendere un appartamento di 110 m² a Bologna, in buono stato",
                       "Vorrei affittare il mio appartamento",
                       "Ho bisogno di capire quanto vale il mio immobile",
                     ]

@@ -16,7 +16,7 @@ export default function AccountPage() {
           Il tuo account
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-          Dati personali, tipo di profilo e stato professionale in un unico spazio.
+          Gestisci i dati personali, la sicurezza e le preferenze del tuo account.
         </p>
       </header>
       <AccountPanel />

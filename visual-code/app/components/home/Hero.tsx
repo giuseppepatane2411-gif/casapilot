@@ -192,7 +192,7 @@ export default function Hero({
   const ownerAction = ownerActions[market];
 
   return (
-    <section className="px-3 pt-3 sm:px-5 sm:pt-5">
+    <section className="bg-slate-50 px-3 py-14 sm:px-5 sm:py-20 lg:py-24">
       <div className="relative mx-auto overflow-hidden rounded-[28px] bg-slate-950 sm:rounded-[38px]">
         <Image
           src="/images/guimmia/home-hero-agency.webp"
@@ -205,19 +205,18 @@ export default function Hero({
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/35" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-slate-950/20" />
 
-        <div className="relative z-10 mx-auto grid min-h-[680px] max-w-7xl items-center gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-12 xl:grid-cols-[minmax(0,1fr)_390px] xl:gap-14">
+        <div className="relative z-10 mx-auto grid min-h-[620px] max-w-7xl items-center gap-10 px-5 py-12 sm:px-8 sm:py-16 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-12 xl:grid-cols-[minmax(0,1fr)_390px] xl:gap-14">
           <div>
             <p className="inline-flex rounded-full border border-white/25 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.14em] text-white backdrop-blur sm:text-sm">
-              Guimmia, la tua guida immobiliare intelligente
+              Vetrina immobili Guimmia
             </p>
 
-            <h1 className="mt-6 max-w-4xl text-[44px] font-black leading-[0.96] tracking-[-0.055em] text-white sm:text-6xl lg:text-[68px] xl:text-[76px]">
-              Trova casa.
-              <span className="block text-blue-200">Oppure affidaci la tua.</span>
+            <h1 className="mt-6 max-w-3xl text-[40px] font-black leading-[0.98] tracking-[-0.05em] text-white sm:text-5xl lg:text-[58px]">
+              Cerca la casa giusta. Oppure scopri quanto può valere la tua.
             </h1>
 
-            <p className="mt-5 max-w-3xl text-sm leading-6 text-slate-200 sm:text-base sm:leading-7 lg:text-[17px] lg:leading-8">
-              Guimmia è un’agenzia immobiliare completamente digitale che semplifica il modo di comprare, vendere e affittare casa. Il cliente gestisce direttamente alcune attività, come gli appuntamenti e le visite, mentre Guimmia lo assiste nella pubblicazione dell’annuncio, nella gestione della documentazione, nella negoziazione e nella contrattualistica, offrendo anche una serie di servizi accessori e utilizzando l’intelligenza artificiale per migliorare il servizio.
+            <p className="mt-5 max-w-2xl text-sm leading-6 text-slate-200 sm:text-base sm:leading-7">
+              Esplora gli immobili disponibili per comprare, affittare o soggiornare. La vetrina completa si apre dopo la ricerca.
             </p>
 
             <form

@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BadgeCheck,
   BriefcaseBusiness,
   Building2,
   FileText,
@@ -11,13 +10,13 @@ import {
   Route,
   Settings,
   UserRound,
-  Users,
   X,
 } from "lucide-react";
 
 import Logo from "@/components/brand/Logo";
 
 type DashboardSidebarProps = {
+  canAccessProfessional: boolean;
   mobileMenuOpen: boolean;
   onCloseMobileMenu: () => void;
 };
@@ -26,11 +25,15 @@ const navigation = [
   { label: "Percorso", href: "/dashboard", icon: Route },
   { label: "I miei immobili", href: "/dashboard/properties", icon: Building2 },
   { label: "Documenti", href: "/dashboard/documents", icon: FileText },
-  { label: "Professionisti", href: "/dashboard/professionals", icon: Users },
-  { label: "Marketplace", href: "/dashboard/marketplace", icon: BriefcaseBusiness },
+  {
+    label: "Servizi per l’immobile",
+    href: "/dashboard/professionals",
+    icon: BriefcaseBusiness,
+  },
 ];
 
 export default function DashboardSidebar({
+  canAccessProfessional,
   mobileMenuOpen,
   onCloseMobileMenu,
 }: DashboardSidebarProps) {
@@ -120,14 +123,16 @@ export default function DashboardSidebar({
         </div>
 
         <div className="border-t border-slate-100 p-4">
-          <Link
-            href="/dashboard/professional-profile"
-            onClick={onCloseMobileMenu}
-            className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-500 hover:bg-slate-100 hover:text-slate-950"
-          >
-            <BadgeCheck size={17} />
-            Profilo professionale
-          </Link>
+          {canAccessProfessional ? (
+            <Link
+              href="/professionista"
+              onClick={onCloseMobileMenu}
+              className="mb-2 flex min-h-11 items-center gap-3 rounded-xl bg-blue-50 px-3 text-sm font-bold text-blue-700 hover:bg-blue-100"
+            >
+              <BriefcaseBusiness size={17} />
+              Passa all’area professionista
+            </Link>
+          ) : null}
           <Link
             href="/dashboard/account"
             onClick={onCloseMobileMenu}

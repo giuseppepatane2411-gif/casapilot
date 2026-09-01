@@ -399,7 +399,7 @@ export default function Onboarding() {
                 <input
                   value={areas}
                   onChange={(event) => setAreas(event.target.value)}
-                  placeholder="Catania, Acireale, provincia di Catania"
+                  placeholder="Bologna, Imola, provincia di Bologna"
                   className="min-h-13 rounded-xl border border-slate-200 px-4"
                 />
                 <ToggleCard
@@ -485,4 +485,3 @@ export default function Onboarding() {
     </Page>
   );
 }
-

@@ -9,14 +9,19 @@ import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 
 type DashboardShellProps = {
   children: React.ReactNode;
+  canAccessProfessional: boolean;
 };
 
-export default function DashboardShell({ children }: DashboardShellProps) {
+export default function DashboardShell({
+  children,
+  canAccessProfessional,
+}: DashboardShellProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-50">
       <DashboardSidebar
+        canAccessProfessional={canAccessProfessional}
         mobileMenuOpen={mobileMenuOpen}
         onCloseMobileMenu={() => setMobileMenuOpen(false)}
       />

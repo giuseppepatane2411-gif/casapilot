@@ -102,7 +102,7 @@ function demoLeads(): LeadRequest[] {
       serviceId: "verifica-catastale-urbanistica",
       categoryId: "documenti-conformita",
       propertyLabel: "Appartamento in Via Roma",
-      approximateLocation: "Catania",
+      approximateLocation: "Bologna",
       propertyType: "apartment",
       urgency: "within_month",
       answers: {

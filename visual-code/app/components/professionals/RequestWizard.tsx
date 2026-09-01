@@ -449,7 +449,7 @@ export default function RequestWizard({
             <input
               value={location}
               onChange={(event) => setLocation(event.target.value)}
-              placeholder="Catania, zona centro"
+              placeholder="Bologna, zona centro"
               className="min-h-14 w-full rounded-2xl border border-slate-200 px-4"
             />
             <span className="mt-2 block text-xs text-slate-500">
@@ -807,4 +807,3 @@ export default function RequestWizard({
     </Page>
   );
 }
-

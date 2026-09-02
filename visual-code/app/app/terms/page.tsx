@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, FileCheck2, Info, Scale, ShieldCheck } from "lucide-react";
+import { createPublicMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPublicMetadata({
   title: "Condizioni d’uso",
   description: "Condizioni generali per l’utilizzo di Guimmia.",
-};
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (
@@ -81,4 +83,3 @@ function TermSection({
     </section>
   );
 }
-

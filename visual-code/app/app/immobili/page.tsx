@@ -5,15 +5,26 @@ import ListingCard from "@/components/agency/ListingCard";
 import Hero from "@/components/home/Hero";
 import { getAgencyListings, getDemoListings } from "@/lib/agency/listings";
 import type { ListingMarket } from "@/lib/agency/types";
-
-export const metadata: Metadata = {
-  title: "Immobili in vendita e in affitto | Guimmia",
-  description: "La vetrina immobiliare Guimmia: vendita, affitto e guida intelligente durante tutto il percorso.",
-};
+import { createPublicMetadata } from "@/lib/seo/metadata";
 
 type Params = Promise<Record<string, string | string[] | undefined>>;
 const one = (x: string | string[] | undefined) => Array.isArray(x) ? (x[0] ?? "") : (x ?? "");
 const num = (x: string) => { const n = Number(x); return Number.isFinite(n) && n > 0 ? n : undefined; };
+
+export async function generateMetadata({ searchParams }: { searchParams: Params }): Promise<Metadata> {
+  const params = await searchParams;
+  const hasFilters = Object.values(params).some((value) =>
+    Array.isArray(value) ? value.some(Boolean) : Boolean(value),
+  );
+
+  return createPublicMetadata({
+    title: "Vetrina immobili: case in vendita e in affitto",
+    description:
+      "Scopri la vetrina immobiliare Guimmia: case in vendita, affitti, stanze e soluzioni per le vacanze.",
+    path: "/immobili",
+    noIndex: hasFilters,
+  });
+}
 
 export default async function ImmobiliPage({ searchParams }: { searchParams: Params }) {
   const sp = await searchParams;

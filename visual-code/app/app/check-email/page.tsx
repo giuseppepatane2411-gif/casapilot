@@ -6,6 +6,7 @@ import AuthShell from "@/components/auth/AuthShell";
 export const metadata: Metadata = {
   title: "Conferma email",
   description: "Conferma l’indirizzo email associato al tuo account Guimmia.",
+  robots: { index: false, follow: false },
 };
 
 export default function CheckEmailPage() {

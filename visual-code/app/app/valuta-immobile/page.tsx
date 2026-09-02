@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
-
 import PublicAgencyFooter from "@/components/agency/PublicAgencyFooter";
 import PublicAgencyHeader from "@/components/agency/PublicAgencyHeader";
 import PropertyValuationExperience from "@/components/valuation/PropertyValuationExperience";
+import { createPublicMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Valuta il tuo immobile | Guimmia",
+export const metadata = createPublicMetadata({
+  title: "Valuta il tuo immobile",
   description:
     "Ottieni una fascia indicativa per vendita, affitto, vacanze o singola stanza con Guimmia.",
-};
+  path: "/valuta-immobile",
+});
 
 export default function PropertyValuationPage() {
   return (

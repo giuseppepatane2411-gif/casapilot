@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Guimmia">
+  <rect width="512" height="512" rx="128" fill="#020617"/>
+  <circle cx="256" cy="256" r="151" fill="#fff"/>
+  <circle cx="256" cy="256" r="105" fill="none" stroke="#020617" stroke-width="24"/>
+  <path d="M304 208 275 275l-67 29 29-67 67-29Z" fill="#0b63f6" stroke="#020617" stroke-linejoin="round" stroke-width="16"/>
+  <circle cx="256" cy="256" r="14" fill="#020617"/>
+</svg>

@@ -6,6 +6,7 @@ import UpdatePasswordForm from "@/components/auth/UpdatePasswordForm";
 export const metadata: Metadata = {
   title: "Nuova password",
   description: "Imposta una nuova password per Guimmia.",
+  robots: { index: false, follow: false },
 };
 
 export default function UpdatePasswordPage() {

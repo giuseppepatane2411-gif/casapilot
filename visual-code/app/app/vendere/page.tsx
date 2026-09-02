@@ -1,6 +1,14 @@
 import Link from "next/link";
 import PublicAgencyHeader from "@/components/agency/PublicAgencyHeader";
 import PublicAgencyFooter from "@/components/agency/PublicAgencyFooter";
+import { createPublicMetadata } from "@/lib/seo/metadata";
+
+export const metadata = createPublicMetadata({
+  title: "Vendere casa online",
+  description:
+    "Vendi casa con Guimmia: valutazione, documenti, annuncio, richieste, visite, offerte e contratti in un unico percorso digitale.",
+  path: "/vendere",
+});
 
 const steps = [
   ["1", "Prepariamo l'immobile", "Dati, documenti, prezzo, fotografie e professionisti quando servono."],

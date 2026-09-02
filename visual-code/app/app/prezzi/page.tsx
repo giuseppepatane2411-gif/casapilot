@@ -1,6 +1,14 @@
 import PublicAgencyHeader from "@/components/agency/PublicAgencyHeader";
 import PublicAgencyFooter from "@/components/agency/PublicAgencyFooter";
 import { SELL_PACKAGES, RENT_PACKAGES } from "@/lib/guimmia/packages";
+import { createPublicMetadata } from "@/lib/seo/metadata";
+
+export const metadata = createPublicMetadata({
+  title: "Prezzi dei servizi immobiliari",
+  description:
+    "Consulta i prezzi dei servizi Guimmia per vendere o affittare casa con un percorso digitale chiaro e costi definiti.",
+  path: "/prezzi",
+});
 
 type PricePackage = {
   id: string;

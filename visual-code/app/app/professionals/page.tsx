@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Area professionisti",
+  robots: { index: false, follow: false },
+};
 
 const benefits = [
   ["Richieste compatibili", "Guimmia filtra prima i requisiti indispensabili e ti mostra le opportunità coerenti con servizi, zona e disponibilità."],
@@ -67,4 +73,3 @@ export default function ProfessionalsLandingPage() {
     </main>
   );
 }
-

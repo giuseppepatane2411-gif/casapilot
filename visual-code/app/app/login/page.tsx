@@ -7,6 +7,7 @@ import LoginForm from "@/components/auth/LoginForm";
 export const metadata: Metadata = {
   title: "Accedi",
   description: "Accedi al tuo spazio personale Guimmia.",
+  robots: { index: false, follow: false },
 };
 
 export default function LoginPage() {

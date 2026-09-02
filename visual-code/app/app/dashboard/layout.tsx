@@ -6,6 +6,7 @@ import { getCurrentRoleAccess } from "@/lib/auth/role-access";
 export const metadata: Metadata = {
   title: "Dashboard | Guimmia",
   description: "Gestisci il tuo percorso immobiliare con Guimmia.",
+  robots: { index: false, follow: false },
 };
 
 type DashboardLayoutProps = {

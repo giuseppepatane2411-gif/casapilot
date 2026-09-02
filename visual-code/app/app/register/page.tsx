@@ -7,6 +7,7 @@ import RegistrationForm from "@/components/auth/RegistrationForm";
 export const metadata: Metadata = {
   title: "Registrati",
   description: "Crea il tuo account Guimmia come privato o professionista.",
+  robots: { index: false, follow: false },
 };
 
 export default function RegisterPage() {

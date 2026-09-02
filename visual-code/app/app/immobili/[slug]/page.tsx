@@ -18,8 +18,11 @@ import {
 
 import PublicAgencyFooter from "@/components/agency/PublicAgencyFooter";
 import PublicAgencyHeader from "@/components/agency/PublicAgencyHeader";
+import JsonLd from "@/components/seo/JsonLd";
 import { getAgencyListing, getListingMarket } from "@/lib/agency/listings";
 import type { AgencyListing } from "@/lib/agency/types";
+import { createPublicMetadata } from "@/lib/seo/metadata";
+import { listingStructuredData } from "@/lib/seo/schema";
 
 type Params = Promise<{ slug: string }>;
 
@@ -58,12 +61,39 @@ function occupantProfileLabel(value: "student" | "worker") {
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
-  const { item } = await getAgencyListing(slug);
-  if (!item) return { title: "Immobile non disponibile | Guimmia" };
+  const { item, source } = await getAgencyListing(slug);
+  if (!item) {
+    return {
+      title: "Immobile non disponibile",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const description = `${operationLabel(item)} a ${item.city}. ${item.description}`.slice(0, 155);
+
+  const base = createPublicMetadata({
+    title: item.title,
+    description,
+    path: `/immobili/${item.slug}`,
+    noIndex: source === "demo",
+  });
 
   return {
-    title: `${item.title} | Guimmia`,
-    description: `${operationLabel(item)} a ${item.city}. ${item.description}`.slice(0, 155),
+    ...base,
+    openGraph: {
+      ...base.openGraph,
+      type: "website",
+      url: `/immobili/${item.slug}`,
+      title: item.title,
+      description,
+      images: item.cover_image_url
+        ? [{ url: item.cover_image_url, alt: item.title }]
+        : undefined,
+    },
+    twitter: {
+      ...base.twitter,
+      images: item.cover_image_url ? [item.cover_image_url] : undefined,
+    },
   };
 }
 
@@ -79,6 +109,7 @@ export default async function ListingDetailPage({ params }: { params: Params }) 
 
   return (
     <>
+      {source === "supabase" ? <JsonLd data={listingStructuredData(listing)} /> : null}
       <PublicAgencyHeader />
       <main className="min-h-screen bg-slate-50 text-slate-950">
         <section className="border-b border-slate-200 bg-white">

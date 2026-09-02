@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -13,12 +12,15 @@ import PublicAgencyFooter from "@/components/agency/PublicAgencyFooter";
 import PublicAgencyHeader from "@/components/agency/PublicAgencyHeader";
 import GuimmiaFloatingGuide from "@/components/home/GuimmiaFloatingGuide";
 import HomeIntroduction from "@/components/home/HomeIntroduction";
+import { createPublicMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
+export const metadata = createPublicMetadata({
   title: "Guimmia | L’agenzia immobiliare digitale",
   description:
-    "Guimmia semplifica vendita e affitto con intelligenza artificiale, agenti e professionisti quando servono.",
-};
+    "Vendi o affitta casa con Guimmia: annunci, documenti, visite, negoziazione e contratti in un unico percorso immobiliare digitale.",
+  path: "/",
+  absoluteTitle: true,
+});
 
 const serviceSteps = [
   {

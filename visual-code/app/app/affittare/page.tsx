@@ -1,6 +1,14 @@
 import Link from "next/link";
 import PublicAgencyHeader from "@/components/agency/PublicAgencyHeader";
 import PublicAgencyFooter from "@/components/agency/PublicAgencyFooter";
+import { createPublicMetadata } from "@/lib/seo/metadata";
+
+export const metadata = createPublicMetadata({
+  title: "Affittare casa online",
+  description:
+    "Affitta casa con Guimmia: canone, documenti, annuncio, richieste, visite, contratto e adempimenti in un unico percorso digitale.",
+  path: "/affittare",
+});
 
 export default function AffittarePage() {
   return (

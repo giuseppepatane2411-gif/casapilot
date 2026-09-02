@@ -6,6 +6,7 @@ import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 export const metadata: Metadata = {
   title: "Recupera password",
   description: "Recupera l’accesso al tuo account Guimmia.",
+  robots: { index: false, follow: false },
 };
 
 export default function ForgotPasswordPage() {

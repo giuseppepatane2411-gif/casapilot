@@ -1,5 +1,13 @@
 import PublicAgencyHeader from "@/components/agency/PublicAgencyHeader";
 import PublicAgencyFooter from "@/components/agency/PublicAgencyFooter";
+import { createPublicMetadata } from "@/lib/seo/metadata";
+
+export const metadata = createPublicMetadata({
+  title: "Servizi immobiliari digitali",
+  description:
+    "Scopri i servizi Guimmia per vendita e affitto: valutazione, annuncio, documenti, visite, professionisti, negoziazione e contratti.",
+  path: "/servizi",
+});
 
 const services = [
   ["Preparazione immobile", "Raccolta dati, checklist documenti, valutazione, foto e professionisti quando servono."],
@@ -18,7 +26,7 @@ export default function ServiziPage() {
         <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <p className="text-sm font-black uppercase tracking-[.16em] text-blue-600">Cosa fa Guimmia</p>
           <h1 className="mt-4 max-w-5xl text-5xl font-black tracking-[-.055em] text-slate-950 sm:text-7xl">Meno burocrazia. Più controllo. Un solo percorso.</h1>
-          <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-600">Guimmia non vende soltanto pubblicazione online: semplifica l'intera operazione immobiliare.</p>
+          <p className="mt-6 max-w-3xl text-xl leading-9 text-slate-600">Guimmia non vende soltanto pubblicazione online: semplifica l’intera operazione immobiliare.</p>
 
           <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {services.map(([title, description]) => (

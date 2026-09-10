@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import { CheckCircle2, MapPin, Ruler, Save, UserRound } from "lucide-react";
 
 import { OCCUPANCY_OPTIONS } from "@/lib/property-journey/constants";
-import { updateJourneyProperty } from "@/lib/property-journey/storage";
+import { updateCloudJourneyProperty } from "@/lib/property-journey/cloud";
 import type {
   OccupancyStatus,
   PropertyJourney,
@@ -28,25 +28,38 @@ export default function PropertyQuickData({
   const [postalCode, setPostalCode] = useState(journey.property.postalCode);
   const [province, setProvince] = useState(journey.property.province);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    updateJourneyProperty(journey.id, {
-      surface: surface.trim() ? Number(surface) : null,
-      occupancy: occupancy || null,
-      address: address.trim(),
-      postalCode: postalCode.trim(),
-      province: province.trim(),
-    });
-    addPilotTimelineEvent(journey.id, {
-      title: "Profilo immobile aggiornato",
-      description:
-        "Guimmia ha ricalcolato contesto, prontezza e prossime missioni.",
-      type: "mission",
-    });
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 1800);
+    setSaving(true);
+    setSaveError("");
+    try {
+      await updateCloudJourneyProperty(journey.id, {
+        surface: surface.trim() ? Number(surface) : null,
+        occupancy: occupancy || null,
+        address: address.trim(),
+        postalCode: postalCode.trim(),
+        province: province.trim(),
+      });
+      addPilotTimelineEvent(journey.id, {
+        title: "Profilo immobile aggiornato",
+        description:
+          "Guimmia ha ricalcolato contesto, prontezza e prossime missioni.",
+        type: "mission",
+      });
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 1800);
+    } catch (error) {
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : "Non siamo riusciti ad aggiornare l’immobile.",
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -70,6 +83,11 @@ export default function PropertyQuickData({
       </p>
 
       <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+        {saveError && (
+          <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700">
+            {saveError}
+          </div>
+        )}
         <Field label="Superficie (m²)" icon={Ruler}>
           <input
             type="number"
@@ -128,10 +146,11 @@ export default function PropertyQuickData({
 
         <button
           type="submit"
-          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-bold text-white hover:bg-blue-600"
+          disabled={saving}
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-bold text-white hover:bg-blue-600 disabled:cursor-wait disabled:opacity-60"
         >
           {saved ? <CheckCircle2 size={17} /> : <Save size={17} />}
-          {saved ? "Dati aggiornati" : "Aggiorna il contesto"}
+          {saving ? "Salvataggio…" : saved ? "Dati aggiornati" : "Aggiorna il contesto"}
         </button>
       </form>
     </section>
@@ -155,4 +174,3 @@ function Field({ label, icon: Icon, children }: FieldProps) {
     </label>
   );
 }
-

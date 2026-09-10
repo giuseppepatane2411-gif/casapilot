@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { safeNextPath } from "@/lib/navigation/auth-flow";
 import { isSupabaseConfigured, requireSupabaseEnvironment } from "@/lib/supabase/config";
 
 const PUBLIC_PATHS = [
@@ -57,11 +58,13 @@ export async function updateSession(request: NextRequest) {
     !requiresDashboardProfessional &&
     !isPublicPath(pathname);
   const requiresProfessional = pathname.startsWith("/professionista") && !isPublicPath(pathname);
+  const requiresAI = isRoute(pathname, "/ai");
   const requiresAuthenticatedRole =
     requiresOwner ||
     requiresProfessional ||
     requiresDashboardProfessional ||
-    requiresDashboardAdmin;
+    requiresDashboardAdmin ||
+    requiresAI;
 
   if (!isAuthenticated && requiresAuthenticatedRole) {
     const loginUrl = request.nextUrl.clone();
@@ -109,6 +112,11 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (isAuthenticated && (pathname === "/login" || pathname === "/register")) {
+    const requestedNext = safeNextPath(request.nextUrl.searchParams.get("next"), "");
+    if (requestedNext) {
+      return NextResponse.redirect(new URL(requestedNext, request.nextUrl.origin));
+    }
+
     const target = request.nextUrl.clone();
     target.pathname = isProfessional && !isOwner ? "/professionista" : "/dashboard";
     target.search = "";

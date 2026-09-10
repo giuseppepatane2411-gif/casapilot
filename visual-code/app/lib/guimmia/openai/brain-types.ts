@@ -2,6 +2,7 @@ import type {
   SiteOrchestrationRequest,
   SiteOrchestrationResponse,
 } from "@/lib/guimmia/site-orchestration/types";
+import type { GuimmiaAssistantFocus } from "@/lib/guimmia-ai/types";
 
 export const GUIMMIA_BRAIN_REQUEST_KINDS = [
   "GUIDANCE",
@@ -21,8 +22,11 @@ export type GuimmiaBrainConversationMessage = {
 export type GuimmiaBrainRequest = {
   question: string;
   requestKind?: GuimmiaBrainRequestKind;
-  case: SiteOrchestrationRequest;
+  case?: SiteOrchestrationRequest;
   conversation?: GuimmiaBrainConversationMessage[];
+  experience?: "case" | "assistant";
+  conversationId?: string;
+  focus?: GuimmiaAssistantFocus;
 };
 
 export type GuimmiaBrainReferenceType = "RULE" | "CARD" | "WORKFLOW";

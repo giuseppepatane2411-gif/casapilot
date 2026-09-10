@@ -1,0 +1,9 @@
+.workspace :is(button, a, input, select, textarea):focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+.workspace :global([data-guimmia-action]) { transition: transform 180ms cubic-bezier(.2,.75,.3,1), box-shadow 180ms ease, background-color 180ms ease, border-color 180ms ease; }
+@media (hover: hover) and (pointer: fine) {
+  .workspace :global([data-guimmia-action]):not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 6px 16px #2563eb18; }
+}
+.workspace :global([data-guimmia-action]):not(:disabled):active { transform: translateY(0) scale(.98); }
+@media (prefers-reduced-motion: reduce) {
+  .workspace :global([data-guimmia-action]) { transition: none; transform: none !important; }
+}

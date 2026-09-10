@@ -11,6 +11,7 @@ const publicRoutes: Array<{
   priority: number;
 }> = [
   { path: "/", changeFrequency: "weekly", priority: 1 },
+  { path: "/agenzia", changeFrequency: "monthly", priority: 0.8 },
   { path: "/immobili", changeFrequency: "daily", priority: 0.9 },
   { path: "/vendere", changeFrequency: "monthly", priority: 0.8 },
   { path: "/affittare", changeFrequency: "monthly", priority: 0.8 },

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { redactCustomerText } from "@/lib/guimmia/brain/case-orchestrator/redaction";
+import type { GuimmiaAssistantFocus } from "@/lib/guimmia-ai/types";
 import type {
   GuimmiaBrainAnswer,
   GuimmiaBrainConversationMessage,
@@ -217,7 +218,7 @@ function validateAnswer(
     reply: prohibitedMaterialAction
       ? orchestration.customerExplanation ||
         "Guimmia ha mantenuto il passaggio sicuro previsto per questa pratica."
-      : cleanText(raw.reply, 1800) ||
+      : cleanText(raw.reply, 5000) ||
         orchestration.customerExplanation ||
         "Guimmia ha ordinato i prossimi passaggi della pratica.",
     nextAction: prohibitedMaterialAction
@@ -246,6 +247,8 @@ export async function generateGuimmiaBrainGuidance(input: {
   question: string;
   requestKind: GuimmiaBrainRequestKind;
   conversation: GuimmiaBrainConversationMessage[];
+  experience?: "case" | "assistant";
+  focus?: GuimmiaAssistantFocus;
   orchestration: SiteOrchestrationResponse;
   knowledge: GuimmiaBrainRetrievalContext;
   property: {
@@ -265,6 +268,7 @@ export async function generateGuimmiaBrainGuidance(input: {
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 40_000);
+  const assistantExperience = input.experience === "assistant";
 
   try {
     const response = await fetch("https://api.openai.com/v1/responses", {
@@ -280,21 +284,31 @@ export async function generateGuimmiaBrainGuidance(input: {
         reasoning: { effort: "low" },
         max_output_tokens: GUIMMIA_BRAIN_MAX_OUTPUT_TOKENS,
         instructions: [
-          "Sei Guimmia, la guida immobiliare intelligente di un'agenzia immobiliare online con persone reali dietro il servizio.",
-          "Il motore deterministico Guimmia è la fonte di verità: non modificare decisione, stato, autorità, blocchi o handoff ricevuti.",
-          "Usa esclusivamente regole, knowledge card e workflow forniti nel contesto. Non inventare norme, documenti, prezzi, scadenze o fatti mancanti.",
-          "Rispondi in italiano semplice, concreto e breve. Fai al massimo tre domande mirate per volta.",
-          "Distingui sempre fatti dichiarati, elementi mancanti e verifiche ancora necessarie.",
+          assistantExperience
+            ? "Sei Guimmia, un assistente specializzato nell'immobiliare italiano per privati, agenti e professionisti."
+            : "Sei Guimmia, la guida immobiliare intelligente di un'agenzia immobiliare online con persone reali dietro il servizio.",
+          assistantExperience
+            ? "Rispondi prima alla domanda concreta dell'utente. La decisione deterministica descrive il perimetro di rischio: non trasformarla automaticamente in un questionario per aprire una pratica."
+            : "Il motore deterministico Guimmia è la fonte di verità: non modificare decisione, stato, autorità, blocchi o handoff ricevuti.",
+          "Usa regole, knowledge card e workflow forniti nel contesto come base immobiliare verificabile. Non inventare norme, documenti, prezzi, scadenze o fatti mancanti.",
+          "Rispondi in italiano semplice, concreto e utile. Fai al massimo tre domande mirate per volta.",
+          "Distingui sempre fatti dichiarati, ipotesi, elementi mancanti e verifiche ancora necessarie.",
           "Non approvare documenti, non certificare conformità, non scegliere candidati, non fissare prezzi finali, non accettare offerte e non eseguire azioni.",
           "Quando una regola richiede agente o professionista, imposta handoffRequired e spiegalo senza allarmismi.",
-          "Per COMMUNICATION_DRAFT prepara soltanto una bozza da confermare e non affermare che sia stata inviata.",
+          "Quando l'utente chiede un annuncio, un messaggio, una clausola o un contratto, prepara soltanto una bozza modificabile: non presentarla come completa, valida, firmabile o sostitutiva del controllo professionale.",
+          "Non affermare che una clausola di esclusione trasferisca automaticamente ogni responsabilità all'utente.",
+          "Per questioni legali, fiscali o tecniche soggette a cambiamenti, evita certezze non sostenute dal contesto e indica quale verifica aggiornata serve.",
           "Lo snapshot operativo descrive documenti e agenda realmente registrati. Un documento ARCHIVED è classificato, non legalmente verificato.",
           "Non dire mai che un documento è stato inviato. Non creare o confermare appuntamenti: usa solo disponibilità e stati presenti nello snapshot.",
           "Cita in knowledgeRefs soltanto codici presenti in availableKnowledgeRefs.",
-          "Non chiedere né ricostruire email, telefono, codice fiscale, dati bancari o altri contatti personali.",
+          "Non chiedere né ricostruire email, telefono, codice fiscale, dati bancari o altri contatti personali se non sono indispensabili alla bozza richiesta; in tal caso usa segnaposto.",
         ].join("\n"),
         input: JSON.stringify({
-          useCase: "GUIMMIA_FULL_BRAIN_GUIDANCE",
+          useCase: assistantExperience
+            ? "GUIMMIA_AI_BETA_ASSISTANT"
+            : "GUIMMIA_FULL_BRAIN_GUIDANCE",
+          experience: assistantExperience ? "ASSISTANT" : "CASE",
+          focus: input.focus ?? "GENERAL",
           executionMode: "DRY_RUN",
           requestKind: input.requestKind,
           customerQuestion: redactCustomerText(input.question),

@@ -9,6 +9,7 @@ import {
   Plus,
   Route,
   Settings,
+  Sparkles,
   UserRound,
   X,
 } from "lucide-react";
@@ -22,6 +23,7 @@ type DashboardSidebarProps = {
 };
 
 const navigation = [
+  { label: "Guimmia", href: "/ai", icon: Sparkles },
   { label: "Percorso", href: "/dashboard", icon: Route },
   { label: "I miei immobili", href: "/dashboard/properties", icon: Building2 },
   { label: "Documenti", href: "/dashboard/documents", icon: FileText },

@@ -15,7 +15,7 @@ export default function RegisterPage() {
     <AuthShell
       eyebrow="Registrazione"
       title="Crea il tuo account."
-      description="Scegli il profilo più adatto. Un privato organizza le proprie pratiche; un professionista costruisce la propria presenza nella rete Guimmia."
+      description="Crea il tuo account per conservare conversazioni e pratiche. Puoi entrare come privato oppure creare un profilo professionale."
     >
       <Suspense fallback={<div className="h-96 animate-pulse rounded-3xl bg-slate-100" />}>
         <RegistrationForm />

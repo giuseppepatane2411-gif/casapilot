@@ -1,5 +1,5 @@
-export const ACCOUNT_TERMS_VERSION = "2026-08-01";
-export const ACCOUNT_PRIVACY_VERSION = "2026-08-01";
+export const ACCOUNT_TERMS_VERSION = "2026-09-04";
+export const ACCOUNT_PRIVACY_VERSION = "2026-09-04";
 
 export const PROFESSIONS = [
   "Agente immobiliare",

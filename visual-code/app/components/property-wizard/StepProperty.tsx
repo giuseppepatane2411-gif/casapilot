@@ -148,6 +148,7 @@ export default function StepProperty({
                 <input
                   type="number"
                   min="4"
+                  max="200"
                   inputMode="numeric"
                   value={data.roomRental.roomSurface}
                   onChange={(event) => updateRoom("roomSurface", event.target.value)}
@@ -163,6 +164,7 @@ export default function StepProperty({
               <input
                 type="number"
                 min="0"
+                max="30"
                 inputMode="numeric"
                 value={data.roomRental.currentRoommates}
                 onChange={(event) => updateRoom("currentRoommates", event.target.value)}

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const siteUrl = "https://guimmia.com";
+import { SITE_URL } from "@/lib/seo/metadata";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -12,7 +12,7 @@ export default function robots(): MetadataRoute.Robots {
       // gli endpoint che non producono contenuti destinati ai motori di ricerca.
       disallow: ["/api/"],
     },
-    sitemap: `${siteUrl}/sitemap.xml`,
-    host: siteUrl,
+    sitemap: `${SITE_URL}/sitemap.xml`,
+    host: SITE_URL,
   };
 }

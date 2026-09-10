@@ -7,12 +7,17 @@ import { CheckCircle2, Mail, RefreshCw } from "lucide-react";
 import AuthMessage from "@/components/auth/AuthMessage";
 import FormField from "@/components/auth/FormField";
 import { getAccountErrorMessage } from "@/lib/account/errors";
+import { buildAuthPath, safeNextPath } from "@/lib/navigation/auth-flow";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
-export default function CheckEmailPanel() {
+export default function CheckEmailPanel({
+  initialNext = "/dashboard",
+}: {
+  initialNext?: string;
+}) {
   const [email, setEmail] = useState("");
-  const [nextPath, setNextPath] = useState("/dashboard");
+  const [nextPath, setNextPath] = useState(() => safeNextPath(initialNext));
   const [cooldown, setCooldown] = useState(0);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{
@@ -23,16 +28,12 @@ export default function CheckEmailPanel() {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       const storedEmail = window.sessionStorage.getItem("casapilot-pending-email") ?? "";
-      const storedNext = window.sessionStorage.getItem("casapilot-pending-next") ?? "/dashboard";
+      const storedNext = window.sessionStorage.getItem("casapilot-pending-next") ?? initialNext;
       setEmail(storedEmail);
-      setNextPath(
-        storedNext.startsWith("/") && !storedNext.startsWith("//")
-          ? storedNext
-          : "/dashboard",
-      );
+      setNextPath(safeNextPath(storedNext));
     }, 0);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [initialNext]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -139,7 +140,7 @@ export default function CheckEmailPanel() {
 
       <p className="text-center text-sm text-slate-500">
         Hai già confermato?{" "}
-        <Link href="/login" className="font-bold text-blue-600 hover:underline">
+        <Link href={buildAuthPath("/login", { next: nextPath })} className="font-bold text-blue-600 hover:underline">
           Accedi al tuo account
         </Link>
       </p>

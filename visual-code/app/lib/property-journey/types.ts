@@ -126,6 +126,7 @@ export type JourneyMission = {
 
 export type WizardDraft = {
   version: 1;
+  journeyId?: string;
   step: number;
   data: WizardData;
   updatedAt: string;

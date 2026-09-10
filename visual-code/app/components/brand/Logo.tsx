@@ -5,6 +5,7 @@ type LogoProps = {
   showText?: boolean;
   showTagline?: boolean;
   compact?: boolean;
+  inverted?: boolean;
   className?: string;
 };
 
@@ -12,6 +13,7 @@ export default function Logo({
   showText = true,
   showTagline = false,
   compact = false,
+  inverted = false,
   className = "",
 }: LogoProps) {
   const iconSize = compact ? 18 : 21;
@@ -74,7 +76,7 @@ export default function Logo({
       {showText && (
         <span className="min-w-0">
           <span
-            className="
+            className={`
               block
               whitespace-nowrap
               [font-family:var(--font-brand)]
@@ -82,17 +84,17 @@ export default function Logo({
               font-bold
               leading-none
               tracking-[-0.055em]
-              text-slate-950
+              ${inverted ? "text-white" : "text-slate-950"}
               sm:text-[24px]
-            "
+            `}
           >
             Guimm
             <span className="text-blue-600">ia</span>
           </span>
 
           {showTagline && (
-            <span className="mt-1.5 hidden whitespace-nowrap text-[10px] font-medium tracking-[0.08em] text-slate-500 lg:block">
-              IL TUO ASSISTENTE IMMOBILIARE
+            <span className={`mt-1.5 hidden whitespace-nowrap text-[10px] font-medium tracking-[0.08em] lg:block ${inverted ? "text-slate-400" : "text-slate-500"}`}>
+              La tua guida immobiliare intelligente.
             </span>
           )}
         </span>

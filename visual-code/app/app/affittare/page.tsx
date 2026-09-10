@@ -1,6 +1,7 @@
 import Link from "next/link";
 import PublicAgencyHeader from "@/components/agency/PublicAgencyHeader";
 import PublicAgencyFooter from "@/components/agency/PublicAgencyFooter";
+import { buildAuthPath } from "@/lib/navigation/auth-flow";
 import { createPublicMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createPublicMetadata({
@@ -8,6 +9,11 @@ export const metadata = createPublicMetadata({
   description:
     "Affitta casa con Guimmia: canone, documenti, annuncio, richieste, visite, contratto e adempimenti in un unico percorso digitale.",
   path: "/affittare",
+});
+
+const startRentPath = buildAuthPath("/register", {
+  accountType: "private",
+  next: "/dashboard/properties/new?goal=rent",
 });
 
 export default function AffittarePage() {
@@ -26,7 +32,7 @@ export default function AffittarePage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/valuta-immobile" className="rounded-2xl bg-blue-600 px-6 py-3.5 font-black text-white">Stima il canone</Link>
-              <Link href="/registrazione/proprietario" className="rounded-2xl border border-slate-300 bg-white px-6 py-3.5 font-black text-slate-900">Affitta con Guimmia</Link>
+              <Link href={startRentPath} className="rounded-2xl border border-slate-300 bg-white px-6 py-3.5 font-black text-slate-900">Affitta con Guimmia</Link>
               <Link href="/guimmia?intent=rent" className="rounded-2xl border border-slate-300 bg-white px-6 py-3.5 font-black text-slate-900">Parla con Guimmia</Link>
             </div>
           </div>

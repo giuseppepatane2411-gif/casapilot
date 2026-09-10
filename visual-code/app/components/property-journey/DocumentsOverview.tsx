@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import {
   ArrowRight,
   Building2,
@@ -12,26 +13,36 @@ import {
 } from "lucide-react";
 
 import DocumentGuideItem from "@/components/property-journey/DocumentGuideItem";
+import JourneySyncError from "@/components/property-journey/JourneySyncError";
 import { useJourneys } from "@/hooks/useJourneys";
 import { useLocalVault } from "@/hooks/useLocalVault";
 import {
   getOperationLabel,
   getRequiredDocuments,
 } from "@/lib/property-journey/constants";
-import { updateJourneyDocuments } from "@/lib/property-journey/storage";
+import { updateCloudJourneyDocuments } from "@/lib/property-journey/cloud";
 import type { DocumentKey } from "@/lib/property-journey/types";
 
 export default function DocumentsOverview() {
+  const [updatingDocument, setUpdatingDocument] = useState<DocumentKey | null>(null);
+  const [updateError, setUpdateError] = useState("");
   const {
     hydrated,
+    refreshing,
     journeys,
     activeJourney,
+    error: journeyError,
     activateJourney,
+    refresh,
   } = useJourneys();
   const { hydrated: vaultHydrated, documents: vaultDocuments } = useLocalVault();
 
   if (!hydrated || !vaultHydrated) {
     return <div className="h-80 animate-pulse rounded-[28px] bg-slate-200/70" />;
+  }
+
+  if (journeyError) {
+    return <JourneySyncError message={journeyError} retry={refresh} refreshing={refreshing} />;
   }
 
   if (!activeJourney) {
@@ -64,16 +75,33 @@ export default function DocumentsOverview() {
   const attachedFiles = vaultDocuments.filter((document) => document.journeyId === activeJourney.id).length;
   const progress = requiredDocuments.length ? Math.round((available.length / requiredDocuments.length) * 100) : 0;
 
-  function toggleDocument(documentId: DocumentKey) {
+  async function toggleDocument(documentId: DocumentKey) {
     const nextDocuments = activeJourney.documents.includes(documentId)
       ? activeJourney.documents.filter((item) => item !== documentId)
       : [...activeJourney.documents, documentId];
 
-    updateJourneyDocuments(activeJourney.id, nextDocuments);
+    setUpdatingDocument(documentId);
+    setUpdateError("");
+    try {
+      await updateCloudJourneyDocuments(activeJourney.id, nextDocuments);
+    } catch (error) {
+      setUpdateError(
+        error instanceof Error
+          ? error.message
+          : "Non siamo riusciti ad aggiornare la checklist.",
+      );
+    } finally {
+      setUpdatingDocument(null);
+    }
   }
 
   return (
     <div className="mx-auto max-w-4xl space-y-5">
+      {updateError && (
+        <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+          {updateError}
+        </div>
+      )}
       <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-blue-600">Documenti</p>
@@ -157,7 +185,9 @@ export default function DocumentsOverview() {
           <DocumentGuideItem
             document={primaryMissing}
             selected={false}
-            onToggle={() => toggleDocument(primaryMissing.id)}
+            onToggle={() => {
+              if (!updatingDocument) void toggleDocument(primaryMissing.id);
+            }}
           />
         </section>
       ) : (
@@ -188,7 +218,9 @@ export default function DocumentsOverview() {
                 key={document.id}
                 document={document}
                 selected={false}
-                onToggle={() => toggleDocument(document.id)}
+                onToggle={() => {
+                  if (!updatingDocument) void toggleDocument(document.id);
+                }}
               />
             ))}
           </div>
@@ -207,7 +239,9 @@ export default function DocumentsOverview() {
                 key={document.id}
                 document={document}
                 selected
-                onToggle={() => toggleDocument(document.id)}
+                onToggle={() => {
+                  if (!updatingDocument) void toggleDocument(document.id);
+                }}
               />
             ))}
           </div>

@@ -27,9 +27,10 @@ import {
 import {
   filterDocumentsForJourney,
 } from "@/lib/property-journey/scoring";
+import { createCloudJourney } from "@/lib/property-journey/cloud";
+import { createJourneyId, isJourneyUuid } from "@/lib/property-journey/model";
 import {
   clearWizardDraft,
-  createJourney,
   readWizardDraft,
   saveWizardDraft,
 } from "@/lib/property-journey/storage";
@@ -43,12 +44,15 @@ const LAST_STEP = WIZARD_STEPS.length;
 export default function PropertyWizard() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const aiConversationId = searchParams.get("conversation");
+  const startedFromAI = searchParams.get("from") === "ai";
   const [step, setStep] = useState(1);
   const [data, setData] = useState<WizardData>(INITIAL_WIZARD_DATA);
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [draftRestored, setDraftRestored] = useState(false);
   const [validationMessage, setValidationMessage] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const [journeyId, setJourneyId] = useState(() => createJourneyId());
 
   const currentStep = WIZARD_STEPS[step - 1];
   const requiredDocuments = useMemo(
@@ -61,6 +65,11 @@ export default function PropertyWizard() {
       const draft = readWizardDraft();
 
       if (draft) {
+        setJourneyId(
+          isJourneyUuid(draft.journeyId)
+            ? draft.journeyId
+            : createJourneyId(),
+        );
         setStep(Math.min(Math.max(draft.step, 1), LAST_STEP));
         setData({
           ...INITIAL_WIZARD_DATA,
@@ -96,8 +105,8 @@ export default function PropertyWizard() {
 
   useEffect(() => {
     if (!draftLoaded || isCreating) return;
-    saveWizardDraft(step, data);
-  }, [data, draftLoaded, isCreating, step]);
+    saveWizardDraft(step, data, journeyId);
+  }, [data, draftLoaded, isCreating, journeyId, step]);
 
   function updateField<K extends keyof WizardData>(
     field: K,
@@ -161,9 +170,18 @@ export default function PropertyWizard() {
         if (!data.roomRental.roomType) return "Seleziona il tipo di stanza.";
         if (
           !data.roomRental.roomSurface.trim() ||
-          Number(data.roomRental.roomSurface) < 4
+          Number(data.roomRental.roomSurface) < 4 ||
+          Number(data.roomRental.roomSurface) > 200
         ) {
-          return "Inserisci una superficie valida per la stanza.";
+          return "Inserisci una superficie della stanza compresa tra 4 e 200 m².";
+        }
+        if (
+          !data.roomRental.currentRoommates.trim() ||
+          !Number.isInteger(Number(data.roomRental.currentRoommates)) ||
+          Number(data.roomRental.currentRoommates) < 0 ||
+          Number(data.roomRental.currentRoommates) > 30
+        ) {
+          return "Indica un numero di coinquilini compreso tra 0 e 30.";
         }
         if (!data.roomRental.acceptedOccupantProfiles.length) {
           return "Indica almeno un profilo compatibile: studente o lavoratore.";
@@ -217,13 +235,14 @@ export default function PropertyWizard() {
     if (!confirmed) return;
 
     clearWizardDraft();
+    setJourneyId(createJourneyId());
     setStep(1);
     setData(INITIAL_WIZARD_DATA);
     setDraftRestored(false);
     setValidationMessage("");
   }
 
-  function completeJourney() {
+  async function completeJourney() {
     const messages = [1, 2, 3]
       .map((targetStep) => validateStep(targetStep))
       .filter(Boolean);
@@ -236,12 +255,20 @@ export default function PropertyWizard() {
     setIsCreating(true);
 
     try {
-      const journey = createJourney(data);
+      const journey = await createCloudJourney(data, journeyId, aiConversationId || undefined);
       clearWizardDraft();
-      router.push(`/dashboard?created=${journey.id}`);
-    } catch {
+      const conversationQuery =
+        startedFromAI && aiConversationId
+          ? `&conversation=${encodeURIComponent(aiConversationId)}`
+          : "";
+      router.push(
+        `/dashboard?created=${journey.id}${startedFromAI ? "&from=ai" : ""}${conversationQuery}`,
+      );
+    } catch (error) {
       setValidationMessage(
-        "Non siamo riusciti a creare il percorso. Controlla i dati e riprova.",
+        error instanceof Error
+          ? error.message
+          : "Non siamo riusciti a creare il percorso. La bozza è ancora disponibile.",
       );
       setIsCreating(false);
     }
@@ -296,6 +323,18 @@ export default function PropertyWizard() {
             </div>
           </div>
         )}
+
+        {startedFromAI && !draftRestored ? (
+          <div className="flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+            <Sparkles size={18} className="mt-0.5 shrink-0 text-blue-600" />
+            <div>
+              <p className="font-bold">Pratica avviata da Guimmia</p>
+              <p className="mt-1 leading-6 text-blue-800">
+                Le informazioni che inserirai qui verranno salvate nella tua pratica immobiliare privata.
+              </p>
+            </div>
+          </div>
+        ) : null}
 
         <WizardProgress currentStep={step} operation={data.operation} />
 
@@ -365,7 +404,7 @@ export default function PropertyWizard() {
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
                 <span className="inline-flex items-center justify-center gap-2 text-xs font-semibold text-slate-400">
                   <Save size={14} />
-                  Salvataggio automatico
+                  Bozza salvata su questo dispositivo
                 </span>
 
                 {step < LAST_STEP ? (
@@ -383,7 +422,7 @@ export default function PropertyWizard() {
                 ) : (
                   <button
                     type="button"
-                    onClick={completeJourney}
+                    onClick={() => void completeJourney()}
                     disabled={isCreating}
                     className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:-translate-y-0.5 hover:bg-blue-700 disabled:cursor-wait disabled:opacity-70"
                   >

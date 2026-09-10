@@ -30,23 +30,14 @@ import {
   normalizeProvince,
 } from "@/lib/account/errors";
 import type { AccountType } from "@/lib/account/types";
+import {
+  buildAuthPath,
+  resolveAuthNextPath,
+} from "@/lib/navigation/auth-flow";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 type ProfessionalType = "individual" | "organization";
-
-function safeNextPath(
-  value: string | null,
-  goal: string | null,
-  accountType: AccountType,
-) {
-  if (value?.startsWith("/") && !value.startsWith("//")) return value;
-  if (accountType === "professional") return "/professionista/onboarding";
-  if (goal === "sale" || goal === "rent") {
-    return `/dashboard/properties/new?goal=${goal}`;
-  }
-  return "/dashboard";
-}
 
 export default function RegistrationForm() {
   const router = useRouter();
@@ -76,8 +67,19 @@ export default function RegistrationForm() {
   } | null>(null);
 
   const nextPath = useMemo(
-    () => safeNextPath(searchParams.get("next"), searchParams.get("goal"), accountType),
+    () => resolveAuthNextPath({
+      next: searchParams.get("next"),
+      goal: searchParams.get("goal"),
+      message: searchParams.get("message"),
+      intent: searchParams.get("intent"),
+      brand: searchParams.get("brand"),
+      accountType,
+    }),
     [searchParams, accountType],
+  );
+  const loginHref = useMemo(
+    () => buildAuthPath("/login", { next: nextPath, accountType }),
+    [nextPath, accountType],
   );
 
   const steps =
@@ -215,7 +217,7 @@ export default function RegistrationForm() {
 
       window.sessionStorage.setItem("casapilot-pending-email", normalizedEmail);
       window.sessionStorage.setItem("casapilot-pending-next", nextPath);
-      router.push("/check-email");
+      router.push(buildAuthPath("/check-email", { next: nextPath }));
     } catch (error) {
       setMessage({
         tone: "error",
@@ -344,7 +346,7 @@ export default function RegistrationForm() {
         )}
       </div>
 
-      <p className="text-center text-sm text-slate-500">Hai già un account? <Link href="/login" className="font-bold text-blue-600 hover:underline">Accedi</Link></p>
+      <p className="text-center text-sm text-slate-500">Hai già un account? <Link href={loginHref} className="font-bold text-blue-600 hover:underline">Accedi</Link></p>
     </form>
   );
 }

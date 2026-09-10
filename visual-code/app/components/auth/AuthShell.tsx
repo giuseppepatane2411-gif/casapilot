@@ -29,19 +29,19 @@ export default function AuthShell({
             />
 
             <div className="relative flex h-full flex-col">
-              <Logo className="[&_span]:text-white" />
+              <Logo inverted />
 
               <div className="my-auto py-12">
                 <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-bold">
                   <Sparkles size={14} />
-                  Il tuo spazio immobiliare
+                  Il tuo spazio personale
                 </span>
                 <h1 className="mt-6 text-3xl font-bold leading-tight sm:text-4xl">
-                  Tutta la pratica, un passo alla volta.
+                  La tua guida immobiliare intelligente.
                 </h1>
                 <p className="mt-4 max-w-xl text-sm leading-7 text-slate-300 sm:text-base">
-                  Crea il tuo profilo, organizza gli immobili e lascia che Guimmia
-                  scelga la prossima azione utile in base al tuo obiettivo.
+                  Fai domande, prepara bozze e organizza conversazioni e pratiche
+                  in un unico spazio personale.
                 </p>
 
                 <div className="mt-8 space-y-3 text-sm text-slate-200">
@@ -51,7 +51,7 @@ export default function AuthShell({
                   </p>
                   <p className="flex items-center gap-3">
                     <Compass size={18} className="text-blue-300" />
-                    Percorso adattato a vendita o affitto
+                    Intelligenza specializzata nell’immobiliare italiano
                   </p>
                 </div>
               </div>
@@ -80,4 +80,3 @@ export default function AuthShell({
     </main>
   );
 }
-

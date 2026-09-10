@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { resolveItalianProvince } from "@/lib/location/italian-geography";
+
 type PhotonReverseResponse = {
   features?: Array<{
     properties?: {
@@ -62,8 +64,8 @@ async function reversePhoton(latitude: number, longitude: number): Promise<Rever
     const payload = (await response.json()) as PhotonReverseResponse;
     const p = payload.features?.[0]?.properties;
     if (!p) return null;
-    const city = clean(p.city) || clean(p.district) || clean(p.county);
-    const province = clean(p.county) || clean(p.state);
+    const city = clean(p.city) || clean(p.district);
+    const province = resolveItalianProvince(p.county);
     const address = [clean(p.street) || clean(p.name), clean(p.housenumber)]
       .filter(Boolean)
       .join(" ");
@@ -104,8 +106,8 @@ async function reverseArcGis(latitude: number, longitude: number): Promise<Rever
     const payload = (await response.json()) as ArcGisReverseResponse;
     if (payload.error || !payload.address) return null;
     const a = payload.address;
-    const city = clean(a.City) || clean(a.District) || clean(a.Subregion);
-    const province = clean(a.RegionAbbr) || clean(a.Region) || clean(a.Subregion);
+    const city = clean(a.City) || clean(a.District);
+    const province = resolveItalianProvince(a.Subregion, a.RegionAbbr);
     const postalCode = clean(a.Postal);
     const address = clean(a.Address) || clean(a.ShortLabel) || clean(a.Match_addr).split(",")[0];
     const label = clean(a.LongLabel) || clean(a.Match_addr) || unique([address, postalCode, city, province]).join(", ");

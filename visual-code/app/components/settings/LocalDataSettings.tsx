@@ -18,6 +18,8 @@ import {
 } from "@/lib/product/storage";
 import type { GuimmiaBackup } from "@/lib/product/types";
 import { clearLocalVault } from "@/lib/local-vault/db";
+import { useJourneys } from "@/hooks/useJourneys";
+import JourneySyncError from "@/components/property-journey/JourneySyncError";
 import { PILOT_MEMORY_STORAGE_KEY } from "@/lib/pilot-os/store";
 import {
   ACTIVE_JOURNEY_STORAGE_KEY,
@@ -25,11 +27,9 @@ import {
   WIZARD_DRAFT_STORAGE_KEY,
 } from "@/lib/property-journey/constants";
 import {
-  readActiveJourneyId,
-  readJourneys,
   readWizardDraft,
-  replaceJourneys,
 } from "@/lib/property-journey/storage";
+import { importCloudJourneys } from "@/lib/property-journey/cloud";
 import type { PropertyJourney } from "@/lib/property-journey/types";
 
 function readJsonObject(storageKey: string) {
@@ -48,6 +48,14 @@ function readJsonObject(storageKey: string) {
 
 export default function LocalDataSettings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const {
+    hydrated,
+    refreshing,
+    journeys,
+    activeJourneyId,
+    error,
+    refresh,
+  } = useJourneys();
   const [message, setMessage] = useState<{
     tone: "success" | "error";
     text: string;
@@ -59,8 +67,8 @@ export default function LocalDataSettings() {
       product: "Guimmia",
       release: "casapilot-1.0",
       exportedAt: new Date().toISOString(),
-      activeJourneyId: readActiveJourneyId(),
-      journeys: readJourneys(),
+      activeJourneyId,
+      journeys,
       wizardDraft: readWizardDraft(),
       pilotMemory: readJsonObject(
         PILOT_MEMORY_STORAGE_KEY,
@@ -98,15 +106,12 @@ export default function LocalDataSettings() {
       }
 
       const confirmed = window.confirm(
-        "L’importazione sostituirà le pratiche presenti in questo browser. Vuoi continuare?",
+        "L’importazione aggiungerà o aggiornerà queste pratiche nel tuo account Guimmia. Vuoi continuare?",
       );
       if (!confirmed) return;
 
-      replaceJourneys(
+      const imported = await importCloudJourneys(
         parsed.journeys as PropertyJourney[],
-        typeof parsed.activeJourneyId === "string"
-          ? parsed.activeJourneyId
-          : null,
       );
 
       if (parsed.wizardDraft?.version === 1) {
@@ -140,7 +145,7 @@ export default function LocalDataSettings() {
 
       setMessage({
         tone: "success",
-        text: `${parsed.journeys.length} pratiche importate. Guimmia verrà ricaricato.`,
+        text: `${imported.length} pratiche importate nel tuo account. Guimmia verrà ricaricato.`,
       });
       window.setTimeout(() => {
         window.location.href = "/dashboard";
@@ -160,7 +165,7 @@ export default function LocalDataSettings() {
 
   async function clearData() {
     const confirmed = window.confirm(
-      "Vuoi cancellare pratiche, bozze, memoria di Guimmia, preferenze, dati tecnici e file dell’Archivio locale? L’operazione non può essere annullata.",
+      "Vuoi rimuovere da questo dispositivo bozze, memoria locale, preferenze e file dell’Archivio locale? Gli immobili salvati nel tuo account non verranno eliminati.",
     );
 
     if (!confirmed) return;
@@ -179,6 +184,14 @@ export default function LocalDataSettings() {
     window.location.href = "/dashboard";
   }
 
+  if (!hydrated) {
+    return <div className="h-80 animate-pulse rounded-[28px] bg-slate-100" />;
+  }
+
+  if (error) {
+    return <JourneySyncError message={error} retry={refresh} refreshing={refreshing} />;
+  }
+
   return (
     <div className="space-y-7">
       <header>
@@ -187,7 +200,7 @@ export default function LocalDataSettings() {
           Backup, importazione e privacy
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-          Le pratiche vengono conservate nel browser. Esporta un backup prima di cambiare dispositivo o cancellare i dati del sito.
+          Immobili e checklist sono collegati al tuo account. Puoi comunque esportare una copia personale insieme alle bozze e alla memoria conservata su questo dispositivo.
         </p>
       </header>
 
@@ -216,10 +229,10 @@ export default function LocalDataSettings() {
           </span>
           <div>
             <h2 className="text-xl font-bold text-slate-950">
-              Archivio locale completo
+              Copia personale dei dati
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              Il backup include immobili, checklist, bozza del wizard, memoria di Guimmia, timeline, conversazioni, preferenze e dati tecnici. I file salvati sul dispositivo restano esclusi: conserva sempre gli originali.
+              Il backup include immobili e checklist del tuo account, più bozza del wizard, memoria di Guimmia, timeline, conversazioni, preferenze e dati tecnici locali. I PDF e le immagini dell’Archivio locale restano esclusi: conserva sempre gli originali.
             </p>
           </div>
         </div>
@@ -237,7 +250,7 @@ export default function LocalDataSettings() {
           <DataAction
             icon={Upload}
             title="Importa backup"
-            description="Ripristina un file esportato in precedenza. I dati attuali verranno sostituiti."
+            description="Aggiunge le pratiche mancanti e aggiorna quelle con lo stesso identificativo nel tuo account."
             actionLabel="Scegli file JSON"
             onClick={() => fileInputRef.current?.click()}
           />
@@ -335,4 +348,3 @@ function DataAction({
     </article>
   );
 }
-

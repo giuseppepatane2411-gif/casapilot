@@ -49,11 +49,35 @@ function isBrowser() {
 }
 
 function createId() {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
+  const webCrypto =
+    typeof globalThis.crypto === "undefined"
+      ? null
+      : (globalThis.crypto as unknown as {
+          randomUUID?: () => string;
+          getRandomValues?: (array: Uint8Array) => Uint8Array;
+        });
+  if (typeof webCrypto?.randomUUID === "function") {
+    return webCrypto.randomUUID();
   }
 
-  return `journey-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  const bytes = new Uint8Array(16);
+  if (typeof webCrypto?.getRandomValues === "function") {
+    webCrypto.getRandomValues(bytes);
+  } else {
+    for (let index = 0; index < bytes.length; index += 1) {
+      bytes[index] = Math.floor(Math.random() * 256);
+    }
+  }
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0"));
+  return [
+    hex.slice(0, 4).join(""),
+    hex.slice(4, 6).join(""),
+    hex.slice(6, 8).join(""),
+    hex.slice(8, 10).join(""),
+    hex.slice(10).join(""),
+  ].join("-");
 }
 
 function isOperation(value: unknown): value is OperationType {
@@ -494,11 +518,16 @@ export function deleteJourney(journeyId: string) {
   return true;
 }
 
-export function saveWizardDraft(step: number, data: WizardData) {
+export function saveWizardDraft(
+  step: number,
+  data: WizardData,
+  journeyId?: string,
+) {
   if (!isBrowser()) return;
 
   const draft: WizardDraft = {
     version: 1,
+    journeyId,
     step,
     data,
     updatedAt: new Date().toISOString(),
@@ -601,6 +630,8 @@ export function readWizardDraft(): WizardDraft | null {
 
     return {
       version: 1,
+      journeyId:
+        typeof parsed.journeyId === "string" ? parsed.journeyId : undefined,
       step: parsed.step,
       data: {
         ...INITIAL_WIZARD_DATA,

@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 
 import { useJourneys } from "@/hooks/useJourneys";
+import JourneySyncError from "@/components/property-journey/JourneySyncError";
 import { useLocalVault } from "@/hooks/useLocalVault";
 import {
   ACCEPTED_LOCAL_FILE_TYPES,
@@ -37,7 +38,7 @@ import {
   getOperationLabel,
   getRequiredDocuments,
 } from "@/lib/property-journey/constants";
-import { updateJourneyDocuments } from "@/lib/property-journey/storage";
+import { updateCloudJourneyDocuments } from "@/lib/property-journey/cloud";
 import type { DocumentKey } from "@/lib/property-journey/types";
 
 export default function LocalDocumentVault() {
@@ -47,9 +48,12 @@ export default function LocalDocumentVault() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     hydrated: journeysHydrated,
+    refreshing: journeysRefreshing,
     journeys,
     activeJourney,
+    error: journeysError,
     activateJourney,
+    refresh: refreshJourneys,
   } = useJourneys();
   const { hydrated, documents, stats, error, add, remove } = useLocalVault(
     activeJourney?.id ?? null,
@@ -104,6 +108,16 @@ export default function LocalDocumentVault() {
     return <div className="h-[650px] animate-pulse rounded-[32px] bg-slate-100" />;
   }
 
+  if (journeysError) {
+    return (
+      <JourneySyncError
+        message={journeysError}
+        retry={refreshJourneys}
+        refreshing={journeysRefreshing}
+      />
+    );
+  }
+
   if (!activeJourney) {
     return (
       <section className="rounded-[30px] border border-dashed border-slate-300 bg-white p-9 text-center shadow-sm">
@@ -146,10 +160,20 @@ export default function LocalDocumentVault() {
       });
 
       if (!activeJourney.documents.includes(uploadingDocument)) {
-        updateJourneyDocuments(activeJourney.id, [
-          ...activeJourney.documents,
-          uploadingDocument,
-        ]);
+        try {
+          await updateCloudJourneyDocuments(activeJourney.id, [
+            ...activeJourney.documents,
+            uploadingDocument,
+          ]);
+        } catch (syncError) {
+          setMessage({
+            tone: "error",
+            text: `${file.name} è stato conservato su questo dispositivo, ma la checklist online non è stata aggiornata. ${
+              syncError instanceof Error ? syncError.message : "Riprova dalla pagina Documenti."
+            }`,
+          });
+          return;
+        }
       }
 
       const definition = requiredDocuments.find(
@@ -534,4 +558,3 @@ function formatBytes(bytes: number) {
   const value = bytes / 1024 ** index;
   return `${value >= 10 || index === 0 ? value.toFixed(0) : value.toFixed(1)} ${units[index]}`;
 }
-

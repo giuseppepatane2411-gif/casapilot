@@ -1,13 +1,8 @@
 import { NextResponse } from "next/server";
 
+import { buildAuthPath, safeNextPath } from "@/lib/navigation/auth-flow";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
-
-function safeNextPath(value: string | null) {
-  return value?.startsWith("/") && !value.startsWith("//")
-    ? value
-    : "/dashboard";
-}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -15,7 +10,9 @@ export async function GET(request: Request) {
   const next = safeNextPath(url.searchParams.get("next"));
 
   if (!isSupabaseConfigured()) {
-    return NextResponse.redirect(new URL("/login?error=configuration", url.origin));
+    return NextResponse.redirect(
+      new URL(buildAuthPath("/login", { error: "configuration", next }), url.origin),
+    );
   }
 
   if (code) {
@@ -27,5 +24,7 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.redirect(new URL("/login?error=confirmation", url.origin));
+  return NextResponse.redirect(
+    new URL(buildAuthPath("/login", { error: "confirmation", next }), url.origin),
+  );
 }

@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 
-export const SITE_URL = "https://guimmia.com";
+// URL canonico scelto per il rilascio. Il redirect del dominio è una
+// configurazione di hosting separata e va verificata dopo la pubblicazione.
+export const SITE_URL = "https://www.guimmia.com";
 export const SITE_NAME = "Guimmia";
 export const SITE_DESCRIPTION =
-  "Guimmia è l’agenzia immobiliare digitale che semplifica vendita e affitto: annunci, documenti, visite, negoziazione e contratti in un unico percorso.";
+  "La tua guida immobiliare intelligente. La chat italiana per domande, documenti, annunci, bozze, valutazioni, vendita e affitti a lungo termine, studenti e turistici.";
 
 const DEFAULT_SOCIAL_IMAGE = {
   url: `${SITE_URL}/opengraph-image`,
   width: 1200,
   height: 630,
-  alt: "Guimmia, l’agenzia immobiliare digitale",
+  alt: "Guimmia, la tua guida immobiliare intelligente.",
 };
 
 type PublicMetadataInput = {

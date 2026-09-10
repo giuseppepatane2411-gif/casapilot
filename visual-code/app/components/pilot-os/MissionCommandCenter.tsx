@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import {
   ArrowRight,
   CheckCircle2,
@@ -12,7 +13,7 @@ import {
 
 import { markProductMilestone, trackProductEvent } from "@/lib/product/storage";
 import { getDocumentDefinition } from "@/lib/property-journey/scoring";
-import { updateJourneyDocuments } from "@/lib/property-journey/storage";
+import { updateCloudJourneyDocuments } from "@/lib/property-journey/cloud";
 import {
   addPilotTimelineEvent,
   completePilotMission,
@@ -27,14 +28,29 @@ export default function MissionCommandCenter({
   context,
 }: MissionCommandCenterProps) {
   const mission = context.mission;
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
 
-  function completeMission(selectedMission: PilotMission) {
+  async function completeMission(selectedMission: PilotMission) {
     if (selectedMission.documentId) {
       const document = getDocumentDefinition(selectedMission.documentId);
-      updateJourneyDocuments(context.journey.id, [
-        ...context.journey.documents,
-        selectedMission.documentId,
-      ]);
+      setSaving(true);
+      setSaveError("");
+      try {
+        await updateCloudJourneyDocuments(context.journey.id, [
+          ...context.journey.documents,
+          selectedMission.documentId,
+        ]);
+      } catch (error) {
+        setSaveError(
+          error instanceof Error
+            ? error.message
+            : "Non siamo riusciti ad aggiornare la pratica.",
+        );
+        setSaving(false);
+        return;
+      }
+      setSaving(false);
       addPilotTimelineEvent(context.journey.id, {
         id: `document-${selectedMission.documentId}`,
         title: `${document?.title ?? "Documento"} disponibile`,
@@ -114,17 +130,18 @@ export default function MissionCommandCenter({
               </Link>
               <button
                 type="button"
-                onClick={() => completeMission(mission)}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                onClick={() => void completeMission(mission)}
+                disabled={saving}
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60"
               >
                 <CheckCircle2 size={18} />
-                Ce l’ho già
+                {saving ? "Salvataggio…" : "Ce l’ho già"}
               </button>
             </>
           ) : canComplete ? (
             <button
               type="button"
-              onClick={() => completeMission(mission)}
+              onClick={() => void completeMission(mission)}
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 hover:bg-blue-700"
             >
               <CheckCircle2 size={18} />
@@ -140,6 +157,12 @@ export default function MissionCommandCenter({
             </Link>
           )}
         </div>
+
+        {saveError && (
+          <p role="alert" className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700">
+            {saveError}
+          </p>
+        )}
 
         {context.missionQueue.length > 1 && (
           <details className="mt-6 border-t border-slate-100 pt-5">

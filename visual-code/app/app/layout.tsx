@@ -25,7 +25,7 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Guimmia | Agenzia immobiliare digitale",
+    default: "Guimmia | La tua guida immobiliare intelligente.",
     template: "%s | Guimmia",
   },
   description: SITE_DESCRIPTION,
@@ -45,12 +45,12 @@ export const metadata: Metadata = {
     locale: "it_IT",
     url: SITE_URL,
     siteName: SITE_NAME,
-    title: "Guimmia | Agenzia immobiliare digitale",
+    title: "Guimmia | La tua guida immobiliare intelligente.",
     description: SITE_DESCRIPTION,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Guimmia | Agenzia immobiliare digitale",
+    title: "Guimmia | La tua guida immobiliare intelligente.",
     description: SITE_DESCRIPTION,
   },
   robots: {

@@ -4,6 +4,10 @@ import { NextResponse } from "next/server";
 import { redactCustomerText } from "@/lib/guimmia/brain/case-orchestrator/redaction";
 import type { GuimmiaOperationType } from "@/lib/guimmia/brain/case-orchestrator/types";
 import {
+  GUIMMIA_ASSISTANT_FOCUSES,
+  type GuimmiaAssistantFocus,
+} from "@/lib/guimmia-ai/types";
+import {
   generateGuimmiaBrainGuidance,
   OpenAIBrainNotConfiguredError,
 } from "@/lib/guimmia/openai/brain-guidance";
@@ -64,6 +68,11 @@ const serviceModels = new Set(["COMPLETA", "MENSILE"]);
 const requestKinds = new Set<GuimmiaBrainRequestKind>(
   GUIMMIA_BRAIN_REQUEST_KINDS,
 );
+const assistantFocuses = new Set<GuimmiaAssistantFocus>(
+  GUIMMIA_ASSISTANT_FOCUSES,
+);
+const uuidPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function cleanText(value: unknown, maxLength: number) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
@@ -140,6 +149,53 @@ function parseCase(value: unknown):
             .filter(Boolean)
             .slice(0, 100)
         : [],
+    },
+  };
+}
+
+function inferAssistantCase(
+  question: string,
+  focus: GuimmiaAssistantFocus,
+  conversationId: string,
+): SiteOrchestrationRequest & { operationType: GuimmiaOperationType } {
+  const value = `${focus} ${question}`.toLocaleLowerCase("it-IT");
+  const operationType: GuimmiaOperationType =
+    /turistic|vacanz|short|booking|cin\b/.test(value)
+      ? "RENT_TOURIST_SHORT"
+      : /student|universit/.test(value)
+        ? "RENT_STUDENT"
+        : /transitori|temporane/.test(value)
+          ? "RENT_TRANSITORY"
+          : /affitt|locaz|canone|conduttor|inquilin|rent\b/.test(value)
+            ? "RENT_LONG_TERM"
+            : "SALE";
+  const customerRole: SiteOrchestrationRequest["customerRole"] =
+    /acquirent|comprator|comprare|acquist/.test(value)
+      ? "BUYER"
+      : /conduttor|inquilin/.test(value)
+        ? "TENANT"
+        : /venditor|vendere|proprietari/.test(value)
+          ? operationType === "SALE"
+            ? "SELLER"
+            : "LANDLORD"
+          : /locatore|mettere in affitto/.test(value)
+            ? "LANDLORD"
+            : "UNCONFIRMED";
+
+  return {
+    caseId: `ai:${conversationId}`,
+    caseVersion: 1,
+    operationType,
+    customerRole,
+    confidence: 0.6,
+    property: {
+      country: "Italia",
+      locationVerified: false,
+      documents: [],
+    },
+    progress: {
+      currentPhase: "INTAKE",
+      completedActionCodes: [],
     },
   };
 }
@@ -397,7 +453,18 @@ export async function POST(request: Request) {
   }
 
   const question = cleanText(body.question, 2000);
-  const caseInput = parseCase(body.case);
+  const assistantExperience = body.experience === "assistant";
+  const rawConversationId = cleanText(body.conversationId, 80);
+  const rawFocus = cleanText(body.focus, 40) as GuimmiaAssistantFocus;
+  const focus = assistantFocuses.has(rawFocus) ? rawFocus : "GENERAL";
+  const conversationId = uuidPattern.test(rawConversationId)
+    ? rawConversationId
+    : "";
+  const caseInput =
+    parseCase(body.case) ??
+    (assistantExperience && conversationId
+      ? inferAssistantCase(question, focus, conversationId)
+      : null);
   const requestedKind = cleanText(body.requestKind, 40) as GuimmiaBrainRequestKind;
   const requestKind = requestKinds.has(requestedKind) ? requestedKind : "GUIDANCE";
   const conversation = Array.isArray(body.conversation)
@@ -412,14 +479,16 @@ export async function POST(request: Request) {
         .filter((item): item is { role: "user" | "assistant"; text: string } =>
           Boolean(item),
         )
-        .slice(-4)
+        .slice(assistantExperience ? -8 : -4)
     : [];
 
   if (!question || !caseInput) {
     return error(
       400,
       "invalid_request",
-      "Servono una domanda e una pratica immobiliare valida.",
+      assistantExperience
+        ? "Servono una domanda e una conversazione Guimmia valida."
+        : "Servono una domanda e una pratica immobiliare valida.",
     );
   }
   if (!isSupabaseConfigured() || !supabaseAccess()) {
@@ -458,8 +527,12 @@ export async function POST(request: Request) {
   const requestFingerprint = createHash("sha256")
     .update(
       JSON.stringify({
-        bridgeVersion: "77.4.0-rev2",
+        bridgeVersion: assistantExperience
+          ? "78.0.0-ai-beta-rev2"
+          : "77.4.0-rev2",
         userId: data.user.id,
+        experience: assistantExperience ? "assistant" : "case",
+        focus,
         requestKind,
         question: safeQuestion,
         conversation: conversation.map((item) => ({
@@ -478,7 +551,10 @@ export async function POST(request: Request) {
     orchestration = orchestrateSiteCase(caseInput, {
       identityConfirmed: true,
     });
-    knowledge = retrieveGuimmiaBrainContext(safeQuestion, caseInput);
+    knowledge = retrieveGuimmiaBrainContext(
+      assistantExperience ? `${focus} ${safeQuestion}` : safeQuestion,
+      caseInput,
+    );
     const cached = await findReusableBrainInteraction(requestFingerprint);
     if (cached) {
       return NextResponse.json<GuimmiaBrainSuccess>(
@@ -531,6 +607,8 @@ export async function POST(request: Request) {
       question: safeQuestion,
       requestKind,
       conversation,
+      experience: assistantExperience ? "assistant" : "case",
+      focus,
       orchestration,
       knowledge,
       property: caseInput.property ?? {},

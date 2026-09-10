@@ -1,5 +1,15 @@
 import { redirect } from "next/navigation";
 
-export default function PilotPage() {
-  redirect("/dashboard/pilot");
+import {
+  buildPathWithSearchParams,
+  type PageSearchParams,
+} from "@/lib/navigation/auth-flow";
+
+export default async function PilotPage({
+  searchParams,
+}: {
+  searchParams: Promise<PageSearchParams>;
+}) {
+  redirect(buildPathWithSearchParams("/dashboard/pilot", await searchParams));
 }
+

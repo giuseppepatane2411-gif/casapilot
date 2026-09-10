@@ -52,7 +52,8 @@ import type {
 } from "@/lib/guimmia/site-orchestration/types";
 import type { GuimmiaOperationType } from "@/lib/guimmia/brain/case-orchestrator/types";
 import { INITIAL_WIZARD_DATA } from "@/lib/property-journey/constants";
-import { createJourney } from "@/lib/property-journey/storage";
+import { createCloudJourney } from "@/lib/property-journey/cloud";
+import { createJourneyId, isJourneyUuid } from "@/lib/property-journey/model";
 import type { PropertyType } from "@/lib/property-journey/types";
 
 type ChatMessage = {
@@ -163,6 +164,9 @@ function nextQuestion(draft: PropertyDraft) {
   if (!draft.propertyType) return "Di che tipo di immobile si tratta? Per esempio appartamento, villa, stanza, casa indipendente, terreno o locale.";
   if (!draft.city) return "In quale comune si trova l’immobile?";
   if (!draft.country) return "In quale Paese si trova l’immobile?";
+  if (!draft.province) return "In quale provincia si trova l’immobile?";
+  if (!draft.address) return "Qual è la via e il numero civico dell’immobile?";
+  if (!draft.postalCode) return "Qual è il CAP dell’immobile?";
   if (!draft.locationVerified) return "Controlla la località suggerita nella scheda e conferma la posizione dell’immobile.";
   if (!draft.surface) return "Conosci indicativamente la superficie in metri quadrati? Puoi anche dirmi che non la sai ancora.";
   if (!draft.condition) return "Come descriveresti lo stato dell’immobile: da ristrutturare, buono, ristrutturato o nuovo?";
@@ -175,6 +179,9 @@ function firstMissingField(draft: PropertyDraft): keyof PropertyDraft | null {
   if (!draft.propertyType) return "propertyType";
   if (!draft.city) return "city";
   if (!draft.country) return "country";
+  if (!draft.province) return "province";
+  if (!draft.address) return "address";
+  if (!draft.postalCode) return "postalCode";
   if (!draft.locationVerified) return "locationVerified";
   if (!draft.surface) return "surface";
   if (!draft.condition) return "condition";
@@ -360,6 +367,7 @@ export default function PilotFirstChat() {
   const [brainDecision, setBrainDecision] = useState<SiteOrchestrationResponse | null>(null);
   const [quickReplies, setQuickReplies] = useState<string[]>([]);
   const [thinking, setThinking] = useState(false);
+  const [savingPractice, setSavingPractice] = useState(false);
   const [documentUploading, setDocumentUploading] = useState(false);
   const [documentRefreshToken, setDocumentRefreshToken] = useState(0);
   const [caseRoomRefreshToken, setCaseRoomRefreshToken] = useState(0);
@@ -708,7 +716,7 @@ export default function PilotFirstChat() {
     setSavedNotice("Posizione confermata. La scheda resta una bozza finché non la approvi.");
   };
 
-  const saveDraft = () => {
+  const saveDraft = async () => {
     if (draft.destinationHref) {
       router.push(draft.destinationHref);
       return;
@@ -747,17 +755,56 @@ export default function PilotFirstChat() {
       return;
     }
 
-    const journey = createJourney({
-      ...INITIAL_WIZARD_DATA,
-      operation: toSiteOperationType(draft.operationType),
-      propertyType,
-      propertyName: `${draft.propertyType} a ${draft.city}`,
-      surface: draft.surface.replace(/[^0-9.,]/g, "").replace(",", "."),
-      country: draft.country,
-      city: draft.city,
-      province: draft.province,
-      address: draft.address,
-    });
+    setSavingPractice(true);
+    setSavedNotice("");
+    const journeyRequestId = isJourneyUuid(draft.journeyId)
+      ? draft.journeyId
+      : createJourneyId();
+    if (draft.journeyId !== journeyRequestId) {
+      setDraft((current) => ({
+        ...current,
+        journeyId: journeyRequestId,
+        updatedAt: new Date().toISOString(),
+      }));
+    }
+    let journey;
+    try {
+      journey = await createCloudJourney({
+        ...INITIAL_WIZARD_DATA,
+        operation: toSiteOperationType(draft.operationType),
+        propertyType,
+        propertyName: `${draft.propertyType} a ${draft.city}`,
+        surface: draft.surface.replace(/[^0-9.,]/g, "").replace(",", "."),
+        country: draft.country,
+        city: draft.city,
+        province: draft.province,
+        address: draft.address,
+        postalCode: draft.postalCode,
+        latitude: draft.latitude,
+        longitude: draft.longitude,
+        locationVerified: draft.locationVerified,
+        locationVerifiedAt: draft.locationVerified
+          ? new Date().toISOString()
+          : "",
+        locationLabel: [
+          draft.address,
+          draft.postalCode,
+          draft.city,
+          draft.province,
+          draft.country,
+        ]
+          .filter(Boolean)
+          .join(", "),
+      }, journeyRequestId);
+    } catch (error) {
+      setSavedNotice(
+        error instanceof Error
+          ? error.message
+          : "Non siamo riusciti a creare la pratica. La bozza resta disponibile.",
+      );
+      setSavingPractice(false);
+      return;
+    }
     const confirmed = {
       ...draft,
       journeyId: journey.id,
@@ -772,7 +819,9 @@ export default function PilotFirstChat() {
       setSavedNotice("Pratica creata. Ora puoi aprire il percorso orchestrato da Guimmia.");
       addMessage("pilot", "Perfetto. Ho creato la pratica e collegato il percorso al cervello di Guimmia. Nella dashboard vedrai il primo passo adatto a questa operazione.");
     } catch {
-      setSavedNotice("Non è stato possibile salvare la scheda nel browser.");
+      setSavedNotice("La pratica online è stata creata, ma non è stato possibile aggiornare la copia della chat.");
+    } finally {
+      setSavingPractice(false);
     }
   };
 
@@ -1149,8 +1198,10 @@ export default function PilotFirstChat() {
               </label>
             </div>
 
-            <button type="button" onClick={saveDraft} className="mt-6 flex min-h-12 w-full items-center justify-center rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700">
-              {draft.destinationHref
+            <button type="button" onClick={() => void saveDraft()} disabled={savingPractice} className="mt-6 flex min-h-12 w-full items-center justify-center rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 disabled:cursor-wait disabled:opacity-60">
+              {savingPractice
+                ? "Creazione pratica…"
+                : draft.destinationHref
                 ? "Vedi gli immobili Guimmia"
                 : draft.journeyId
                   ? "Apri il percorso Guimmia"

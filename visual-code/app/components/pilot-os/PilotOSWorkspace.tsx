@@ -10,13 +10,22 @@ import PilotReadinessCard from "@/components/pilot-os/PilotReadinessCard";
 import PilotRecommendations from "@/components/pilot-os/PilotRecommendations";
 import PilotTimeline from "@/components/pilot-os/PilotTimeline";
 import PropertyQuickData from "@/components/pilot-os/PropertyQuickData";
+import JourneySyncError from "@/components/property-journey/JourneySyncError";
 import { useJourneys } from "@/hooks/useJourneys";
 import { usePilotMemory } from "@/hooks/usePilotMemory";
 import { markProductMilestone, trackProductEvent } from "@/lib/product/storage";
 import { buildPilotContext } from "@/lib/pilot-os";
 
 export default function PilotOSWorkspace() {
-  const { hydrated: journeysHydrated, journeys, activeJourney, activateJourney } = useJourneys();
+  const {
+    hydrated: journeysHydrated,
+    refreshing,
+    journeys,
+    activeJourney,
+    error,
+    activateJourney,
+    refresh,
+  } = useJourneys();
   const activeJourneyId = activeJourney?.id ?? null;
   const { hydrated: memoryHydrated, memory } = usePilotMemory(activeJourneyId);
 
@@ -27,6 +36,9 @@ export default function PilotOSWorkspace() {
   }, [activeJourneyId]);
 
   if (!journeysHydrated || !memoryHydrated) return <PilotSkeleton />;
+  if (error) {
+    return <JourneySyncError message={error} retry={refresh} refreshing={refreshing} />;
+  }
   if (!activeJourney || !memory) return <EmptyPilot />;
 
   const context = buildPilotContext(activeJourney, memory);
@@ -111,4 +123,3 @@ function EmptyPilot() {
     </section>
   );
 }
-

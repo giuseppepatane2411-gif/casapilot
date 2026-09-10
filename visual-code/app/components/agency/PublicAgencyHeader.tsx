@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 
 const navigation = [
+  { href: "/", label: "Guimmia" },
   { href: "/immobili", label: "Vetrina immobili" },
   { href: "/vendere", label: "Vendere" },
   { href: "/affittare", label: "Affittare" },

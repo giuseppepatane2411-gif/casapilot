@@ -34,7 +34,13 @@ export default function TermsPage() {
             Guimmia aiuta a organizzare dati, documenti, attività e prossimi passi relativi a immobili e operazioni immobiliari. Le informazioni fornite hanno carattere organizzativo e informativo.
           </TermSection>
           <TermSection icon={Info} title="Limiti delle indicazioni">
-            Guimmia, checklist e punteggi non sostituiscono pareri, certificazioni o verifiche di professionisti abilitati. L’utente resta responsabile della correttezza dei dati inseriti e delle decisioni assunte.
+            Le risposte di Guimmia, le checklist e i punteggi possono essere incompleti o errati e non sostituiscono pareri, certificazioni o verifiche di professionisti abilitati. L’utente deve controllare i dati inseriti e valutare le decisioni con competenza adeguata al caso.
+          </TermSection>
+          <TermSection icon={FileCheck2} title="Bozze e contenuti generati">
+            Annunci, messaggi, clausole e contratti prodotti da Guimmia sono bozze modificabili. Non sono automaticamente completi, validi o pronti per la firma e devono essere verificati prima dell’uso, soprattutto quando producono effetti legali, fiscali, tecnici o economici.
+          </TermSection>
+          <TermSection icon={ShieldCheck} title="Richieste di verifica">
+            Il comando per chiedere una verifica registra l’interesse dell’utente e il relativo contesto. Non garantisce l’assegnazione immediata di un professionista, un tempo di risposta o l’accettazione di un incarico. Eventuali condizioni, responsabilità e compensi del servizio professionale dovranno essere confermati separatamente.
           </TermSection>
           <TermSection icon={ShieldCheck} title="Account e sicurezza">
             L’utente deve fornire dati veritieri, custodire le credenziali e segnalare accessi non autorizzati. I professionisti non possono dichiararsi verificati autonomamente: la verifica è un processo separato.
@@ -54,7 +60,7 @@ export default function TermsPage() {
           </Link>
         </section>
 
-        <p className="mt-8 text-center text-xs text-slate-400">Condizioni d’uso Guimmia · versione 1 agosto 2026</p>
+        <p className="mt-8 text-center text-xs text-slate-400">Condizioni d’uso Guimmia · versione 7 settembre 2026</p>
       </div>
     </main>
   );

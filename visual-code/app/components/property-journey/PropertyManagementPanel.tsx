@@ -20,10 +20,7 @@ import {
   OPERATION_OPTIONS,
 } from "@/lib/property-journey/constants";
 import { deleteJourneyCompletely } from "@/lib/property-journey/delete";
-import {
-  updateJourneyOperation,
-  updateJourneyProperty,
-} from "@/lib/property-journey/storage";
+import { saveCloudJourney } from "@/lib/property-journey/cloud";
 import type {
   OccupancyStatus,
   OperationType,
@@ -41,7 +38,9 @@ export default function PropertyManagementPanel({ journey }: PropertyManagementP
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [actionError, setActionError] = useState("");
   const [operation, setOperation] = useState<OperationType>(journey.operation);
   const [form, setForm] = useState<EditableProperty>({
     ...journey.property,
@@ -94,30 +93,56 @@ export default function PropertyManagementPanel({ journey }: PropertyManagementP
     setSaved(false);
   }
 
-  function save() {
-    updateJourneyOperation(journey.id, operation);
-    updateJourneyProperty(journey.id, {
-      ...form,
-      name: form.name.trim() || journey.property.name,
-      surface: form.surface && form.surface > 0 ? form.surface : null,
-      country: form.country.trim(),
-      city: form.city.trim(),
-      province: form.province.trim(),
-      address: form.address.trim(),
-      postalCode: form.postalCode.trim(),
-      cadastralSheet: (form.cadastralSheet ?? "").trim(),
-      cadastralParcel: (form.cadastralParcel ?? "").trim(),
-      cadastralSubaltern: (form.cadastralSubaltern ?? "").trim(),
-    });
-    setEditing(false);
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 2500);
+  async function save() {
+    setSaving(true);
+    setActionError("");
+
+    try {
+      await saveCloudJourney({
+        ...journey,
+        operation,
+        property: {
+          ...form,
+          name: form.name.trim() || journey.property.name,
+          surface: form.surface && form.surface > 0 ? form.surface : null,
+          country: form.country.trim(),
+          city: form.city.trim(),
+          province: form.province.trim(),
+          address: form.address.trim(),
+          postalCode: form.postalCode.trim(),
+          cadastralSheet: (form.cadastralSheet ?? "").trim(),
+          cadastralParcel: (form.cadastralParcel ?? "").trim(),
+          cadastralSubaltern: (form.cadastralSubaltern ?? "").trim(),
+        },
+      });
+      setEditing(false);
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 2500);
+    } catch (error) {
+      setActionError(
+        error instanceof Error
+          ? error.message
+          : "Non siamo riusciti a salvare le modifiche.",
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function removeJourney() {
     setDeleting(true);
-    await deleteJourneyCompletely(journey.id);
-    router.replace("/dashboard/properties");
+    setActionError("");
+    try {
+      await deleteJourneyCompletely(journey.id);
+      router.replace("/dashboard/properties");
+    } catch (error) {
+      setActionError(
+        error instanceof Error
+          ? error.message
+          : "Non siamo riusciti a eliminare l’immobile.",
+      );
+      setDeleting(false);
+    }
   }
 
   return (
@@ -147,6 +172,12 @@ export default function PropertyManagementPanel({ journey }: PropertyManagementP
         <div className="mt-5 flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
           <Check size={16} />
           Modifiche salvate.
+        </div>
+      )}
+
+      {actionError && (
+        <div role="alert" className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+          {actionError}
         </div>
       )}
 
@@ -275,11 +306,12 @@ export default function PropertyManagementPanel({ journey }: PropertyManagementP
             </button>
             <button
               type="button"
-              onClick={save}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-bold text-white hover:bg-blue-700"
+              onClick={() => void save()}
+              disabled={saving}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-bold text-white hover:bg-blue-700 disabled:cursor-wait disabled:opacity-60"
             >
               <Save size={16} />
-              Salva modifiche
+              {saving ? "Salvataggio…" : "Salva modifiche"}
             </button>
           </div>
         </div>
@@ -304,7 +336,7 @@ export default function PropertyManagementPanel({ journey }: PropertyManagementP
               <div>
                 <p className="font-bold text-rose-950">Vuoi davvero ripartire da zero?</p>
                 <p className="mt-1 text-sm leading-6 text-rose-800">
-                  Verranno eliminati da questo browser l’immobile, il suo percorso, la memoria di Guimmia e i file collegati nell’Archivio locale. Questa operazione non si può annullare.
+                  Verranno eliminati dal tuo account l’immobile e la sua pratica. Anche la memoria Guimmia e gli eventuali file conservati localmente su questo dispositivo saranno rimossi. Questa operazione non si può annullare.
                 </p>
               </div>
             </div>

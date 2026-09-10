@@ -16,6 +16,7 @@ import {
 
 import { useJourneys } from "@/hooks/useJourneys";
 import GuimmiaOrchestrationCard from "@/components/guimmia/GuimmiaOrchestrationCard";
+import JourneySyncError from "@/components/property-journey/JourneySyncError";
 import GoalProgressCard from "@/components/property-journey/GoalProgressCard";
 import { usePilotMemory } from "@/hooks/usePilotMemory";
 import { buildPilotContext } from "@/lib/pilot-os";
@@ -31,10 +32,13 @@ import type { PropertyJourney } from "@/lib/property-journey/types";
 
 export default function DashboardOverview() {
   const searchParams = useSearchParams();
-  const { hydrated, activeJourney } = useJourneys();
+  const { hydrated, refreshing, activeJourney, error, refresh } = useJourneys();
   const { hydrated: memoryHydrated, memory } = usePilotMemory(activeJourney?.id ?? null);
 
   if (!hydrated || !memoryHydrated) return <DashboardSkeleton />;
+  if (error) {
+    return <JourneySyncError message={error} retry={refresh} refreshing={refreshing} />;
+  }
   if (!activeJourney || !memory) return <EmptyDashboard />;
 
   return (
@@ -42,6 +46,11 @@ export default function DashboardOverview() {
       journey={activeJourney}
       context={buildPilotContext(activeJourney, memory)}
       justCreated={searchParams.get("created") === activeJourney.id}
+      aiConversationId={
+        searchParams.get("from") === "ai"
+          ? searchParams.get("conversation")
+          : null
+      }
     />
   );
 }
@@ -50,10 +59,12 @@ function ActiveDashboard({
   journey,
   context,
   justCreated,
+  aiConversationId,
 }: {
   journey: PropertyJourney;
   context: PilotContext;
   justCreated: boolean;
+  aiConversationId: string | null;
 }) {
   const mission = context.mission;
   const nextMission = context.missionQueue[1] ?? null;
@@ -92,11 +103,22 @@ function ActiveDashboard({
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white">
               <Sparkles size={18} />
             </span>
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="font-bold text-emerald-950">Il tuo percorso è pronto.</p>
               <p className="mt-1 text-sm leading-6 text-emerald-800">
-                Non devi imparare Guimmia: completa il passo evidenziato e il successivo comparirà da solo.
+                {aiConversationId
+                  ? "La pratica è collegata alla conversazione. Guimmia potrà usare operazione, località e checklist per darti risposte più precise."
+                  : "Non devi imparare Guimmia: completa il passo evidenziato e il successivo comparirà da solo."}
               </p>
+              {aiConversationId ? (
+                <Link
+                  href={`/ai?conversation=${encodeURIComponent(aiConversationId)}`}
+                  className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-xl bg-emerald-700 px-4 text-xs font-extrabold text-white hover:bg-emerald-800"
+                >
+                  Torna alla conversazione
+                  <ArrowRight size={14} />
+                </Link>
+              ) : null}
             </div>
           </div>
         </section>

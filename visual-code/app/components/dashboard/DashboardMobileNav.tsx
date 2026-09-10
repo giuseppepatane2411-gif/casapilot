@@ -8,7 +8,7 @@ const items = [
   { label: "Percorso", href: "/dashboard", icon: Route },
   { label: "Immobili", href: "/dashboard/properties", icon: Building2 },
   { label: "Documenti", href: "/dashboard/documents", icon: FileText },
-  { label: "Guimmia", href: "/dashboard/pilot", icon: Bot },
+  { label: "Guimmia", href: "/ai", icon: Bot },
 ];
 
 function isActive(pathname: string, href: string) {
@@ -49,4 +49,3 @@ export default function DashboardMobileNav() {
     </nav>
   );
 }
-

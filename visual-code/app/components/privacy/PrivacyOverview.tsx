@@ -9,6 +9,8 @@ import {
   MapPin,
   RotateCcw,
   ShieldCheck,
+  Sparkles,
+  UserRoundCheck,
 } from "lucide-react";
 
 export default function PrivacyOverview() {
@@ -45,10 +47,35 @@ export default function PrivacyOverview() {
             separatamente e non può essere attribuito autonomamente dall’utente.
           </PrivacySection>
 
-          <PrivacySection icon={HardDrive} title="Pratiche e documenti sul dispositivo">
-            Immobili, checklist, missioni e cronologia vengono attualmente conservati nel browser.
-            I file allegati all’Archivio locale sono salvati in IndexedDB sul dispositivo utilizzato.
-            Non vengono trasferiti automaticamente nell’account.
+          <PrivacySection icon={Sparkles} title="Conversazioni con Guimmia">
+            Le cartelle, le conversazioni e i messaggi della nuova area Guimmia vengono
+            conservati nel cloud e collegati al tuo account, così puoi ritrovarli da altri
+            dispositivi. Quando invii una domanda, il testo e il contesto recente necessario
+            vengono trasmessi dal server di Guimmia a OpenAI, il fornitore del modello di
+            intelligenza artificiale, per generare la risposta. Se colleghi una pratica, Guimmia può
+            includere tipo di operazione, località e stato della checklist; indirizzo preciso, coordinate
+            e riferimenti catastali non vengono inviati al modello in questo flusso. Non inserire dati personali o documenti di
+            terzi se non sono indispensabili e non sei autorizzato a trattarli.
+          </PrivacySection>
+
+          <PrivacySection icon={UserRoundCheck} title="Richieste di verifica">
+            Quando chiedi una verifica, Guimmia conserva la risposta selezionata, la tua nota,
+            lo stato della richiesta e il collegamento all’eventuale pratica. L’invio registra una
+            richiesta di assistenza: non assegna automaticamente un professionista e non costituisce
+            da solo un incarico professionale.
+          </PrivacySection>
+
+          <PrivacySection icon={Cloud} title="Pratica privata dell’immobile">
+            I dati completi dell’immobile e la checklist vengono collegati al tuo account e conservati
+            in un’area privata. Indirizzo esatto, coordinate e dati catastali non vengono copiati nella
+            scheda pubblica dell’annuncio. L’accesso alla pratica è limitato al proprietario autenticato
+            e agli amministratori autorizzati di Guimmia.
+          </PrivacySection>
+
+          <PrivacySection icon={HardDrive} title="File e memoria sul dispositivo">
+            I PDF e le immagini allegati all’Archivio locale restano in IndexedDB sul dispositivo
+            utilizzato e non vengono trasferiti automaticamente nell’account. Alcune preferenze,
+            bozze e memorie operative delle funzioni agenzia precedenti possono ancora restare nel browser.
           </PrivacySection>
 
           <PrivacySection icon={MapPin} title="Ricerca indirizzi e mappa">
@@ -72,7 +99,9 @@ export default function PrivacyOverview() {
           </PrivacySection>
 
           <PrivacySection icon={RotateCcw} title="Cancellazione">
-            Puoi eliminare i dati locali dalla pagina Impostazioni. Puoi inoltre uscire dal tuo account.
+            Puoi eliminare un immobile e la relativa pratica privata dalla sua pagina di gestione. Dalle
+            Impostazioni puoi rimuovere separatamente bozze, preferenze, memoria e file conservati sul
+            dispositivo. Puoi inoltre uscire dal tuo account.
             La cancellazione definitiva dell’account remoto richiederà una procedura dedicata di verifica
             dell’identità prima della rimozione.
           </PrivacySection>
@@ -87,9 +116,9 @@ export default function PrivacyOverview() {
         <section className="mt-7 rounded-[28px] border border-blue-200 bg-blue-50 p-6 sm:p-7">
           <h2 className="text-xl font-bold text-slate-950">In sintesi</h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            L’account identifica l’utente; le pratiche e i file restano sul dispositivo in questa
-            configurazione. I servizi geografici ricevono soltanto le informazioni necessarie quando
-            scegli di usare la ricerca automatica.
+            L’account identifica l’utente e protegge conversazioni, cartelle, immobili e checklist.
+            Le domande inviate a Guimmia vengono elaborate da OpenAI, il fornitore del modello; i file
+            dell’Archivio locale e alcune memorie delle funzioni agenzia restano invece sul dispositivo.
           </p>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
             <Link
@@ -109,7 +138,7 @@ export default function PrivacyOverview() {
         </section>
 
         <p className="mt-8 text-center text-xs text-slate-400">
-          Informativa tecnica di Guimmia · ultimo aggiornamento agosto 2026
+          Informativa tecnica di Guimmia · ultimo aggiornamento 7 settembre 2026
         </p>
       </div>
     </main>
@@ -139,4 +168,3 @@ function PrivacySection({
     </section>
   );
 }
-

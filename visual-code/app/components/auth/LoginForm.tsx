@@ -2,20 +2,19 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowRight, LockKeyhole, Mail } from "lucide-react";
 
 import AuthMessage from "@/components/auth/AuthMessage";
 import FormField from "@/components/auth/FormField";
 import { getAccountErrorMessage } from "@/lib/account/errors";
+import {
+  buildAuthPath,
+  resolveAuthNextPath,
+  type AuthAccountType,
+} from "@/lib/navigation/auth-flow";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-
-function safeNextPath(value: string | null) {
-  return value?.startsWith("/") && !value.startsWith("//")
-    ? value
-    : "/dashboard";
-}
 
 export default function LoginForm() {
   const router = useRouter();
@@ -27,6 +26,28 @@ export default function LoginForm() {
     tone: "error" | "success" | "info";
     text: string;
   } | null>(null);
+
+  const nextPath = useMemo(
+    () => resolveAuthNextPath({
+      next: searchParams.get("next"),
+      goal: searchParams.get("goal"),
+      message: searchParams.get("message"),
+      intent: searchParams.get("intent"),
+      brand: searchParams.get("brand"),
+    }),
+    [searchParams],
+  );
+  const registrationType: AuthAccountType =
+    searchParams.get("type") === "professional" ||
+    nextPath.startsWith("/professionista") ||
+    nextPath.startsWith("/dashboard/professional")
+      ? "professional"
+      : "private";
+  const registerHref = buildAuthPath("/register", {
+    accountType: registrationType,
+    next: nextPath,
+  });
+  const checkEmailHref = buildAuthPath("/check-email", { next: nextPath });
 
   const callbackMessage = (() => {
     const error = searchParams.get("error");
@@ -53,7 +74,7 @@ export default function LoginForm() {
     if (!isSupabaseConfigured()) {
       setMessage({
         tone: "info",
-        text: "L’accesso è temporaneamente non disponibile. Puoi continuare a usare le pratiche salvate su questo dispositivo.",
+        text: "L’accesso è temporaneamente non disponibile. Riprova più tardi.",
       });
       return;
     }
@@ -69,7 +90,7 @@ export default function LoginForm() {
 
       if (error) throw error;
 
-      router.push(safeNextPath(searchParams.get("next")));
+      router.push(nextPath);
       router.refresh();
     } catch (error) {
       setMessage({
@@ -118,7 +139,7 @@ export default function LoginForm() {
           Password dimenticata?
         </Link>
         {searchParams.get("error") === "confirmation" && (
-          <Link href="/check-email" className="font-semibold text-blue-600 hover:underline">
+          <Link href={checkEmailHref} className="font-semibold text-blue-600 hover:underline">
             Reinvia conferma
           </Link>
         )}
@@ -135,18 +156,9 @@ export default function LoginForm() {
         )}
       </button>
 
-      {!isSupabaseConfigured() && (
-        <Link
-          href="/dashboard"
-          className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl border border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50"
-        >
-          Continua sul dispositivo
-        </Link>
-      )}
-
       <p className="text-center text-sm text-slate-500">
         Non hai ancora un account?{" "}
-        <Link href="/register" className="font-bold text-blue-600 hover:underline">
+        <Link href={registerHref} className="font-bold text-blue-600 hover:underline">
           Registrati gratuitamente
         </Link>
       </p>

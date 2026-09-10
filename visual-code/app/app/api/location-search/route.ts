@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { resolveItalianProvince } from "@/lib/location/italian-geography";
+
 type SuggestionKind = "address" | "street" | "city" | "postcode" | "place";
 
 type LocationSuggestion = {
@@ -199,12 +201,15 @@ function photonKind(feature: PhotonFeature): SuggestionKind {
 function photonToSuggestion(feature: PhotonFeature, index: number): LocationSuggestion {
   const p = feature.properties ?? {};
   const kind = photonKind(feature);
-  const city = clean(p.city) || clean(p.district) || clean(p.county);
-  const province = clean(p.county) || clean(p.state);
+  const name = clean(p.name);
+  const city =
+    clean(p.city) ||
+    clean(p.district) ||
+    (kind === "city" ? name : "");
+  const province = resolveItalianProvince(p.county);
   const postalCode = clean(p.postcode);
   const street = clean(p.street);
   const houseNumber = clean(p.housenumber);
-  const name = clean(p.name);
   const address = street
     ? [street, houseNumber].filter(Boolean).join(" ")
     : kind === "street" || kind === "address"
@@ -263,8 +268,8 @@ function arcGisKind(attributes: Record<string, string | number | null | undefine
 function arcGisToSuggestion(candidate: ArcGisCandidate, index: number): LocationSuggestion {
   const a = candidate.attributes ?? {};
   const kind = arcGisKind(a);
-  const city = clean(a.City) || clean(a.District) || clean(a.Subregion);
-  const province = clean(a.RegionAbbr) || clean(a.Region) || clean(a.Subregion);
+  const city = clean(a.City) || clean(a.District);
+  const province = resolveItalianProvince(a.Subregion, a.RegionAbbr);
   const postalCode = clean(a.Postal);
   const address = clean(a.StAddr) || clean(a.Address) || clean(a.Addr);
   const longLabel = clean(a.LongLabel) || clean(a.Match_addr) || clean(candidate.address);
@@ -326,7 +331,7 @@ async function searchArcGis(query: string, maxLocations = 10) {
 
 function openMeteoToSuggestion(result: OpenMeteoResult, index: number): LocationSuggestion {
   const city = clean(result.name);
-  const province = clean(result.admin2) || clean(result.admin1);
+  const province = resolveItalianProvince(result.admin2);
   const region = clean(result.admin1);
   const postalCode = result.postcodes?.[0] ?? "";
   return {
@@ -385,7 +390,10 @@ async function searchPostcode(postcode: string): Promise<LocationSuggestion[]> {
     const payload = (await response.json()) as ZippopotamResponse;
     return (payload.places ?? []).map((place, index) => {
       const city = clean(place["place name"]);
-      const province = clean(place["state abbreviation"]) || clean(place.state);
+      const province = resolveItalianProvince(
+        place["state abbreviation"],
+        place.state,
+      );
       return {
         id: `zip-${postcode}-${city}-${index}`,
         primary: city || postcode,

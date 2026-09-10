@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { useJourneys } from "@/hooks/useJourneys";
+import JourneySyncError from "@/components/property-journey/JourneySyncError";
 import { getOperationLabel, getPropertyLabel } from "@/lib/property-journey/constants";
 import type { PropertyType } from "@/lib/property-journey/types";
 
@@ -29,10 +30,22 @@ const propertyIcons: Record<PropertyType, LucideIcon> = {
 };
 
 export default function PropertiesList() {
-  const { hydrated, journeys, activeJourneyId, activateJourney } = useJourneys();
+  const {
+    hydrated,
+    refreshing,
+    journeys,
+    activeJourneyId,
+    error,
+    activateJourney,
+    refresh,
+  } = useJourneys();
 
   if (!hydrated) {
     return <div className="h-72 animate-pulse rounded-[28px] bg-slate-200/70" />;
+  }
+
+  if (error) {
+    return <JourneySyncError message={error} retry={refresh} refreshing={refreshing} />;
   }
 
   return (

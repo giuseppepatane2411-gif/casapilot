@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { useJourneys } from "@/hooks/useJourneys";
+import JourneySyncError from "@/components/property-journey/JourneySyncError";
 import PropertyManagementPanel from "@/components/property-journey/PropertyManagementPanel";
 import PropertyLocationMap from "@/components/property-wizard/PropertyLocationMap";
 import {
@@ -42,11 +43,23 @@ type PropertyJourneyDetailProps = {
 };
 
 export default function PropertyJourneyDetail({ journeyId }: PropertyJourneyDetailProps) {
-  const { hydrated, journeys, activeJourneyId, activateJourney } = useJourneys();
+  const {
+    hydrated,
+    refreshing,
+    journeys,
+    activeJourneyId,
+    error,
+    activateJourney,
+    refresh,
+  } = useJourneys();
   const journey = journeys.find((item) => item.id === journeyId) ?? null;
 
   if (!hydrated) {
     return <div className="h-96 animate-pulse rounded-[30px] bg-slate-200/70" />;
+  }
+
+  if (error) {
+    return <JourneySyncError message={error} retry={refresh} refreshing={refreshing} />;
   }
 
   if (!journey) {
@@ -54,7 +67,7 @@ export default function PropertyJourneyDetail({ journeyId }: PropertyJourneyDeta
       <section className="rounded-[30px] border border-slate-200 bg-white p-8 text-center shadow-sm">
         <h1 className="text-2xl font-bold text-slate-950">Immobile non trovato</h1>
         <p className="mt-3 text-sm text-slate-500">
-          Questo immobile non è presente nel browser oppure è stato rimosso.
+          Questo immobile non appartiene al tuo account oppure è stato rimosso.
         </p>
         <Link
           href="/dashboard/properties"

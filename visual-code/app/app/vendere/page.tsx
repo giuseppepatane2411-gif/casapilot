@@ -1,6 +1,7 @@
 import Link from "next/link";
 import PublicAgencyHeader from "@/components/agency/PublicAgencyHeader";
 import PublicAgencyFooter from "@/components/agency/PublicAgencyFooter";
+import { buildAuthPath } from "@/lib/navigation/auth-flow";
 import { createPublicMetadata } from "@/lib/seo/metadata";
 
 export const metadata = createPublicMetadata({
@@ -16,6 +17,11 @@ const steps = [
   ["3", "Gestiamo richieste e visite", "Lead ordinati, agenda visite e prossimo passo sempre chiaro."],
   ["4", "Documenti, offerte e firma", "Proposte, preliminare, contratti e adempimenti seguono un percorso guidato con Guimmia."],
 ];
+
+const startSalePath = buildAuthPath("/register", {
+  accountType: "private",
+  next: "/dashboard/properties/new?goal=sale",
+});
 
 export default function VenderePage() {
   return (
@@ -33,7 +39,7 @@ export default function VenderePage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/valuta-immobile" className="rounded-2xl bg-blue-600 px-6 py-3.5 font-black text-white">Valuta il tuo immobile</Link>
-              <Link href="/registrazione/proprietario" className="rounded-2xl border border-white/20 px-6 py-3.5 font-black text-white">Inizia il percorso</Link>
+              <Link href={startSalePath} className="rounded-2xl border border-white/20 px-6 py-3.5 font-black text-white">Inizia il percorso</Link>
               <Link href="/guimmia?intent=sell" className="rounded-2xl border border-white/20 px-6 py-3.5 font-black text-white">Parla con Guimmia</Link>
             </div>
           </div>

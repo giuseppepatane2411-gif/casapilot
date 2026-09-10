@@ -3,23 +3,34 @@
 import Link from "next/link";
 import { ArrowUpRight, Briefcase, Building2, KeyRound } from "lucide-react";
 
+import { buildAuthPath } from "@/lib/navigation/auth-flow";
+
 const actions = [
   {
     title: "Vendere",
     description: "Organizza l’immobile e segui il percorso verso la vendita.",
-    href: "/register?type=private&goal=sale",
+    href: buildAuthPath("/register", {
+      accountType: "private",
+      next: "/dashboard/properties/new?goal=sale",
+    }),
     icon: Building2,
   },
   {
     title: "Affittare",
     description: "Prepara documenti, contratto e selezione dell’inquilino.",
-    href: "/register?type=private&goal=rent",
+    href: buildAuthPath("/register", {
+      accountType: "private",
+      next: "/dashboard/properties/new?goal=rent",
+    }),
     icon: KeyRound,
   },
   {
     title: "Lavorare con Guimmia",
     description: "Crea il profilo professionale, indica le zone servite e avvia il percorso di verifica.",
-    href: "/register?type=professional",
+    href: buildAuthPath("/register", {
+      accountType: "professional",
+      next: "/professionista/onboarding",
+    }),
     icon: Briefcase,
   },
 ];
